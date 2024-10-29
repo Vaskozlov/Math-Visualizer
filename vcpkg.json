@@ -1,0 +1,10 @@
+{
+  "name": "visualizer",
+  "version": "0.0.1",
+  "dependencies": [
+    "fmt",
+    "glew",
+    "glfw3",
+    "glm"
+  ]
+}
