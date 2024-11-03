@@ -37,6 +37,9 @@ namespace mv
         float mouseSensitivity;
         float zoom;
 
+        float rotationAngle = 0.0F;
+        float rotationAngleY = 0.0F;
+
     public:
         explicit Camera(
             const glm::vec3 position = glm::vec3(5.0F, 5.0F, 5.0F),
@@ -54,14 +57,23 @@ namespace mv
             updateCameraVectors();
         }
 
+
         [[nodiscard]] auto getViewMatrix() const -> glm::mat4
         {
-            return glm::lookAt(position, position + front, up);
+            return glm::rotate(
+                glm::lookAt(position, position + front, up), rotationAngle,
+                glm::vec3(0.0F, 1.0F, 0.0F));
         }
 
         [[nodiscard]] auto getZoom() const noexcept -> float
         {
             return zoom;
+        }
+
+        auto rotate(const double x_pos_in, const double y_pos_in) -> void
+        {
+            rotationAngle += glm::radians(x_pos_in);
+            rotationAngleY -= glm::radians(y_pos_in);
         }
 
         auto processMouseMovement(

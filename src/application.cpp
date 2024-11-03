@@ -1,8 +1,33 @@
 #include "mv/application.hpp"
-#include <unordered_map>
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
+#include <thread>
 
 namespace mv
 {
+    static auto initGlfw() -> void
+    {
+        glfwInit();
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+#ifdef __APPLE__
+        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+    }
+
+    static auto initGL() -> void
+    {
+        glewInit();
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_LINE_SMOOTH);
+        glEnable(GL_BLEND);
+        glEnable(GL_PROGRAM_POINT_SIZE);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    }
+
     static auto frameBufferSizeCallback(GLFWwindow *window, const int width, const int height)
     {
         auto *app = static_cast<Application *>(glfwGetWindowUserPointer(window));
@@ -33,16 +58,10 @@ namespace mv
       , windowWidth{static_cast<float>(width)}
       , windowHeight{static_cast<float>(height)}
     {
-        glfwInit();
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-#ifdef __APPLE__
-        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
+        initGlfw();
 
         window = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
+        glfwSwapInterval(1);
 
         if (window == nullptr) {
             fmt::println(stderr, "Failed to create GLFW window.");
@@ -58,12 +77,19 @@ namespace mv
         glfwSetScrollCallback(window, scrollCallback);
         glfwSetCursorEnterCallback(window, cursorEnterLeaveCallback);
 
-        glewInit();
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_LINE_SMOOTH);
-        glEnable(GL_BLEND);
-        glEnable(GL_PROGRAM_POINT_SIZE);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        initGL();
+
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+        ImGuiIO &io = ImGui::GetIO();
+        (void)io;
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;// Enable Keyboard Controls
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad; // Enable Gamepad Controls
+
+        ImGui::StyleColorsLight();
+
+        ImGui_ImplGlfw_InitForOpenGL(window, true);
+        ImGui_ImplOpenGL3_Init("#version 410 core");
     }
 
     auto Application::onResize(const int width, const int height) -> void
@@ -94,10 +120,15 @@ namespace mv
         lastMouseX = x_pos;
         lastMouseY = y_pos;
 
+        if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_TRUE) {
+            camera.rotate(x_offset, y_offset);
+            return;
+        }
+
         camera.processMouseMovement(x_offset, y_offset);
     }
 
-    auto Application::onScroll(const double xOffset, const double yOffset) -> void
+    auto Application::onScroll(const double /*xOffset*/, const double yOffset) -> void
     {
         if (!isInFocus || isMouseShowed) {
             return;
@@ -110,16 +141,29 @@ namespace mv
     {
         init();
 
-        while (!glfwWindowShouldClose(window)) {
+        while (glfwWindowShouldClose(window) == GLFW_FALSE) {
+            glfwPollEvents();
+
+            if (glfwGetWindowAttrib(window, GLFW_ICONIFIED) != 0) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                continue;
+            }
+
             const auto current_time = static_cast<float>(glfwGetTime());
             deltaTime = current_time - lastFrameTime;
             lastFrameTime = current_time;
 
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+
             processInput();
             update();
 
+            ImGui::Render();
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
             glfwSwapBuffers(window);
-            glfwPollEvents();
         }
     }
 
@@ -151,5 +195,12 @@ namespace mv
         isInFocus = entered;
         firstMouse = true;
         fmt::println("{}", isInFocus);
+    }
+
+    Application::~Application()
+    {
+        ImGui_ImplOpenGL3_Shutdown();
+        ImGui_ImplGlfw_Shutdown();
+        ImGui::DestroyContext();
     }
 }// namespace mv

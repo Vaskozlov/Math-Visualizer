@@ -28,6 +28,7 @@ target_link_libraries(
         glfw
         GLEW::GLEW
         glm::glm
+        imgui::imgui
 )
 
 b_embed_proxy_target(

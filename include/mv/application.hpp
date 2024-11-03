@@ -28,7 +28,7 @@ namespace mv
         bool isMouseShowed = false;
 
     public:
-        virtual ~Application() = default;
+        virtual ~Application();
 
         Application(int width, int height, const std::string &title);
 

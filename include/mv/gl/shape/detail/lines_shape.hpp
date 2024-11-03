@@ -10,7 +10,7 @@ namespace mv::gl::shape::detail
     public:
         auto doDraw() const -> void final
         {
-            glDrawArrays(GL_LINES, 0, vertices.size());
+            glDrawArrays(GL_LINE, 0, vertices.size());
         }
     };
 }// namespace mv::gl::shape::detail

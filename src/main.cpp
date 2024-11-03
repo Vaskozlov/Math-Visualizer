@@ -6,6 +6,8 @@
 #include <mv/gl/shapes_storage.hpp>
 #include <mv/shader.hpp>
 
+#include <imgui.h>
+
 namespace math_1_3
 {
     [[nodiscard]] constexpr auto fFunction(const glm::vec2 vec) -> float
@@ -41,13 +43,11 @@ private:
     mv::gl::shape::Plot plot{-10.0F, -10.0F, -50.0F, 10.0F, 10.0F, 50.0F};
 
     mv::gl::shape::Function function{
-        [](glm::vec2 point) {
-            return 3.0F;
-        },
-        -0.75F,
-        -0.25F,
-        0.75F,
-        0.25F,
+        math_1_3::fFunction,
+        -4.0F,
+        -4.0F,
+        7.0F,
+        7.0F,
     };
 
     std::vector<glm::vec3> points{};
@@ -72,10 +72,10 @@ public:
         plot.gird.bind(0, 0, 3, GL_FLOAT, sizeof(glm::vec3), 0);
         function.bind(0, 0, 3, GL_FLOAT, sizeof(glm::vec3), 0);
 
-        glm::vec2 vec = {6.0F, 6.0F};
-        constexpr float a = 0.01F;
+        glm::vec2 vec{6.0F};
+        constexpr float a = 0.03F;
 
-        for (uint32_t i = 1; i <= 50; ++i) {
+        for (uint32_t i = 1; i <= 30; ++i) {
             points.emplace_back(vec.x, math_1_3::fFunction(vec), vec.y);
             vec += math_1_3::fFunctionGradient(vec) * a;
         }
@@ -83,9 +83,14 @@ public:
 
     auto update() -> void override
     {
-        glClearColor(0.3f, 0.3F, 0.3f, 1.0f);
+        glClearColor(0.8f, 0.8F, 0.8f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        if (glfwGetWindowAttrib(window, GLFW_ICONIFIED) != 0) {
+            return;
+        }
+
+        ImGui::Text("FPS %f", ImGui::GetIO().Framerate);
         shader.use();
 
         const glm::mat4 resulted_matrix = getResultedViewMatrix();
@@ -103,18 +108,18 @@ public:
         shader.setVec4("elementColor", glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
         plot.mainAxis.drawAt(shader, glm::vec3{0.0F});
 
-        shader.setVec4("elementColor", glm::vec4(0.15f, 0.15f, 0.15f, 1.0f));
+        shader.setVec4("elementColor", glm::vec4(0.07F, 0.07F, 0.07F, 1.0f));
         plot.gird.draw();
 
         colorShader.use();
         colorShader.setMat4("projection", resulted_matrix);
-        colorShader.setVec4("elementColor", glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+        colorShader.setVec4("elementColor", glm::vec4(0.5f, 0.5f, 0.0f, 1.0f));
 
         function.bindVao();
         constexpr auto model = glm::mat4(1.0f);
 
         colorShader.setMat4("model", model);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         glDrawArrays(GL_TRIANGLES, 0, function.vertices.size());
     }
 
