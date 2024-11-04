@@ -11,13 +11,19 @@ namespace mv::gl::shape
     public:
         auto draw() const -> void
         {
-            bindVao();
+            vao.bind();
             doDraw();
+            vao.unbind();
         }
 
-        auto drawAt(const Shader &shader, const glm::vec3 location = {0.0F, 0.0F, 0.0F}) const -> void
+        auto drawAt(
+            const Shader &shader, const glm::vec3 location = {0.0F, 0.0F, 0.0F},
+            const float angle = 0.0F, const glm::vec3 rotation_vec = {1.0F, 0.0F, 0.0F}) const
+            -> void
         {
-            shader.setMat4("model", glm::translate(glm::mat4(1.0f), location));
+            shader.setMat4(
+                "model",
+                glm::rotate(glm::translate(glm::mat4(1.0f), location), angle, rotation_vec));
             draw();
         }
 

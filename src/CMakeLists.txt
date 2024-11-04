@@ -50,3 +50,9 @@ b_embed(
         math-visualizer-resources
         resources/shaders/colored_shader.vert
 )
+
+
+b_embed(
+        math-visualizer-resources
+        resources/shaders/static_instance.vert
+)

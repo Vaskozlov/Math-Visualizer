@@ -21,6 +21,7 @@ namespace mv
     static auto initGL() -> void
     {
         glewInit();
+        glEnable(GL_MULTISAMPLE);
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_LINE_SMOOTH);
         glEnable(GL_BLEND);
@@ -59,9 +60,10 @@ namespace mv
       , windowHeight{static_cast<float>(height)}
     {
         initGlfw();
+        glfwSwapInterval(1);
+        glfwWindowHint(GLFW_SAMPLES, 16);
 
         window = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
-        glfwSwapInterval(1);
 
         if (window == nullptr) {
             fmt::println(stderr, "Failed to create GLFW window.");

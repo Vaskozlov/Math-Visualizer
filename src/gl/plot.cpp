@@ -2,38 +2,30 @@
 
 namespace mv::gl::shape
 {
-    Plot::Plot(
-        const float min_x, const float min_y, const float min_z, const float max_x,
-        const float max_y, const float max_z)
-      : minX{min_x}
-      , minY{min_y}
-      , minZ{min_z}
-      , maxX{max_x}
-      , maxY{max_y}
-      , maxZ{max_z}
+    Plot::Plot(const float plot_size)
+      : mainAxis{0.005F, plot_size * 2.0F, 4}
+      , axis{0.005F, plot_size * 2.0F, 4}
     {
-        mainAxis.vertices.reserve(8);
+        const auto original_points = axis.vertices;
 
-        mainAxis.vertices.emplace_back(minX, 0, 0);
-        mainAxis.vertices.emplace_back(maxX, 0, 0);
-        mainAxis.vertices.emplace_back(0, minY, 0);
-        mainAxis.vertices.emplace_back(0, maxY, 0);
-        mainAxis.vertices.emplace_back(0, 0, minZ);
-        mainAxis.vertices.emplace_back(0, 0, maxZ);
+        for (std::int32_t i = -20; i != 21; ++i) {
+            auto model1 = glm::rotate(
+                glm::translate(glm::mat4{1.0F}, {static_cast<float>(i), 0.0F, 0.0F}),
+                static_cast<float>(M_PI_2),
+                {1.0F, 0.0F, 0.0F});
 
-        float x = floor(minX);
-        float y = floor(minY);
+            auto model2 = glm::rotate(
+                glm::translate(glm::mat4{1.0F}, {0.0F, static_cast<float>(i), 0.0F}),
+                static_cast<float>(M_PI_2),
+                {0.0F, 1.0F, 0.0F});
 
-        while (x <= maxX) {
-            gird.vertices.emplace_back(x, minY, 0);
-            gird.vertices.emplace_back(x, maxY, 0);
-            x += 1.0F;
-        }
+            for (auto point: original_points) {
+                axis.vertices.push_back(model1 * glm::vec4(point, 1.0F));
+            }
 
-        while (y <= maxY) {
-            gird.vertices.emplace_back(minX, y, 0);
-            gird.vertices.emplace_back(maxX, y, 0);
-            y += 1.0F;
+            for (auto point: original_points) {
+                axis.vertices.push_back(model2 * glm::vec4(point, 1.0F));
+            }
         }
     }
 }// namespace mv::gl::shape

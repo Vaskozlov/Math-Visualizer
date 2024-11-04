@@ -1,6 +1,7 @@
 #ifndef MV_SPHERE_HPP
 #define MV_SPHERE_HPP
 
+#include <isl/isl.hpp>
 #include <mv/gl/shape/detail/polygons_shape.hpp>
 
 namespace mv::gl::shape
