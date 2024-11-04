@@ -118,10 +118,6 @@ public:
         glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        if (glfwGetWindowAttrib(window, GLFW_ICONIFIED) != 0) {
-            return;
-        }
-
         ImGui::Text("FPS %f", ImGui::GetIO().Framerate);
         const glm::mat4 resulted_matrix = getResultedViewMatrix();
 
