@@ -142,18 +142,19 @@ namespace mv
     auto Application::run() -> void
     {
         init();
+        constexpr static auto fps_10 = 1.0 / 10.0;
 
         while (glfwWindowShouldClose(window) == GLFW_FALSE) {
-            glfwPollEvents();
+            glfwWaitEventsTimeout(fps_10);
+
+            const auto current_time = static_cast<float>(glfwGetTime());
+            deltaTime = current_time - lastFrameTime;
+            lastFrameTime = current_time;
 
             if (glfwGetWindowAttrib(window, GLFW_ICONIFIED) != 0) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 continue;
             }
-
-            const auto current_time = static_cast<float>(glfwGetTime());
-            deltaTime = current_time - lastFrameTime;
-            lastFrameTime = current_time;
 
             ImGui_ImplOpenGL3_NewFrame();
             ImGui_ImplGlfw_NewFrame();
@@ -177,18 +178,22 @@ namespace mv
 
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
             camera.processKeyboard(CameraMovement::FORWARD, deltaTime);
+            glfwPostEmptyEvent();
         }
 
         if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
             camera.processKeyboard(CameraMovement::BACKWARD, deltaTime);
+            glfwPostEmptyEvent();
         }
 
         if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
             camera.processKeyboard(CameraMovement::LEFT, deltaTime);
+            glfwPostEmptyEvent();
         }
 
         if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
             camera.processKeyboard(CameraMovement::RIGHT, deltaTime);
+            glfwPostEmptyEvent();
         }
     }
 
