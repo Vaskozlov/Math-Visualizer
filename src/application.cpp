@@ -9,8 +9,8 @@ namespace mv
     static auto initGlfw() -> void
     {
         glfwInit();
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 #ifdef __APPLE__
@@ -91,7 +91,7 @@ namespace mv
         ImGui::StyleColorsLight();
 
         ImGui_ImplGlfw_InitForOpenGL(window, true);
-        ImGui_ImplOpenGL3_Init("#version 410 core");
+        ImGui_ImplOpenGL3_Init("#version 330 core");
     }
 
     auto Application::onResize(const int width, const int height) -> void
