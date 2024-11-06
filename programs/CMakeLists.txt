@@ -33,33 +33,22 @@ b_embed_proxy_target(
 
 b_embed(
         mandelbrot_fractal-resources
-        resources/shaders/vertex.vert
+        resources/shaders/mandelbrot_fractal.vert
 )
 
 b_embed(
         mandelbrot_fractal-resources
-        resources/shaders/fragment.frag
+        resources/shaders/mandelbrot_fractal.frag
 )
 
 b_embed(
         mandelbrot_fractal-resources
-        resources/shaders/colored_shader.vert
-)
-
-
-b_embed(
-        mandelbrot_fractal-resources
-        resources/shaders/static_instance.vert
+        resources/shaders/julia_fractal.vert
 )
 
 b_embed(
         mandelbrot_fractal-resources
-        resources/shaders/fractal.vert
-)
-
-b_embed(
-        mandelbrot_fractal-resources
-        resources/shaders/fractal.frag
+        resources/shaders/julia_fractal.frag
 )
 
 add_executable(

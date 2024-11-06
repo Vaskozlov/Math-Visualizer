@@ -53,11 +53,6 @@ private:
 
     mv::gl::InstancesHolder<mv::gl::InstanceParameters> sphereInstancing;
 
-    mv::gl::VerticesContainer<glm::vec3> vertices{
-        {10.0F, 10.0F, 0.0F}, {10.0F, -10.0F, 0.0F},  {-10.0F, -10.0F, 0.0F},
-        {10.0F, 10.0F, 0.0F}, {-10.0F, -10.0F, 0.0F}, {-10.0F, 10.0F, 0.0F},
-    };
-
     mv::gl::shape::Function function{
         math_1_3::fFunction, -4.0F, -4.0F, 7.0F, 7.0F,
     };
@@ -91,7 +86,7 @@ public:
         plot.vbo.bind();
         plot.vao.bind(0, 3, GL_FLOAT, sizeof(glm::vec3), 0);
 
-        glm::vec2 vec{6.0F};
+        glm::vec2 evaluation_point{6.0F};
         constexpr float a = 0.03F;
 
         sphereInstancing.models.emplace_back(
@@ -100,13 +95,15 @@ public:
         for (uint32_t i = 1; i <= 30; ++i) {
             sphereInstancing.models.emplace_back(
                 glm::vec4(0.0F, 0.0F, 0.3F, 1.0F),
-                glm::translate(glm::mat4{1.0F}, {vec.x, math_1_3::fFunction(vec), vec.y}));
+                glm::translate(
+                    glm::mat4{1.0F},
+                    {evaluation_point.x, math_1_3::fFunction(evaluation_point),
+                     evaluation_point.y}));
 
-            vec += math_1_3::fFunctionGradient(vec) * a;
+            evaluation_point += math_1_3::fFunctionGradient(evaluation_point) * a;
         }
 
         sphereInstancing.loadData();
-        vertices.loadData();
 
         sphere.vbo.bind();
         sphere.vao.bind(0, 3, GL_FLOAT, sizeof(glm::vec3), 0);
@@ -117,6 +114,8 @@ public:
         colorShader.use();
         colorShader.setMat4("model", glm::mat4(1.0f));
         colorShader.setVec4("elementColor", glm::vec4(0.5f, 0.5f, 0.0f, 1.0f));
+
+        ImGui::StyleColorsLight();
     }
 
     auto update() -> void override
@@ -141,7 +140,6 @@ public:
         colorShader.setVec4("elementColor", glm::vec4(0.1f, 0.1f, 0.1f, 1.0f));
 
         plot.draw();
-        // glDrawArrays(GL_TRIANGLES, 0, plot.vertices.size());
     }
 
     auto processInput() -> void override

@@ -24,7 +24,7 @@ namespace mv
         constexpr static float YAW = -90.0F;
         constexpr static float PITCH = 0.0F;
         constexpr static float SPEED = 2.5F;
-        float SENSITIVITY = 0.1F;
+        constexpr static float SENSITIVITY = 0.1F;
         constexpr static float ZOOM = 45.0F;
 
         glm::vec3 position;
