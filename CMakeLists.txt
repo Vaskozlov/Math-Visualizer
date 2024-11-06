@@ -9,6 +9,5 @@ include_directories(include)
 include(cmake/ProjectOptions.cmake)
 include(cmake/Libs.cmake)
 include(src/CMakeLists.txt)
-
-
+include(programs/CMakeLists.txt)
 

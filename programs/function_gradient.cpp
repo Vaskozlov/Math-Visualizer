@@ -1,10 +1,11 @@
 #include <battery/embed.hpp>
-#include <mv/application.hpp>
+#include <mv/application_3d.hpp>
+#include <mv/gl/instance_parameters.hpp>
+#include <mv/gl/instancing.hpp>
 #include <mv/gl/plot.hpp>
 #include <mv/gl/shape/function.hpp>
 #include <mv/gl/shape/prism.hpp>
 #include <mv/gl/shape/sphere.hpp>
-#include <mv/gl/shapes_storage.hpp>
 #include <mv/shader.hpp>
 
 #include <imgui.h>
@@ -26,11 +27,9 @@ namespace math_1_3
 }// namespace math_1_3
 
 
-class Application final : public mv::Application
+class FunctionGradientApplication final : public mv::Application3D
 {
 private:
-    constexpr static auto clearColor = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
-
     mv::Shader shader = mv::Shader{
         b::embed<"resources/shaders/vertex.vert">().str(),
         b::embed<"resources/shaders/fragment.frag">().str(),
@@ -50,9 +49,14 @@ private:
 
     mv::gl::shape::Plot plot{20.0F};
 
-    mv::gl::Instancing<mv::gl::InstanceParameters> instancing;
+    mv::gl::InstancesHolder<mv::gl::InstanceParameters> instancing;
 
-    mv::gl::Instancing<mv::gl::InstanceParameters> sphereInstancing;
+    mv::gl::InstancesHolder<mv::gl::InstanceParameters> sphereInstancing;
+
+    mv::gl::VerticesContainer<glm::vec3> vertices{
+        {10.0F, 10.0F, 0.0F}, {10.0F, -10.0F, 0.0F},  {-10.0F, -10.0F, 0.0F},
+        {10.0F, 10.0F, 0.0F}, {-10.0F, -10.0F, 0.0F}, {-10.0F, 10.0F, 0.0F},
+    };
 
     mv::gl::shape::Function function{
         math_1_3::fFunction, -4.0F, -4.0F, 7.0F, 7.0F,
@@ -63,27 +67,29 @@ private:
     double pressTime = 0.0;
 
 public:
-    using mv::Application::Application;
+    using Application3D::Application3D;
 
     auto init() -> void override
     {
+        setClearColor({0.8F, 0.8F, 0.8F, 1.0F});
+
         instancing.models = {mv::gl::InstanceParameters{
             .color = {1.0F, 0.0F, 0.0F, 1.0F},
             .transformation = glm::translate(glm::mat4{1.0F}, {2.5F, 2.0F, 8.0F}),
         }};
 
-        mv::Application::init();
+        Application3D::init();
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
         function.loadData();
         sphere.loadData();
-        plot.axis.loadData();
+        plot.loadData();
 
         function.vbo.bind();
         function.vao.bind(0, 3, GL_FLOAT, sizeof(glm::vec3), 0);
 
-        plot.axis.vbo.bind();
-        plot.axis.vao.bind(0, 3, GL_FLOAT, sizeof(glm::vec3), 0);
+        plot.vbo.bind();
+        plot.vao.bind(0, 3, GL_FLOAT, sizeof(glm::vec3), 0);
 
         glm::vec2 vec{6.0F};
         constexpr float a = 0.03F;
@@ -100,6 +106,7 @@ public:
         }
 
         sphereInstancing.loadData();
+        vertices.loadData();
 
         sphere.vbo.bind();
         sphere.vao.bind(0, 3, GL_FLOAT, sizeof(glm::vec3), 0);
@@ -114,10 +121,6 @@ public:
 
     auto update() -> void override
     {
-        const auto b = glfwGetTime();
-        glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
         ImGui::Text("FPS %f", ImGui::GetIO().Framerate);
         const glm::mat4 resulted_matrix = getResultedViewMatrix();
 
@@ -137,41 +140,40 @@ public:
 
         colorShader.setVec4("elementColor", glm::vec4(0.1f, 0.1f, 0.1f, 1.0f));
 
-        plot.axis.vao.bind();
-        glDrawArrays(GL_TRIANGLES, 0, plot.axis.vertices.size());
+        plot.draw();
+        // glDrawArrays(GL_TRIANGLES, 0, plot.vertices.size());
     }
 
     auto processInput() -> void override
     {
-        mv::Application::processInput();
+        constexpr static auto key_press_delay = 0.2;
 
-        if (glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS &&
-            glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS) {
+        Application3D::processInput();
+
+        const auto left_alt_pressed = glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS;
+        const auto key_g_pressed = glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS;
+
+        if (left_alt_pressed && key_g_pressed) {
             const auto mode = glfwGetInputMode(window, GLFW_CURSOR);
             const double new_press_time = glfwGetTime();
 
-            if (new_press_time - pressTime > 0.2) {
-                pressTime = new_press_time;
-            } else {
+            if (new_press_time - pressTime < key_press_delay) {
                 return;
             }
 
-            fmt::println("PRESSED");
+            pressTime = new_press_time;
             firstMouse = true;
-            if (mode == GLFW_CURSOR_DISABLED) {
-                isMouseShowed = true;
-                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-            } else {
-                isMouseShowed = false;
-                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-            }
+            isMouseShowed = mode == GLFW_CURSOR_DISABLED;
+
+            glfwSetInputMode(
+                window, GLFW_CURSOR, isMouseShowed ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
         }
     }
 };
 
 auto main() -> int
 {
-    Application application{1000, 800, "Hello World"};
+    FunctionGradientApplication application{1000, 800, "Function Gradient"};
     application.run();
     return 0;
 }

@@ -10,11 +10,6 @@ namespace mv::gl::shape
     private:
         constexpr static auto step = 0.05F;
 
-        float minX;
-        float minY;
-        float maxX;
-        float maxY;
-
     public:
         Function(float (*function)(glm::vec2), const glm::vec4 space)
           : Function(function, -space.x, -space.y, space.z, space.w)
@@ -23,10 +18,6 @@ namespace mv::gl::shape
         Function(
             float (*function)(glm::vec2), const float min_x, const float min_y, const float max_x,
             const float max_y)
-          : minX(min_x)
-          , minY(min_y)
-          , maxX(max_x)
-          , maxY(max_y)
         {
             const auto from_x = std::floor(min_x);
             const auto from_y = std::floor(min_y);
@@ -42,7 +33,9 @@ namespace mv::gl::shape
                 const auto x = from_x + (step * x_index);
                 const auto next_x = x + step;
 
-                assert(x != next_x && "Floating point precision is not enough to compute this function");
+                assert(
+                    x != next_x &&
+                    "Floating point precision is not enough to compute this function");
 
                 auto y = from_y;
                 auto next_y = y + step;
@@ -63,7 +56,9 @@ namespace mv::gl::shape
 
                     y = std::exchange(next_y, next_y + step);
 
-                    assert(y != next_y && "Floating point precision is not enough to compute this function");
+                    assert(
+                        y != next_y &&
+                        "Floating point precision is not enough to compute this function");
                 }
             }
         }

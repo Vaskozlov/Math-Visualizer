@@ -1,14 +1,13 @@
 #ifndef MV_INSTANCING_HPP
 #define MV_INSTANCING_HPP
 
-#include <mv/gl/instance_parameters.hpp>
 #include <mv/gl/vbo.hpp>
 #include <vector>
 
 namespace mv::gl
 {
     template<typename T>
-    class Instancing
+    class InstancesHolder
     {
     public:
         std::vector<T> models;

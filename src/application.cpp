@@ -2,66 +2,23 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
+#include <mv/gl/init.hpp>
+#include <mv/glfw/callbacks.hpp>
+#include <mv/glfw/init.hpp>
 #include <thread>
 
 namespace mv
 {
-    static auto initGlfw() -> void
-    {
-        glfwInit();
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-#ifdef __APPLE__
-        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
-    }
-
-    static auto initGL() -> void
-    {
-        glewInit();
-        glEnable(GL_MULTISAMPLE);
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_LINE_SMOOTH);
-        glEnable(GL_BLEND);
-        glEnable(GL_PROGRAM_POINT_SIZE);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    }
-
-    static auto frameBufferSizeCallback(GLFWwindow *window, const int width, const int height)
-    {
-        auto *app = static_cast<Application *>(glfwGetWindowUserPointer(window));
-        app->onResize(width, height);
-    }
-
-    static auto mouseCallback(GLFWwindow *window, const double x, const double y)
-    {
-        auto *app = static_cast<Application *>(glfwGetWindowUserPointer(window));
-        app->onMouseMovement(x, y);
-    }
-
-    static auto scrollCallback(GLFWwindow *window, const double xOffset, const double yOffset)
-    {
-        auto *app = static_cast<Application *>(glfwGetWindowUserPointer(window));
-        app->onScroll(xOffset, yOffset);
-    }
-
-    static auto cursorEnterLeaveCallback(GLFWwindow *window, const int entered)
-    {
-        auto *app = static_cast<Application *>(glfwGetWindowUserPointer(window));
-        app->onLeaveOrEnter(entered == GLFW_TRUE);
-    }
-
-    Application::Application(const int width, const int height, const std::string &title)
-      : lastMouseX{static_cast<float>(width) / 2.0F}
-      , lastMouseY{static_cast<float>(height) / 2.0F}
+    Application::Application(
+        const int width, const int height, std::string window_title, const int multisampling_level)
+      : title{std::move(window_title)}
       , windowWidth{static_cast<float>(width)}
       , windowHeight{static_cast<float>(height)}
     {
-        initGlfw();
+        glfw::init(3, 3);
+
         glfwSwapInterval(1);
-        glfwWindowHint(GLFW_SAMPLES, 16);
+        glfwWindowHint(GLFW_SAMPLES, multisampling_level);
 
         window = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
 
@@ -72,21 +29,16 @@ namespace mv
         }
 
         glfwMakeContextCurrent(window);
-        glfwSetWindowUserPointer(window, this);
+        glfw::setupCallbacksForApplication(this);
 
-        glfwSetFramebufferSizeCallback(window, frameBufferSizeCallback);
-        glfwSetCursorPosCallback(window, mouseCallback);
-        glfwSetScrollCallback(window, scrollCallback);
-        glfwSetCursorEnterCallback(window, cursorEnterLeaveCallback);
-
-        initGL();
+        gl::init();
 
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         ImGuiIO &io = ImGui::GetIO();
-        (void)io;
-        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;// Enable Keyboard Controls
-        io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad; // Enable Gamepad Controls
+
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 
         ImGui::StyleColorsLight();
 
@@ -101,14 +53,14 @@ namespace mv
         glViewport(0, 0, width, height);
     }
 
-    auto Application::onMouseMovement(const double xPosIn, const double yPosIn) -> void
+    auto Application::onMouseMovement(const double x_pos_in, const double y_pos_in) -> void
     {
         if (!isInFocus || isMouseShowed) {
             return;
         }
 
-        const auto x_pos = static_cast<float>(xPosIn);
-        const auto y_pos = static_cast<float>(yPosIn);
+        const auto x_pos = static_cast<float>(x_pos_in);
+        const auto y_pos = static_cast<float>(y_pos_in);
 
         if (firstMouse) {
             lastMouseX = x_pos;
@@ -122,27 +74,34 @@ namespace mv
         lastMouseX = x_pos;
         lastMouseY = y_pos;
 
+        onMouseRelativeMovement(x_offset, y_offset);
+    }
+
+    auto Application::onMouseRelativeMovement(const double delta_x, const double delta_y) -> void
+    {
         if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_TRUE) {
-            camera.rotate(x_offset, y_offset);
+            camera.rotate(delta_x, delta_y);
             return;
         }
 
-        camera.processMouseMovement(x_offset, y_offset);
+        camera.processMouseMovement(static_cast<float>(delta_x), static_cast<float>(delta_y));
     }
 
-    auto Application::onScroll(const double /*xOffset*/, const double yOffset) -> void
+    auto Application::onScroll(const double /*x_offset*/, const double y_offset) -> void
     {
         if (!isInFocus || isMouseShowed) {
             return;
         }
 
-        camera.processMouseScroll(static_cast<float>(yOffset));
+        camera.processMouseScroll(static_cast<float>(y_offset));
     }
 
     auto Application::run() -> void
     {
         init();
         constexpr static auto fps_10 = 1.0 / 10.0;
+
+        glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
 
         while (glfwWindowShouldClose(window) == GLFW_FALSE) {
             glfwWaitEventsTimeout(fps_10);
@@ -161,6 +120,8 @@ namespace mv
             ImGui::NewFrame();
 
             processInput();
+
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             update();
 
             ImGui::Render();
@@ -175,33 +136,12 @@ namespace mv
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
             glfwSetWindowShouldClose(window, GLFW_TRUE);
         }
-
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-            camera.processKeyboard(CameraMovement::FORWARD, deltaTime);
-            glfwPostEmptyEvent();
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-            camera.processKeyboard(CameraMovement::BACKWARD, deltaTime);
-            glfwPostEmptyEvent();
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-            camera.processKeyboard(CameraMovement::LEFT, deltaTime);
-            glfwPostEmptyEvent();
-        }
-
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-            camera.processKeyboard(CameraMovement::RIGHT, deltaTime);
-            glfwPostEmptyEvent();
-        }
     }
 
     auto Application::onLeaveOrEnter(const bool entered) -> void
     {
         isInFocus = entered;
         firstMouse = true;
-        fmt::println("{}", isInFocus);
     }
 
     Application::~Application()

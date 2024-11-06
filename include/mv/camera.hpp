@@ -14,15 +14,17 @@ namespace mv
         BACKWARD,
         LEFT,
         RIGHT,
+        UP,
+        DOWN,
     };
 
     class Camera
     {
-    private:
+    public:
         constexpr static float YAW = -90.0F;
         constexpr static float PITCH = 0.0F;
         constexpr static float SPEED = 2.5F;
-        constexpr static float SENSITIVITY = 0.1F;
+        float SENSITIVITY = 0.1F;
         constexpr static float ZOOM = 45.0F;
 
         glm::vec3 position;
@@ -33,7 +35,6 @@ namespace mv
 
         float yaw;
         float pitch;
-        float movementSpeed;
         float mouseSensitivity;
         float zoom;
 
@@ -41,8 +42,10 @@ namespace mv
         float rotationAngleY = 0.0F;
 
     public:
+        float movementSpeed;
+
         explicit Camera(
-            const glm::vec3 position = glm::vec3(5.0F, 5.0F, 5.0F),
+            const glm::vec3 position = glm::vec3(0.0F, 0.0F, 2.0F),
             const glm::vec3 camera_up = glm::vec3(0.0F, 1.0F, 0.0F), const float camera_yaw = YAW,
             const float camera_pitch = PITCH)
           : position{position}
@@ -50,9 +53,9 @@ namespace mv
           , worldUp{camera_up}
           , yaw{camera_yaw}
           , pitch{camera_pitch}
-          , movementSpeed{SPEED}
           , mouseSensitivity{SENSITIVITY}
           , zoom{ZOOM}
+          , movementSpeed{SPEED}
         {
             updateCameraVectors();
         }
@@ -77,7 +80,7 @@ namespace mv
         }
 
         auto processMouseMovement(
-            float xOffset, float yOffset, const GLboolean constrainPitch = true)
+            float xOffset, float yOffset, const GLboolean constrainPitch = GLFW_TRUE) -> void
         {
             xOffset *= mouseSensitivity;
             yOffset *= mouseSensitivity;
@@ -93,36 +96,46 @@ namespace mv
             updateCameraVectors();
         }
 
-        auto processKeyboard(const CameraMovement direction, const float deltaTime) -> void
+        auto moveLeft(const float delta_time, const float multiplier = 1.0F) -> void
         {
-            const float velocity = movementSpeed * deltaTime;
+            const float velocity = movementSpeed * delta_time * multiplier;
+            position -= right * velocity;
+        }
 
-            switch (direction) {
-            case CameraMovement::FORWARD:
-                position += front * velocity;
-                break;
+        auto moveRight(const float delta_time, const float multiplier = 1.0F) -> void
+        {
+            const float velocity = movementSpeed * delta_time * multiplier;
+            position += right * velocity;
+        }
 
-            case CameraMovement::BACKWARD:
-                position -= front * velocity;
-                break;
+        auto moveUp(const float delta_time, const float multiplier = 1.0F) -> void
+        {
+            const float velocity = movementSpeed * delta_time * multiplier;
+            position += up * velocity;
+        }
 
-            case CameraMovement::LEFT:
-                position -= right * velocity;
-                break;
+        auto moveDown(const float delta_time, const float multiplier = 1.0F) -> void
+        {
+            const float velocity = movementSpeed * delta_time * multiplier;
+            position -= up * velocity;
+        }
 
-            case CameraMovement::RIGHT:
-                position += right * velocity;
-                break;
+        auto moveForward(const float delta_time, const float multiplier = 1.0F) -> void
+        {
+            const float velocity = movementSpeed * delta_time * multiplier;
+            position += front * velocity;
+        }
 
-            default:
-                isl::unreachable();
-            }
+        auto moveBack(const float delta_time, const float multiplier = 1.0F) -> void
+        {
+            const float velocity = movementSpeed * delta_time * multiplier;
+            position -= front * velocity;
         }
 
         auto processMouseScroll(const float yOffset) -> void
         {
             zoom -= yOffset;
-            zoom = std::max(zoom, 1.0F);
+            zoom = std::max(zoom, 0.001F);
             zoom = std::min(zoom, 90.0F);
         }
 

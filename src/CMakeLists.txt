@@ -4,8 +4,9 @@ file(
         "src/*.cpp"
 )
 
-add_executable(
+add_library(
         math-visualizer
+        STATIC
         ${MV_OBJECTS}
 )
 
@@ -29,30 +30,4 @@ target_link_libraries(
         GLEW::GLEW
         glm::glm
         imgui::imgui
-)
-
-b_embed_proxy_target(
-        math-visualizer
-        math-visualizer-resources
-)
-
-b_embed(
-        math-visualizer-resources
-        resources/shaders/vertex.vert
-)
-
-b_embed(
-        math-visualizer-resources
-        resources/shaders/fragment.frag
-)
-
-b_embed(
-        math-visualizer-resources
-        resources/shaders/colored_shader.vert
-)
-
-
-b_embed(
-        math-visualizer-resources
-        resources/shaders/static_instance.vert
 )
