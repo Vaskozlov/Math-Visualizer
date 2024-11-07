@@ -26,16 +26,12 @@ void main()
 {
     vec2 c = vec2(vertexColor.x, vertexColor.y);
     vec2 z = vec2(0.0, 0.0);
-    vec3 t = getColor(1.0);
-    float i = 0;
 
-    float max_i = iterationsCount;
-
-    for (; i < max_i; ++i) {
+    for (float i = 0; i < iterationsCount; ++i) {
         z = squareComplex(z) + c;
 
         if (length(z) > 2.0) {
-            FragColor = vec4(getColor(i / max_i), 1.0);
+            FragColor = vec4(getColor(i / iterationsCount), 1.0);
             return;
         }
     }

@@ -9,7 +9,7 @@
 class MandelbrotFractalApplication final : public mv::Application2D
 {
 private:
-    std::array<char, 256> imguiWindowBuffer{};
+    std::array<char, 128> imguiWindowBuffer{};
 
     mv::Shader mandelbrotFractalShader = mv::Shader{
         b::embed<"resources/shaders/mandelbrot_fractal.vert">().str(),
