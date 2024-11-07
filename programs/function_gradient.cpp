@@ -169,7 +169,6 @@ public:
         ImGui::PushFont(font);
         ImGui::SetWindowFontScale(fontScale);
 
-
         ImGui::Text(
             "Points evaluation time: %.0f ns, number of points: %zu",
             evaluationTimeNs,
