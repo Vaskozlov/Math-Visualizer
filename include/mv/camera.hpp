@@ -75,8 +75,8 @@ namespace mv
 
         auto rotate(const double x_pos_in, const double y_pos_in) -> void
         {
-            rotationAngle += glm::radians(x_pos_in);
-            rotationAngleY -= glm::radians(y_pos_in);
+            rotationAngle += glm::radians(static_cast<float>(x_pos_in));
+            rotationAngleY -= glm::radians(static_cast<float>(y_pos_in));
         }
 
         auto processMouseMovement(

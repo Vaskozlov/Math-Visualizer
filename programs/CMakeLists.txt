@@ -51,6 +51,11 @@ b_embed(
         resources/shaders/julia_fractal.frag
 )
 
+b_embed(
+        mandelbrot_fractal-resources
+        resources/fonts/JetBrainsMono-Medium.ttf
+)
+
 add_executable(
         function_gradient
         programs/function_gradient.cpp
@@ -103,4 +108,9 @@ b_embed(
 b_embed(
         function_gradient-resources
         resources/shaders/static_instance.vert
+)
+
+b_embed(
+        function_gradient-resources
+        resources/fonts/JetBrainsMono-Medium.ttf
 )

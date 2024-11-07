@@ -35,10 +35,10 @@ namespace mv
 
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
-        ImGuiIO &io = ImGui::GetIO();
+        imguiIO = &ImGui::GetIO();
 
-        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-        io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+        imguiIO->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+        imguiIO->ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 
         ImGui_ImplGlfw_InitForOpenGL(window, true);
         ImGui_ImplOpenGL3_Init("#version 330 core");

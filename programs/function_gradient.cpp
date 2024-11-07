@@ -26,10 +26,11 @@ namespace math_1_3
     }
 }// namespace math_1_3
 
-
 class FunctionGradientApplication final : public mv::Application3D
 {
 private:
+    std::array<char, 128> imguiWindowBuffer{};
+
     mv::Shader shader = mv::Shader{
         b::embed<"resources/shaders/vertex.vert">().str(),
         b::embed<"resources/shaders/fragment.frag">().str(),
@@ -59,13 +60,68 @@ private:
 
     std::vector<glm::vec3> points{};
     glm::vec3 extremum = {2.0F, 8.0F, 2.0F};
+    glm::vec3 lastPoint = {0.1F, 0.2F, 0.0F};
     double pressTime = 0.0;
+    float gradientA = 0.03F;
+    float gradientK = 1.0F;
+    float evaluationTimeNs = 0.0;
+    float functionDeltaStop = 1e-4;
+    float gradientDeltaStop = 1e-8;
+    float fontScale = 0.33F;
+    ImFont *font;
 
 public:
     using Application3D::Application3D;
 
+    auto calculateGradientPoints() -> void
+    {
+        using namespace std::chrono_literals;
+
+        glm::vec2 evaluation_point{6.0F};
+        sphereInstancing.models.clear();
+
+        sphereInstancing.models.emplace_back(
+            glm::vec4(1.0F, 0.0F, 0.0F, 1.0F), glm::translate(glm::mat4{1.0F}, {2.0F, 8.0F, 2.0F}));
+
+        float a = gradientA;
+
+        const auto time_begin = std::chrono::high_resolution_clock::now();
+
+        auto current_point = 0.0F;
+        auto gradient_vector = glm::vec2(0.0F);
+
+        do {
+            current_point = math_1_3::fFunction(evaluation_point);
+            gradient_vector = math_1_3::fFunctionGradient(evaluation_point) * a;
+
+            sphereInstancing.models.emplace_back(
+                glm::vec4(0.0F, 0.0F, 0.3F, 1.0F),
+                glm::translate(
+                    glm::mat4{1.0F}, {evaluation_point.x, current_point, evaluation_point.y}));
+
+
+            if (sphereInstancing.models.size() > 5000) {
+                break;
+            }
+
+            evaluation_point += gradient_vector;
+
+            a = std::max(0.001F, a / gradientK);
+        } while (std::abs(current_point - 8.0F) > functionDeltaStop &&
+                 glm::length(gradient_vector) > gradientDeltaStop);
+
+        lastPoint = glm::vec3(evaluation_point.x, evaluation_point.y, current_point);
+
+        const auto time_end = std::chrono::high_resolution_clock::now();
+        evaluationTimeNs = (time_end - time_begin) / 1ns;
+
+        sphereInstancing.loadData();
+    }
+
     auto init() -> void override
     {
+        Application3D::init();
+
         setClearColor({0.8F, 0.8F, 0.8F, 1.0F});
 
         instancing.models = {mv::gl::InstanceParameters{
@@ -73,7 +129,6 @@ public:
             .transformation = glm::translate(glm::mat4{1.0F}, {2.5F, 2.0F, 8.0F}),
         }};
 
-        Application3D::init();
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
         function.loadData();
@@ -86,24 +141,7 @@ public:
         plot.vbo.bind();
         plot.vao.bind(0, 3, GL_FLOAT, sizeof(glm::vec3), 0);
 
-        glm::vec2 evaluation_point{6.0F};
-        constexpr float a = 0.03F;
-
-        sphereInstancing.models.emplace_back(
-            glm::vec4(1.0F, 0.0F, 0.0F, 1.0F), glm::translate(glm::mat4{1.0F}, {2.0F, 8.0F, 2.0F}));
-
-        for (uint32_t i = 1; i <= 30; ++i) {
-            sphereInstancing.models.emplace_back(
-                glm::vec4(0.0F, 0.0F, 0.3F, 1.0F),
-                glm::translate(
-                    glm::mat4{1.0F},
-                    {evaluation_point.x, math_1_3::fFunction(evaluation_point),
-                     evaluation_point.y}));
-
-            evaluation_point += math_1_3::fFunctionGradient(evaluation_point) * a;
-        }
-
-        sphereInstancing.loadData();
+        calculateGradientPoints();
 
         sphere.vbo.bind();
         sphere.vao.bind(0, 3, GL_FLOAT, sizeof(glm::vec3), 0);
@@ -116,11 +154,52 @@ public:
         colorShader.setVec4("elementColor", glm::vec4(0.5f, 0.5f, 0.0f, 1.0f));
 
         ImGui::StyleColorsLight();
+        font = loadFont<"resources/fonts/JetBrainsMono-Medium.ttf">(45.0F);
+
+        camera.position = glm::vec3(0.0F, 12.0F, 10.0F);
     }
 
     auto update() -> void override
     {
-        ImGui::Text("FPS %f", ImGui::GetIO().Framerate);
+        fmt::format_to_n(
+            imguiWindowBuffer.data(), imguiWindowBuffer.size(),
+            "Settings. FPS: {:#.4}###SettingWindowTitle", ImGui::GetIO().Framerate);
+
+        ImGui::Begin(imguiWindowBuffer.data());
+        ImGui::PushFont(font);
+        ImGui::SetWindowFontScale(fontScale);
+
+
+        ImGui::Text(
+            "Points evaluation time: %.0f ns, number of points: %zu",
+            evaluationTimeNs,
+            sphereInstancing.models.size() - 1);
+
+        ImGui::Text(
+            "Last evaluated point: (%.3f, %.3f, %.5f), vector length from extremum: %.3e",
+            lastPoint.x,
+            lastPoint.y,
+            lastPoint.z,
+            glm::length(lastPoint - glm::vec3(2.0F, 2.0F, 8.0F)));
+
+        if (ImGui::SliderFloat("Gradiant a", &gradientA, 0.0F, 0.1F, "%.4f")) {
+            calculateGradientPoints();
+        }
+
+        if (ImGui::SliderFloat("Gradiant k", &gradientK, 1.0F, 5.0F, "%.4f")) {
+            calculateGradientPoints();
+        }
+
+        if (ImGui::SliderFloat("Function delta", &functionDeltaStop, 0.0F, 1e-3F, "%.5e")) {
+            calculateGradientPoints();
+        }
+
+        if (ImGui::SliderFloat("Gradient delta", &gradientDeltaStop, 0.0F, 1e-3F, "%.5e")) {
+            calculateGradientPoints();
+        }
+
+        ImGui::SliderFloat("Font scale", &fontScale, 0.1F, 3.0F, "%.3f");
+
         const glm::mat4 resulted_matrix = getResultedViewMatrix();
 
         shaderWithPositioning.use();
@@ -140,6 +219,9 @@ public:
         colorShader.setVec4("elementColor", glm::vec4(0.1f, 0.1f, 0.1f, 1.0f));
 
         plot.draw();
+
+        ImGui::PopFont();
+        ImGui::End();
     }
 
     auto processInput() -> void override

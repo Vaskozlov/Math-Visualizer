@@ -2,11 +2,14 @@
 #define MV_APPLICATION_HPP
 
 #include <GL/glew.h>
+#include <imgui.h>
 
 #include <GLFW/glfw3.h>
 #include <isl/isl.hpp>
 
 #include <mv/camera.hpp>
+
+#include "../../cmake-build-release-clang-17/_deps/battery-embed-build/embed/autogen/function_gradient_resources/include/battery/embed.hpp"
 
 namespace mv
 {
@@ -17,6 +20,7 @@ namespace mv
         std::string title;
         glm::vec4 clearColor{0.0F, 0.0F, 0.0F, 1.0F};
         GLFWwindow *window;
+        ImGuiIO *imguiIO;
         float lastMouseX = 0.0F;
         float lastMouseY = 0.0F;
         float deltaTime = 0.0f;
@@ -84,6 +88,19 @@ namespace mv
         virtual auto processInput() -> void;
 
         virtual auto onLeaveOrEnter(bool entered) -> void;
+
+        template<b::embed_string_literal fontPath>
+        [[nodiscard]] auto loadFont(const float font_size = 45.0F) const -> ImFont *
+        {
+            void *font_data = const_cast<char *>(b::embed<fontPath>().data());// NOLINT
+            const int font_data_size = b::embed<fontPath>().size();
+
+            ImFontConfig config;
+            config.FontDataOwnedByAtlas = false;
+
+            return imguiIO->Fonts->AddFontFromMemoryTTF(
+                font_data, font_data_size, font_size, &config);
+        }
     };
 }// namespace mv
 
