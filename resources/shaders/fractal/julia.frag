@@ -4,7 +4,7 @@ in vec4 vertexColor;
 in float iterationsCount;
 out vec4 FragColor;
 
-vec2 squareComplex(vec2 value)
+vec2 cx_sqr(vec2 value)
 {
     return vec2(value.x * value.x - value.y * value.y, 2.0 * value.x * value.y);
 }
@@ -24,7 +24,7 @@ vec3 getColor(float k)
 
 vec2 f(vec2 value, vec2 c)
 {
-    return squareComplex(value) + c;
+    return cx_sqr(value) + c;
 }
 
 void main()
