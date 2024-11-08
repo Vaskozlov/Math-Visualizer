@@ -8,7 +8,13 @@
 #include <mv/gl/shape/sphere.hpp>
 #include <mv/shader.hpp>
 
+#include <zep/imgui/editor_imgui.h>
+
+#include <ast-lang/interpreter/interpreter.hpp>
+#include <mvl/mvl.hpp>
+
 #include <imgui.h>
+#include <imgui_stdlib.h>
 
 namespace math_1_3
 {
@@ -70,6 +76,10 @@ private:
     float fontScale = 0.33F;
     ImFont *font;
 
+    std::string sourceCode = "var a = print(1);";
+    std::string programOutput = "";
+    bool disableInput = false;
+
 public:
     using Application3D::Application3D;
 
@@ -81,7 +91,7 @@ public:
         sphereInstancing.models.clear();
 
         sphereInstancing.models.emplace_back(
-            glm::vec4(1.0F, 0.0F, 0.0F, 1.0F), glm::translate(glm::mat4{1.0F}, {2.0F, 8.0F, 2.0F}));
+            glm::vec4(1.0F, 0.0F, 0.0F, 1.0F), glm::translate(glm::mat4{1.0F}, extremum));
 
         float a = gradientA;
 
@@ -221,13 +231,38 @@ public:
 
         ImGui::PopFont();
         ImGui::End();
+
+        ImGui::Begin("Program");
+        ImGui::PushFont(font);
+        ImGui::SetWindowFontScale(fontScale);
+
+        ImGui::InputTextMultiline("##Program input", &sourceCode);
+
+        if (ImGui::Button("run")) {
+            try {
+                auto node = mvl::parse(sourceCode, "stdin");
+                programOutput.clear();
+                auto interpreter = mvl::newInterpreter(std::back_inserter(programOutput));
+                node->compute(interpreter);
+            } catch (const std::exception &e) {
+                programOutput = e.what();
+            }
+        }
+
+        disableInput = ImGui::IsWindowFocused();
+
+        ImGui::TextUnformatted(programOutput.c_str(), programOutput.c_str() + programOutput.size());
+        ImGui::PopFont();
+        ImGui::End();
     }
 
     auto processInput() -> void override
     {
         constexpr static auto key_press_delay = 0.2;
 
-        Application3D::processInput();
+        if (!disableInput) {
+            Application3D::processInput();
+        }
 
         const auto left_alt_pressed = glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS;
         const auto key_g_pressed = glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS;

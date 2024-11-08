@@ -136,7 +136,7 @@ namespace mv
         {
             zoom -= yOffset;
             zoom = std::max(zoom, 0.001F);
-            zoom = std::min(zoom, 90.0F);
+            zoom = std::min(zoom, 120.0F);
         }
 
     private:

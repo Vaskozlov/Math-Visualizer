@@ -24,6 +24,8 @@ target_link_libraries(
         glm::glm
         imgui::imgui
         math-visualizer
+        astlang
+        unordered_dense::unordered_dense
 )
 
 b_embed_proxy_target(
@@ -33,22 +35,27 @@ b_embed_proxy_target(
 
 b_embed(
         mandelbrot_fractal-resources
-        resources/shaders/mandelbrot_fractal.vert
+        resources/shaders/fractal/default.vert
 )
 
 b_embed(
         mandelbrot_fractal-resources
-        resources/shaders/mandelbrot_fractal.frag
+        resources/shaders/fractal/with_offset.vert
 )
 
 b_embed(
         mandelbrot_fractal-resources
-        resources/shaders/julia_fractal.vert
+        resources/shaders/fractal/julia.frag
 )
 
 b_embed(
         mandelbrot_fractal-resources
-        resources/shaders/julia_fractal.frag
+        resources/shaders/fractal/mandelbrot.frag
+)
+
+b_embed(
+        mandelbrot_fractal-resources
+        resources/shaders/fractal/newton.frag
 )
 
 b_embed(
@@ -82,6 +89,9 @@ target_link_libraries(
         glm::glm
         imgui::imgui
         math-visualizer
+        astlang
+        unordered_dense::unordered_dense
+        Zep::Zep
 )
 
 b_embed_proxy_target(

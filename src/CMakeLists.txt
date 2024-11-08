@@ -30,4 +30,18 @@ target_link_libraries(
         GLEW::GLEW
         glm::glm
         imgui::imgui
+        ccl
+        astlang
+        unordered_dense::unordered_dense
 )
+
+b_embed_proxy_target(
+        math-visualizer
+        math-visualizer-resources
+)
+
+b_embed(
+        math-visualizer-resources
+        resources/grammar/mvl.cclp
+)
+

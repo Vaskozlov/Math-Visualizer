@@ -15,9 +15,27 @@ CPMAddPackage(
 )
 
 CPMAddPackage(
+        NAME ccl
+        GITHUB_REPOSITORY Vaskozlov/ccl-project
+        GIT_TAG main
+)
+
+CPMAddPackage(
+        NAME unordered_dense
+        GITHUB_REPOSITORY martinus/unordered_dense
+        GIT_TAG main
+)
+
+CPMAddPackage(
         NAME battery-embed
         GITHUB_REPOSITORY batterycenter/embed
         GIT_TAG main
+)
+
+CPMAddPackage(
+        NAME zep
+        GITHUB_REPOSITORY Rezonality/zep
+        GIT_TAG master
 )
 
 include(${isl_SOURCE_DIR}/cmake/CompilerOptions.cmake)
@@ -25,3 +43,5 @@ include(${isl_SOURCE_DIR}/cmake/InterproceduralOptimization.cmake)
 include(${isl_SOURCE_DIR}/cmake/ProjectOptions.cmake)
 
 include_directories(${isl_SOURCE_DIR}/include)
+include_directories(${ccl_SOURCE_DIR}/include)
+include_directories(${zep_SOURCE_DIR}/include)
