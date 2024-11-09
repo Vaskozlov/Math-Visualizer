@@ -103,6 +103,7 @@ namespace mv
 
         while (glfwWindowShouldClose(window) == GLFW_FALSE) {
             glfwWaitEventsTimeout(fps_10);
+            // glfwPollEvents();
 
             const auto current_time = static_cast<float>(glfwGetTime());
             deltaTime = current_time - lastFrameTime;

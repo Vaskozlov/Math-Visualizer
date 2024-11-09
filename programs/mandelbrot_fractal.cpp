@@ -1,3 +1,5 @@
+#define TRACY_ENABLE 1
+
 #include <battery/embed.hpp>
 #include <imgui.h>
 #include <mv/application_2d.hpp>
@@ -7,9 +9,11 @@
 
 enum class FractalType : std::size_t
 {
-    Mandelbrot = 0,
-    Julia = 1,
-    Newton = 2,
+    MANDELBROT = 0,
+    JULIA = 1,
+    NEWTON = 2,
+    NEWTON_CLASSIC = 3,
+    NEWTON_SIN = 4,
 };
 
 class FractalApplication final : public mv::Application2D
@@ -18,18 +22,43 @@ private:
     std::array<char, 128> imguiWindowBuffer{};
 
     mv::Shader mandelbrotFractalShader = mv::Shader{
-        b::embed<"resources/shaders/fractal/default.vert">().str(),
-        b::embed<"resources/shaders/fractal/mandelbrot.frag">().str(),
+        {b::embed<"resources/shaders/fractal/default.vert">().str()},
+        {
+            b::embed<"resources/shaders/fractal/mandelbrot.frag">().str(),
+            b::embed<"resources/shaders/fractal/common.glsl">().str(),
+        },
     };
 
     mv::Shader juliaFractalShader = mv::Shader{
-        b::embed<"resources/shaders/fractal/with_offset.vert">().str(),
-        b::embed<"resources/shaders/fractal/julia.frag">().str(),
+        {b::embed<"resources/shaders/fractal/with_offset.vert">().str()},
+        {
+            b::embed<"resources/shaders/fractal/julia.frag">().str(),
+            b::embed<"resources/shaders/fractal/common.glsl">().str(),
+        },
     };
 
     mv::Shader newtonFractalShader = mv::Shader{
-        b::embed<"resources/shaders/fractal/default.vert">().str(),
-        b::embed<"resources/shaders/fractal/newton.frag">().str(),
+        {b::embed<"resources/shaders/fractal/default.vert">().str()},
+        {
+            b::embed<"resources/shaders/fractal/newton.frag">().str(),
+            b::embed<"resources/shaders/fractal/common.glsl">().str(),
+        },
+    };
+
+    mv::Shader newtonClassicFractalShader = mv::Shader{
+        {b::embed<"resources/shaders/fractal/default.vert">().str()},
+        {
+            b::embed<"resources/shaders/fractal/newton_classic.frag">().str(),
+            b::embed<"resources/shaders/fractal/common.glsl">().str(),
+        },
+    };
+
+    mv::Shader newtonSinFractalShader = mv::Shader{
+        {b::embed<"resources/shaders/fractal/default.vert">().str()},
+        {
+            b::embed<"resources/shaders/fractal/newton_sin.frag">().str(),
+            b::embed<"resources/shaders/fractal/common.glsl">().str(),
+        },
     };
 
     mv::gl::VerticesContainer<glm::vec3> mandelbrotVertices{
@@ -48,12 +77,14 @@ private:
     };
 
     ImFont *font;
-    float fontScale = 0.33F;
+    float fontScale = 0.5F;
 
     double pressTime = 0.0;
     glm::vec2 fractalC{-0.8F, 0.156};
 
     int newtonIterations = 45;
+    int newtonClassicIterations = 45;
+    int newtonSinIterations = 45;
     int juliaIterations = 1000;
     int mandelbrotIterations = 1000;
 
@@ -83,7 +114,7 @@ public:
         camera.movementSpeed = 0.5F;
 
         ImGui::StyleColorsDark();
-        font = loadFont<"resources/fonts/JetBrainsMono-Medium.ttf">(45.0F);
+        font = loadFont<"resources/fonts/JetBrainsMono-Medium.ttf">(30.0F);
 
         updateShaderUniform();
     }
@@ -135,27 +166,61 @@ public:
         glDrawArrays(GL_TRIANGLES, 0, newtonVertices.vertices.size());
     }
 
+    auto newtonClassicFractal() -> void
+    {
+        if (ImGui::SliderInt("Iterataions", &newtonClassicIterations, 5, 200)) {
+            updateShaderUniform();
+        }
+
+        newtonClassicFractalShader.use();
+        newtonClassicFractalShader.setMat4("projection", getResultedViewMatrix());
+        newtonVertices.vao.bind();
+
+        glDrawArrays(GL_TRIANGLES, 0, newtonVertices.vertices.size());
+    }
+
+    auto newtonSinFractal() -> void
+    {
+        if (ImGui::SliderInt("Iterataions", &newtonSinIterations, 5, 200)) {
+            updateShaderUniform();
+        }
+
+        newtonSinFractalShader.use();
+        newtonSinFractalShader.setMat4("projection", getResultedViewMatrix());
+        newtonVertices.vao.bind();
+
+        glDrawArrays(GL_TRIANGLES, 0, newtonVertices.vertices.size());
+    }
+
     auto update() -> void override
     {
         fmt::format_to_n(
             imguiWindowBuffer.data(), imguiWindowBuffer.size(),
-            "Settings. FPS: {:#.4}###SettingWindowTitle", ImGui::GetIO().Framerate);
+            "Настройки. FPS: {:#.4}###SettingWindowTitle", ImGui::GetIO().Framerate);
 
         ImGui::Begin(imguiWindowBuffer.data());
         ImGui::PushFont(font);
         ImGui::SetWindowFontScale(fontScale);
 
         switch (static_cast<FractalType>(fractalIndex)) {
-        case FractalType::Mandelbrot:
+        case FractalType::MANDELBROT:
             mandelbrotFractal();
             break;
 
-        case FractalType::Julia:
+        case FractalType::JULIA:
             juliaFractal();
             break;
 
-        case FractalType::Newton:
+        case FractalType::NEWTON:
             newtonFractal();
+            break;
+
+        case FractalType::NEWTON_CLASSIC:
+            newtonClassicFractal();
+            break;
+
+        case FractalType::NEWTON_SIN:
+            newtonSinFractal();
             break;
 
         default:
@@ -169,7 +234,7 @@ public:
         ImGui::SameLine();
 
         if (ImGui::Button("Change fractal")) {
-            fractalIndex = (fractalIndex + 1) % 3;
+            fractalIndex = (fractalIndex + 1) % 5;
             updateShaderUniform();
         }
 
@@ -223,16 +288,28 @@ private:
     auto updateShaderUniform() const -> void
     {
         switch (static_cast<FractalType>(fractalIndex)) {
-        case FractalType::Mandelbrot:
-            updateMandelbrotShaderUniform();
+        case FractalType::MANDELBROT:
+            mandelbrotFractalShader.use();
+            mandelbrotFractalShader.setInt("iterations", mandelbrotIterations);
             break;
 
-        case FractalType::Julia:
+        case FractalType::JULIA:
             updateJuliaShaderUniform();
             break;
 
-        case FractalType::Newton:
-            updateNewtonShaderUniform();
+        case FractalType::NEWTON:
+            newtonFractalShader.use();
+            newtonFractalShader.setInt("iterations", newtonIterations);
+            break;
+
+        case FractalType::NEWTON_CLASSIC:
+            newtonClassicFractalShader.use();
+            newtonClassicFractalShader.setInt("iterations", newtonClassicIterations);
+            break;
+
+        case FractalType::NEWTON_SIN:
+            newtonSinFractalShader.use();
+            newtonSinFractalShader.setInt("iterations", newtonSinIterations);
             break;
 
         default:
@@ -246,23 +323,11 @@ private:
         juliaFractalShader.setInt("iterations", juliaIterations);
         juliaFractalShader.setVec2("fC", fractalC);
     }
-
-    auto updateMandelbrotShaderUniform() const -> void
-    {
-        mandelbrotFractalShader.use();
-        mandelbrotFractalShader.setInt("iterations", mandelbrotIterations);
-    }
-
-    auto updateNewtonShaderUniform() const -> void
-    {
-        newtonFractalShader.use();
-        newtonFractalShader.setInt("iterations", newtonIterations);
-    }
 };
 
 auto main() -> int
 {
-    FractalApplication application{1000, 800, "Fractal visualization"};
+    FractalApplication application{1000, 800, "Fractal visualization", 2};
     application.run();
     return 0;
 }

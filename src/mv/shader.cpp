@@ -27,14 +27,14 @@ namespace mv
         return shader;
     }
 
-    template<std::size_t N>
-    static auto createProgram(const std::array<GLuint, N> &shaders) -> GLuint
+
+    static auto createProgram(const std::vector<GLuint> &shaders) -> GLuint
     {
         int success = 0;
         std::array<char, 1024> info_log = {0};
-        GLuint program = glCreateProgram();
+        const GLuint program = glCreateProgram();
 
-        for (auto shader : shaders) {
+        for (const auto shader : shaders) {
             glAttachShader(program, shader);
         }
 
@@ -50,17 +50,25 @@ namespace mv
     }
 
     Shader::Shader(
-        const std::string &vertex_code_str, const std::string &fragment_code_str)
+        const std::vector<std::string> &vertex_shaders,
+        const std::vector<std::string> &fragment_shaders)
     {
-        const char *vertex_code = vertex_code_str.c_str();
-        const char *fragment_code = fragment_code_str.c_str();
+        std::vector<GLuint> shaders;
 
-        auto vertex = compileShader(vertex_code, GL_VERTEX_SHADER);
-        auto fragment = compileShader(fragment_code, GL_FRAGMENT_SHADER);
+        for (const auto &vertex_code_str : vertex_shaders) {
+            const char *vertex_shader_code = vertex_code_str.c_str();
+            shaders.emplace_back(compileShader(vertex_shader_code, GL_VERTEX_SHADER));
+        }
 
-        program = createProgram<2>({vertex, fragment});
+        for (const auto &fragment_code_str : fragment_shaders) {
+            const char *fragment_shader_code = fragment_code_str.c_str();
+            shaders.emplace_back(compileShader(fragment_shader_code, GL_FRAGMENT_SHADER));
+        }
 
-        glDeleteShader(vertex);
-        glDeleteShader(fragment);
+        program = createProgram(shaders);
+
+        for (const auto shader : shaders) {
+            glDeleteShader(shader);
+        }
     }
 }// namespace mv

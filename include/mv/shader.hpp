@@ -15,7 +15,9 @@ namespace mv
         GLuint program;
 
     public:
-        Shader(const std::string &vertex_code_str, const std::string &fragment_code_str);
+        Shader(
+            const std::vector<std::string> &vertex_shaders,
+            const std::vector<std::string> &fragment_shaders);
 
         ~Shader()
         {

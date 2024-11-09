@@ -60,6 +60,21 @@ b_embed(
 
 b_embed(
         mandelbrot_fractal-resources
+        resources/shaders/fractal/common.glsl
+)
+
+b_embed(
+        mandelbrot_fractal-resources
+        resources/shaders/fractal/newton_classic.frag
+)
+
+b_embed(
+        mandelbrot_fractal-resources
+        resources/shaders/fractal/newton_sin.frag
+)
+
+b_embed(
+        mandelbrot_fractal-resources
         resources/fonts/JetBrainsMono-Medium.ttf
 )
 

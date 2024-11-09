@@ -99,7 +99,8 @@ namespace mv
             config.FontDataOwnedByAtlas = false;
 
             return imguiIO->Fonts->AddFontFromMemoryTTF(
-                font_data, font_data_size, font_size, &config);
+                font_data, font_data_size, font_size, &config,
+                imguiIO->Fonts->GetGlyphRangesCyrillic());
         }
     };
 }// namespace mv
