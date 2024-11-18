@@ -106,7 +106,6 @@ target_link_libraries(
         math-visualizer
         astlang2
         unordered_dense::unordered_dense
-        Zep::Zep
 )
 
 b_embed_proxy_target(

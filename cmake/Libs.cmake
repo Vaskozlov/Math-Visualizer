@@ -32,12 +32,6 @@ CPMAddPackage(
         GIT_TAG main
 )
 
-CPMAddPackage(
-        NAME zep
-        GITHUB_REPOSITORY Rezonality/zep
-        GIT_TAG master
-)
-
 include(${isl_SOURCE_DIR}/cmake/CompilerOptions.cmake)
 include(${isl_SOURCE_DIR}/cmake/InterproceduralOptimization.cmake)
 include(${isl_SOURCE_DIR}/cmake/ProjectOptions.cmake)

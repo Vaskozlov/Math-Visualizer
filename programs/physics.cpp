@@ -34,12 +34,6 @@ private:
         {cubeSize, cubeSize, 0.0F}, {-cubeSize, -cubeSize, 0.0F}, {-cubeSize, cubeSize, 0.0F},
     };
 
-
-    std::string sourceCode =
-        isl::io::read("/Users/vaskozlov/CLionProjects/Math-Visualizer/programs/physics.astlang");
-
-    std::string programOutput = "";
-
     double pressTime = 0.0;
     ImFont *font;
     float fontScale = 0.33F;
@@ -172,11 +166,6 @@ public:
         Application2D::onScroll(x_offset * scale, y_offset * scale);
     }
 
-    ~PhysicsApplication() override
-    {
-        isl::io::write(
-            "/Users/vaskozlov/CLionProjects/Math-Visualizer/programs/physics.astlang", sourceCode);
-    }
 };
 
 auto main() -> int
