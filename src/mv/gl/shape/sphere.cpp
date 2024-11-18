@@ -18,28 +18,20 @@ namespace mv::gl::shape
         const float u_step = (u_end - u_start) / static_cast<float>(slices);
         const float v_step = (v_end - v_start) / static_cast<float>(stacks);
 
-        vertices.reserve(slices * stacks * 6U);
+        vertices.reserve(slices * stacks * 2U);
 
-        for (isl::u32 i = 0; i != slices; ++i) {
-            for (isl::u32 j = 0; j != stacks; ++j) {
+        for (isl::u32 i = 0; i != slices + 1; ++i) {
+            for (isl::u32 j = 0; j != stacks + 1; ++j) {
                 const float u = (static_cast<float>(i) * u_step) + u_start;
                 const float v = (static_cast<float>(j) * v_step) + v_start;
 
                 const float next_u = std::min(u + u_step, u_end);
-                const float next_v = std::min(v + v_step, v_end);
 
                 const auto p0 = computeSphereCoordinate(u, v, radius);
-                const auto p1 = computeSphereCoordinate(u, next_v, radius);
-                const auto p2 = computeSphereCoordinate(next_u, v, radius);
-                const auto p3 = computeSphereCoordinate(next_u, next_v, radius);
+                const auto p1 = computeSphereCoordinate(next_u, v, radius);
 
                 vertices.emplace_back(p0);
-                vertices.emplace_back(p2);
                 vertices.emplace_back(p1);
-
-                vertices.emplace_back(p3);
-                vertices.emplace_back(p1);
-                vertices.emplace_back(p2);
             }
         }
 

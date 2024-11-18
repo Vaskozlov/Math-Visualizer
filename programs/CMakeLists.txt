@@ -24,7 +24,7 @@ target_link_libraries(
         glm::glm
         imgui::imgui
         math-visualizer
-        astlang
+        astlang2
         unordered_dense::unordered_dense
 )
 
@@ -104,7 +104,7 @@ target_link_libraries(
         glm::glm
         imgui::imgui
         math-visualizer
-        astlang
+        astlang2
         unordered_dense::unordered_dense
         Zep::Zep
 )

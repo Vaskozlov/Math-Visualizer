@@ -10,7 +10,7 @@
 
 #include <zep/imgui/editor_imgui.h>
 
-#include <ast-lang/interpreter/interpreter.hpp>
+#include <ast-lang-2/interpreter/interpreter.hpp>
 #include <mvl/mvl.hpp>
 
 #include <imgui.h>
@@ -38,30 +38,30 @@ private:
     std::array<char, 128> imguiWindowBuffer{};
 
     mv::Shader shader = mv::Shader{
-        b::embed<"resources/shaders/vertex.vert">().str(),
-        b::embed<"resources/shaders/fragment.frag">().str(),
+        {b::embed<"resources/shaders/vertex.vert">().str()},
+        {b::embed<"resources/shaders/fragment.frag">().str()},
     };
 
     mv::Shader shaderWithPositioning = mv::Shader{
-        b::embed<"resources/shaders/static_instance.vert">().str(),
-        b::embed<"resources/shaders/fragment.frag">().str(),
+        {b::embed<"resources/shaders/static_instance.vert">().str()},
+        {b::embed<"resources/shaders/fragment.frag">().str()},
     };
 
     mv::Shader colorShader = mv::Shader{
-        b::embed<"resources/shaders/colored_shader.vert">().str(),
-        b::embed<"resources/shaders/fragment.frag">().str(),
+        {b::embed<"resources/shaders/colored_shader.vert">().str()},
+        {b::embed<"resources/shaders/fragment.frag">().str()},
     };
 
     mv::gl::shape::Sphere sphere{0.1F};
 
-    mv::gl::shape::Plot plot{20.0F};
+    mv::gl::shape::Plot plot{10};
 
     mv::gl::InstancesHolder<mv::gl::InstanceParameters> instancing;
 
     mv::gl::InstancesHolder<mv::gl::InstanceParameters> sphereInstancing;
 
     mv::gl::shape::Function function{
-        math_1_3::fFunction, -4.0F, -4.0F, 7.0F, 7.0F,
+        math_1_3::fFunction, -10.0F, -10.0F, -15.0F, 10.0F, 10.0F, 15.0F
     };
 
     std::vector<glm::vec3> points{};
@@ -216,7 +216,7 @@ public:
         sphere.vao.bind();
 
         glDrawArraysInstanced(
-            GL_TRIANGLES, 0, sphere.vertices.size(), sphereInstancing.models.size());
+            GL_TRIANGLE_STRIP, 0, sphere.vertices.size(), sphereInstancing.models.size());
 
         colorShader.use();
 
@@ -232,28 +232,28 @@ public:
         ImGui::PopFont();
         ImGui::End();
 
-        ImGui::Begin("Program");
-        ImGui::PushFont(font);
-        ImGui::SetWindowFontScale(fontScale);
+        // ImGui::Begin("Program");
+        // ImGui::PushFont(font);
+        // ImGui::SetWindowFontScale(fontScale);
 
-        ImGui::InputTextMultiline("##Program input", &sourceCode);
+        // ImGui::InputTextMultiline("##Program input", &sourceCode);
 
-        if (ImGui::Button("run")) {
-            try {
-                auto node = mvl::parse(sourceCode, "stdin");
-                programOutput.clear();
-                auto interpreter = mvl::newInterpreter(std::back_inserter(programOutput));
-                node->compute(interpreter);
-            } catch (const std::exception &e) {
-                programOutput = e.what();
-            }
-        }
+        // if (ImGui::Button("run")) {
+        //     try {
+        //         auto node = mvl::parse(sourceCode, "stdin");
+        //         programOutput.clear();
+        //         auto interpreter = mvl::newInterpreter(std::back_inserter(programOutput));
+        //         node->compute(interpreter);
+        //     } catch (const std::exception &e) {
+        //         programOutput = e.what();
+        //     }
+        // }
 
-        disableInput = ImGui::IsWindowFocused();
+        // disableInput = ImGui::IsWindowFocused();
 
-        ImGui::TextUnformatted(programOutput.c_str(), programOutput.c_str() + programOutput.size());
-        ImGui::PopFont();
-        ImGui::End();
+        // ImGui::TextUnformatted(programOutput.c_str(), programOutput.c_str() + programOutput.size());
+        // ImGui::PopFont();
+        // ImGui::End();
     }
 
     auto processInput() -> void override

@@ -1,7 +1,8 @@
 #ifndef MVL_HPP
 #define MVL_HPP
 
-#include <ast-lang/interpreter/interpreter.hpp>
+#include <ast-lang-2/ast/core/node.hpp>
+#include <ast-lang-2/interpreter/interpreter.hpp>
 #include <ccl/ccl.hpp>
 #include <ccl/parser/types.hpp>
 #include <isl/string_view.hpp>
@@ -32,9 +33,10 @@ namespace mvl
     using f64 = ccl::f64;
 
     auto parse(isl::string_view source, isl::string_view filename)
-        -> astlang::ast::SharedNode<astlang::ast::Node>;
+        -> astlang2::ast::core::SharedNode<astlang2::ast::core::AstlangNode>;
 
-    auto newInterpreter(std::back_insert_iterator<std::string> output_buffer) -> astlang::interpreter::Interpreter;
+    auto newInterpreter(std::back_insert_iterator<std::string> output_buffer)
+        -> astlang2::interpreter::Interpreter;
 }// namespace mvl
 
 #endif /* MVL_HPP */

@@ -8,7 +8,7 @@ namespace mv::gl::shape
     class Plot : public Prism
     {
     public:
-        explicit Plot(float plot_size);
+        explicit Plot(std::int32_t plot_size);
     };
 }// namespace mv::gl::shape
 

@@ -31,7 +31,7 @@ target_link_libraries(
         glm::glm
         imgui::imgui
         ccl
-        astlang
+        astlang2
         unordered_dense::unordered_dense
 )
 

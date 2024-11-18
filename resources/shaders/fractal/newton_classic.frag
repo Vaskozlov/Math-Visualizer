@@ -16,12 +16,13 @@ void main()
 
     for (float i = 0; i < iterationsCount; ++i) {
         z = z - cx_div(newtonClassicFunction(z), 3.0 * cx_sqr(z));
+        vec2 f = newtonClassicFunction(z);
 
-        if (length(newtonClassicFunction(z)) < 0.2) {
+        if (length(f) < 0.2) {
             FragColor = vec4(getColorExpScale(i / iterationsCount), 1.0);
             return;
         }
     }
 
-    FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+    FragColor = vec4(0.0, 0.0, 0.0, 0.0);
 }
