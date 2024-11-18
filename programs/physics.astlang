@@ -1,0 +1,12 @@
+def firstCoordinates(double t) {
+    return vec2(-2.0, 0.0);
+}
+
+def secondCoordinates(double t) {
+    return vec2(0.0, 0.0);
+}
+
+def thirdCoordinates(double t) {
+    return vec2(2.0, 0.0);
+}
+

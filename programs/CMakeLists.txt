@@ -139,3 +139,64 @@ b_embed(
         function_gradient-resources
         resources/fonts/JetBrainsMono-Medium.ttf
 )
+
+add_executable(
+        physics
+        programs/physics.cpp
+)
+
+isl_set_target_flags(
+        physics
+        ${MV_STRICT_COMPILATION}
+        ""
+        ""
+        ""
+        ""
+        ${MV_HARDENING}
+        ${MV_LIBCPP}
+        ${MV_UNITY_BUILD}
+)
+
+target_link_libraries(
+        physics
+        PRIVATE
+        fmt::fmt
+        glfw
+        GLEW::GLEW
+        glm::glm
+        imgui::imgui
+        math-visualizer
+        astlang2
+        unordered_dense::unordered_dense
+)
+
+b_embed_proxy_target(
+        physics
+        physics-resources
+)
+
+b_embed(
+        physics-resources
+        resources/shaders/vertex.vert
+)
+
+b_embed(
+        physics-resources
+        resources/shaders/fragment.frag
+)
+
+b_embed(
+        physics-resources
+        resources/shaders/colored_shader.vert
+)
+
+
+b_embed(
+        physics-resources
+        resources/shaders/static_instance.vert
+)
+
+b_embed(
+        physics-resources
+        resources/fonts/JetBrainsMono-Medium.ttf
+)

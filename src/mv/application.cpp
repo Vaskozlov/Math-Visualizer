@@ -102,8 +102,8 @@ namespace mv
         glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
 
         while (glfwWindowShouldClose(window) == GLFW_FALSE) {
-            glfwWaitEventsTimeout(fps_10);
-            // glfwPollEvents();
+            // glfwWaitEventsTimeout(fps_10);
+            glfwPollEvents();
 
             const auto current_time = static_cast<float>(glfwGetTime());
             deltaTime = current_time - lastFrameTime;
