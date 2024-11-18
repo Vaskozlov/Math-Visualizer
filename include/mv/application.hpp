@@ -9,7 +9,7 @@
 
 #include <mv/camera.hpp>
 
-#include "../../cmake-build-release-clang-17/_deps/battery-embed-build/embed/autogen/function_gradient_resources/include/battery/embed.hpp"
+#include <battery/embed.hpp>
 
 namespace mv
 {
