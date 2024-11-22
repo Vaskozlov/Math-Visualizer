@@ -1,18 +1,21 @@
+#include <ast-lang-2/ast-lang.hpp>
 #include <ccl/lexer/tokenizer.hpp>
 #include <ccl/parser/ll/gll_parser.hpp>
 #include <ccl/parser/rules_reader/rules_reader.hpp>
 #include <mvl/mvl.hpp>
-#include <ast-lang-2/ast-lang.hpp>
-
-static ccl::parser::reader::RulesReader reader(astlang2::NodeTypesMap, astlang2::AstLangGrammar);
-static ccl::parser::reader::ParserBuilder &constructor = reader.getParserBuilder();
-static const ccl::lexer::LexicalAnalyzer &lexer = constructor.getLexicalAnalyzer();
-static const auto token_to_string = constructor.getIdToNameTranslationFunction();
-static const ccl::parser::GllParser parser = constructor.buildGLL();
-const auto conversion_table = astlang2::ast::core::AstlangNode::buildConversionTable(constructor);
 
 namespace mvl
 {
+    static ccl::parser::reader::RulesReader
+        reader(astlang2::getNodeTypesMap(), astlang2::getAstlangGrammar());
+
+    static ccl::parser::reader::ParserBuilder &constructor = reader.getParserBuilder();
+    static const ccl::lexer::LexicalAnalyzer &lexer = constructor.getLexicalAnalyzer();
+    static const auto token_to_string = constructor.getIdToNameTranslationFunction();
+    static const ccl::parser::GllParser parser = constructor.buildGLL();
+    static const auto conversion_table = astlang2::ast::core::AstlangNode::buildConversionTable(constructor);
+
+
     auto parse(const isl::string_view source, const isl::string_view filename)
         -> astlang2::ast::core::SharedNode<astlang2::ast::core::AstlangNode>
     {

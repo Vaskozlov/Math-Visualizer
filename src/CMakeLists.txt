@@ -24,15 +24,13 @@ isl_set_target_flags(
 
 target_link_libraries(
         math-visualizer
-        PRIVATE
+        PUBLIC
         fmt::fmt
         glfw
         GLEW::GLEW
         glm::glm
         imgui::imgui
-        ccl
         astlang2
-        unordered_dense::unordered_dense
 )
 
 b_embed_proxy_target(

@@ -8,8 +8,6 @@
 #include <mv/gl/shape/sphere.hpp>
 #include <mv/shader.hpp>
 
-#include <zep/imgui/editor_imgui.h>
-
 #include <ast-lang-2/interpreter/interpreter.hpp>
 #include <mvl/mvl.hpp>
 
@@ -287,7 +285,7 @@ public:
 
 auto main() -> int
 {
-    FunctionGradientApplication application{1000, 800, "Function Gradient"};
+    FunctionGradientApplication application{1000, 800, "Function Gradient", 16};
     application.run();
     return 0;
 }
