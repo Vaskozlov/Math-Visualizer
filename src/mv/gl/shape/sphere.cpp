@@ -1,4 +1,5 @@
 #include <mv/gl/shape/sphere.hpp>
+#include <numbers>
 
 namespace mv::gl::shape
 {
@@ -12,8 +13,8 @@ namespace mv::gl::shape
         constexpr float u_start = 0.0F;
         constexpr float v_start = 0.0F;
 
-        constexpr float u_end = static_cast<float>(M_PI) * 2.0F;
-        constexpr float v_end = static_cast<float>(M_PI);
+        constexpr float u_end = std::numbers::pi_v<float> * 2.0F;
+        constexpr float v_end = std::numbers::pi_v<float>;
 
         const float u_step = (u_end - u_start) / static_cast<float>(slices);
         const float v_step = (v_end - v_start) / static_cast<float>(stacks);

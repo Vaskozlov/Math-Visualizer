@@ -32,8 +32,7 @@ namespace mv::gl
             glBindBuffer(GL_ARRAY_BUFFER, 0);
         }
 
-        auto loadData(
-            const void *data,  std::size_t data_size,  GLenum mode = GL_STATIC_DRAW) const
+        auto loadData(const void *data, std::size_t data_size, GLenum mode = GL_STATIC_DRAW) const
             -> void;
     };
 }// namespace mv::gl

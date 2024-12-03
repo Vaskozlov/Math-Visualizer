@@ -1,8 +1,9 @@
 #include <mv/gl/shape/prism.hpp>
+#include <numbers>
 
 namespace mv::gl::shape {
     Prism::Prism(const float radius, const float height, const uint32_t vertices_count) {
-        const float step = static_cast<float>(M_PI) * 2.0F / static_cast<float>(vertices_count);
+        const float step = std::numbers::pi_v<float> * 2.0F / static_cast<float>(vertices_count);
         const float middle_y = height / 2.0F;
 
         for (uint32_t i = 0; i != vertices_count; ++i) {

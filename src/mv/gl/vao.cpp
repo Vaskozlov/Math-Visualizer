@@ -1,54 +1,62 @@
 #include <mv/gl/vao.hpp>
 
-namespace mv::gl {
+namespace mv::gl
+{
     static auto bindAttribute(
         const GLsizei array_attribute, const GLint size, const GLenum type, const GLsizei stride,
-        const GLsizei offset) -> void {
+        const GLsizei offset) -> void
+    {
         glVertexAttribPointer(
             array_attribute, size, type, GL_FALSE, stride,
-            reinterpret_cast<const void *>(offset)); // NOLINT
+            reinterpret_cast<const void *>(offset));// NOLINT
 
         glEnableVertexAttribArray(array_attribute);
     }
 
-    VAO::VAO() {
+    VAO::VAO()
+    {
         glGenVertexArrays(1, &instanceVAO);
     }
 
-    VAO::~VAO() {
+    VAO::~VAO()
+    {
         if (instanceVAO != 0) {
             glDeleteVertexArrays(1, &instanceVAO);
         }
     }
 
-    VAO::VAO(VAO&&other) noexcept
-        : instanceVAO{std::exchange(other.instanceVAO, 0)} {
-    }
+    VAO::VAO(VAO &&other) noexcept
+      : instanceVAO{std::exchange(other.instanceVAO, 0)}
+    {}
 
-    auto VAO::operator=(VAO&&other) noexcept -> VAO& {
+    auto VAO::operator=(VAO &&other) noexcept -> VAO &
+    {
         std::swap(instanceVAO, other.instanceVAO);
         return *this;
     }
 
     auto VAO::bind(
         const GLsizei array_attribute, const GLint size, const GLenum type, const GLsizei stride,
-        const GLsizei offset) const -> void {
+        const GLsizei offset) const -> void
+    {
         bind();
         bindAttribute(array_attribute, size, type, stride, offset);
         unbind();
     }
 
     auto VAO::bindInstanceParameters(const GLsizei array_attribute, const GLint divisor) const
-        -> void {
+        -> void
+    {
         bind();
 
         for (GLsizei i = 0; i != sizeof(InstanceParameters) / sizeof(glm::vec4); ++i) {
             bindAttribute(
                 array_attribute + i, 4, GL_FLOAT, sizeof(InstanceParameters),
-                static_cast<GLsizei>(sizeof(glm::vec4)) * i); // NOLINT
+                static_cast<GLsizei>(sizeof(glm::vec4)) * i);// NOLINT
+
             glVertexAttribDivisor(array_attribute + i, divisor);
         }
 
         unbind();
     }
-} // namespace mv::gl
+}// namespace mv::gl

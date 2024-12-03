@@ -2,14 +2,12 @@
 #define MV_APPLICATION_HPP
 
 #include <GL/glew.h>
-#include <imgui.h>
-
-#include <GLFW/glfw3.h>
-#include <isl/isl.hpp>
-
-#include <mv/camera.hpp>
 
 #include <battery/embed.hpp>
+#include <GLFW/glfw3.h>
+#include <imgui.h>
+#include <isl/isl.hpp>
+#include <mv/camera.hpp>
 
 namespace mv
 {

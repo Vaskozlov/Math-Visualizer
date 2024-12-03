@@ -7,6 +7,7 @@
 #include <ccl/parser/types.hpp>
 #include <isl/coroutine/task.hpp>
 #include <isl/string_view.hpp>
+#include <numbers>
 
 #define MVL_DECL CCL_DECL
 #define MVL_INLINE CCL_INLINE
@@ -14,7 +15,8 @@
 #define MVL_TRIVIAL_ABI CCL_TRIVIAL_ABI
 #define MVL_NOEXCEPT_IF(EXPR) CCL_NOEXCEPT_IF(EXPR)
 
-namespace mvl {
+namespace mvl
+{
     using i8 = ccl::i8;
     using i16 = ccl::i16;
     using i32 = ccl::i32;
@@ -37,6 +39,6 @@ namespace mvl {
 
     auto newInterpreter(std::back_insert_iterator<std::string> output_buffer)
         -> astlang2::interpreter::Interpreter;
-} // namespace mvl
+}// namespace mvl
 
 #endif /* MVL_HPP */
