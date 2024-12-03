@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include_directories(include)
 
 include(cmake/ProjectOptions.cmake)
-include(cmake/Libs.cmake)
+include(cmake/Libraries.cmake)
 include(src/CMakeLists.txt)
 include(programs/CMakeLists.txt)
 

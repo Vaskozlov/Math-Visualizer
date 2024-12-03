@@ -21,8 +21,8 @@ namespace mv
         glm::vec4 clearColor{0.0F, 0.0F, 0.0F, 1.0F};
         GLFWwindow *window;
         ImGuiIO *imguiIO;
-        float lastMouseX = 0.0F;
-        float lastMouseY = 0.0F;
+        double lastMouseX = 0.0;
+        double lastMouseY = 0.0;
         float deltaTime = 0.0f;
         float lastFrameTime = 0.0f;
         float windowWidth;
@@ -93,7 +93,7 @@ namespace mv
         [[nodiscard]] auto loadFont(const float font_size = 45.0F) const -> ImFont *
         {
             void *font_data = const_cast<char *>(b::embed<fontPath>().data());// NOLINT
-            const int font_data_size = b::embed<fontPath>().size();
+            const int font_data_size = static_cast<int>(b::embed<fontPath>().size());
 
             ImFontConfig config;
             config.FontDataOwnedByAtlas = false;

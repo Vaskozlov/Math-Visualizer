@@ -9,12 +9,6 @@ find_package(OpenGL REQUIRED)
 find_package(imgui CONFIG REQUIRED)
 
 CPMAddPackage(
-        NAME isl
-        GITHUB_REPOSITORY Vaskozlov/ISL
-        GIT_TAG main
-)
-
-CPMAddPackage(
         NAME ccl
         GITHUB_REPOSITORY Vaskozlov/ccl-project
         GIT_TAG main
@@ -32,10 +26,4 @@ CPMAddPackage(
         GIT_TAG main
 )
 
-include(${isl_SOURCE_DIR}/cmake/CompilerOptions.cmake)
-include(${isl_SOURCE_DIR}/cmake/InterproceduralOptimization.cmake)
-include(${isl_SOURCE_DIR}/cmake/ProjectOptions.cmake)
-
-include_directories(${isl_SOURCE_DIR}/include)
-include_directories(${ccl_SOURCE_DIR}/include)
-include_directories(${zep_SOURCE_DIR}/include)
+include(${ccl_SOURCE_DIR}/cmake/Libraries.cmake)

@@ -2,19 +2,17 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
-#include <mv/gl/init.hpp>
+#include <mv/gl/gl_init.hpp>
 #include <mv/glfw/callbacks.hpp>
-#include <mv/glfw/init.hpp>
+#include <mv/glfw/glfw_init.hpp>
 #include <thread>
 
-namespace mv
-{
+namespace mv {
     Application::Application(
         const int width, const int height, std::string window_title, const int multisampling_level)
-      : title{std::move(window_title)}
-      , windowWidth{static_cast<float>(width)}
-      , windowHeight{static_cast<float>(height)}
-    {
+        : title{std::move(window_title)}
+          , windowWidth{static_cast<float>(width)}
+          , windowHeight{static_cast<float>(height)} {
         glfw::init(3, 3);
 
         glfwSwapInterval(1);
@@ -44,39 +42,33 @@ namespace mv
         ImGui_ImplOpenGL3_Init("#version 330 core");
     }
 
-    auto Application::onResize(const int width, const int height) -> void
-    {
+    auto Application::onResize(const int width, const int height) -> void {
         windowWidth = static_cast<float>(width);
         windowHeight = static_cast<float>(height);
         glViewport(0, 0, width, height);
     }
 
-    auto Application::onMouseMovement(const double x_pos_in, const double y_pos_in) -> void
-    {
+    auto Application::onMouseMovement(const double x_pos_in, const double y_pos_in) -> void {
         if (!isInFocus || isMouseShowed) {
             return;
         }
 
-        const auto x_pos = static_cast<float>(x_pos_in);
-        const auto y_pos = static_cast<float>(y_pos_in);
-
         if (firstMouse) {
-            lastMouseX = x_pos;
-            lastMouseY = y_pos;
+            lastMouseX = x_pos_in;
+            lastMouseY = y_pos_in;
             firstMouse = false;
         }
 
-        const float x_offset = x_pos - lastMouseX;
-        const float y_offset = lastMouseY - y_pos;
+        const double x_offset = x_pos_in - lastMouseX;
+        const double y_offset = lastMouseY - y_pos_in;
 
-        lastMouseX = x_pos;
-        lastMouseY = y_pos;
+        lastMouseX = x_pos_in;
+        lastMouseY = y_pos_in;
 
         onMouseRelativeMovement(x_offset, y_offset);
     }
 
-    auto Application::onMouseRelativeMovement(const double delta_x, const double delta_y) -> void
-    {
+    auto Application::onMouseRelativeMovement(const double delta_x, const double delta_y) -> void {
         if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_TRUE) {
             camera.rotate(delta_x, delta_y);
             return;
@@ -85,8 +77,7 @@ namespace mv
         camera.processMouseMovement(static_cast<float>(delta_x), static_cast<float>(delta_y));
     }
 
-    auto Application::onScroll(const double /*x_offset*/, const double y_offset) -> void
-    {
+    auto Application::onScroll(const double /*x_offset*/, const double y_offset) -> void {
         if (!isInFocus || isMouseShowed) {
             return;
         }
@@ -94,16 +85,15 @@ namespace mv
         camera.processMouseScroll(static_cast<float>(y_offset));
     }
 
-    auto Application::run() -> void
-    {
+    auto Application::run() -> void {
         init();
         constexpr static auto fps_10 = 1.0 / 10.0;
 
         glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
 
         while (glfwWindowShouldClose(window) == GLFW_FALSE) {
-            // glfwWaitEventsTimeout(fps_10);
-            glfwPollEvents();
+            glfwWaitEventsTimeout(fps_10);
+            // glfwPollEvents();
 
             const auto current_time = static_cast<float>(glfwGetTime());
             deltaTime = current_time - lastFrameTime;
@@ -130,23 +120,20 @@ namespace mv
         }
     }
 
-    auto Application::processInput() -> void
-    {
+    auto Application::processInput() -> void {
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
             glfwSetWindowShouldClose(window, GLFW_TRUE);
         }
     }
 
-    auto Application::onLeaveOrEnter(const bool entered) -> void
-    {
+    auto Application::onLeaveOrEnter(const bool entered) -> void {
         isInFocus = entered;
         firstMouse = true;
     }
 
-    Application::~Application()
-    {
+    Application::~Application() {
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
     }
-}// namespace mv
+} // namespace mv

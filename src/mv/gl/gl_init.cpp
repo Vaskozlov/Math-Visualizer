@@ -1,5 +1,6 @@
 #include <GL/glew.h>
-#include <mv/gl/init.hpp>
+
+#include <mv/gl/gl_init.hpp>
 #include <mutex>
 
 namespace mv::gl

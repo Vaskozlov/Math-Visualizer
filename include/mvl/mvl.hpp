@@ -1,10 +1,11 @@
 #ifndef MVL_HPP
 #define MVL_HPP
 
-#include <ast-lang-2/ast/core/node.hpp>
+#include <ast-lang-2/ast/node.hpp>
 #include <ast-lang-2/interpreter/interpreter.hpp>
 #include <ccl/ccl.hpp>
 #include <ccl/parser/types.hpp>
+#include <isl/coroutine/task.hpp>
 #include <isl/string_view.hpp>
 
 #define MVL_DECL CCL_DECL
@@ -13,8 +14,7 @@
 #define MVL_TRIVIAL_ABI CCL_TRIVIAL_ABI
 #define MVL_NOEXCEPT_IF(EXPR) CCL_NOEXCEPT_IF(EXPR)
 
-namespace mvl
-{
+namespace mvl {
     using i8 = ccl::i8;
     using i16 = ccl::i16;
     using i32 = ccl::i32;
@@ -33,10 +33,10 @@ namespace mvl
     using f64 = ccl::f64;
 
     auto parse(isl::string_view source, isl::string_view filename)
-        -> astlang2::ast::core::SharedNode<astlang2::ast::core::AstlangNode>;
+        -> isl::Task<astlang2::ast::SharedNode<astlang2::ast::AstlangNode>>;
 
     auto newInterpreter(std::back_insert_iterator<std::string> output_buffer)
         -> astlang2::interpreter::Interpreter;
-}// namespace mvl
+} // namespace mvl
 
 #endif /* MVL_HPP */

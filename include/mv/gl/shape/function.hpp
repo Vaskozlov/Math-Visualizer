@@ -11,14 +11,23 @@ namespace mv::gl::shape
         constexpr static auto step = 0.05F;
 
     public:
-        Function(float (*function)(glm::vec2), const float space_size)
+        Function() = default;
+
+        Function(const std::function<float(glm::vec2)> &function, const float space_size)
           : Function(
                 function, -space_size, -space_size, -space_size, space_size, space_size, space_size)
         {}
 
         Function(
-            float (*function)(glm::vec2), const float min_x, const float min_y, const float min_z,
-            const float max_x, const float max_y, const float max_z)
+            const std::function<float(glm::vec2)> &function, const float min_x, const float min_y,
+            const float min_z, const float max_x, const float max_y, const float max_z)
+        {
+            evaluatePoints(function, min_x, min_y, min_z, max_x, max_y, max_z);
+        }
+
+        auto evaluatePoints(
+            const std::function<float(glm::vec2)> &function, const float min_x, const float min_y,
+            const float min_z, const float max_x, const float max_y, const float max_z) -> void
         {
             const auto from_x = std::floor(min_x);
             const auto from_y = std::floor(min_y);
@@ -28,6 +37,7 @@ namespace mv::gl::shape
             const auto x_steps = static_cast<std::size_t>((to_x - from_x) / step);
             const auto y_steps = static_cast<std::size_t>((to_y - from_y) / step);
 
+            vertices.clear();
             vertices.reserve(x_steps * y_steps * 6U);
 
             for (std::size_t x_index = 0; x_index != x_steps; ++x_index) {

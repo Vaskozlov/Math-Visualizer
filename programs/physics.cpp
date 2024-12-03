@@ -48,9 +48,27 @@ private:
     double k = 400.0;
 
     std::array<Cube, 3> cubes = {
-        Cube{{-3.0F, 0.0F, 0.0F}, {1.0F, 0.5F, 0.0F, 1.0F}, 1.0, 5.0, 0.0},
-        Cube{{0.0F, 0.0F, 0.0F}, {0.0F, 1.0F, 0.0F, 1.0F}, 1.0, 0.0, 0.0},
-        Cube{{3.0F, 0.0F, 0.0F}, {0.0F, 0.5F, 1.0F, 1.0F}, 2.0, 0.0, 0.0},
+        Cube{
+            .position = {-3.0F, 0.0F, 0.0F},
+            .color = {1.0F, 0.5F, 0.0F, 1.0F},
+            .mass = 1.0,
+            .velocity = 5.0,
+            .acceleration = 0.0,
+        },
+        Cube{
+            .position = {0.0F, 0.0F, 0.0F},
+            .color = {0.0F, 1.0F, 0.0F, 1.0F},
+            .mass = 1.0,
+            .velocity = 0.0,
+            .acceleration = 0.0,
+        },
+        Cube{
+            .position = {3.0F, 0.0F, 0.0F},
+            .color = {0.0F, 0.5F, 1.0F, 1.0F},
+            .mass = 2.0,
+            .velocity = 0.0,
+            .acceleration = 0.0,
+        },
     };
 
 public:
@@ -104,7 +122,7 @@ public:
             fi.position[0] += dt * fi.velocity;
             fi.velocity += dt * fi.acceleration;
 
-            if (se.position[0] - (fi.position[0] + cubeSize) <= 0.0 ) {
+            if (se.position[0] - (fi.position[0] + cubeSize) <= 0.0) {
                 fi.acceleration = 0.0;
             }
         }
@@ -114,7 +132,7 @@ public:
 
         cubeVertices.vao.bind();
 
-        for (size_t i = 0; i != cubes.size(); ++i) {
+        for (std::size_t i = 0; i != cubes.size(); ++i) {
             shader.setVec4("elementColor", cubes[i].color);
             shader.setMat4("model", glm::translate(glm::mat4(1.0F), cubes[i].position));
             glDrawArrays(GL_TRIANGLES, 0, cubeVertices.vertices.size());
@@ -165,7 +183,6 @@ public:
         const auto scale = static_cast<double>(camera.zoom) / 90.0;
         Application2D::onScroll(x_offset * scale, y_offset * scale);
     }
-
 };
 
 auto main() -> int
