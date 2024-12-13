@@ -5,10 +5,10 @@
 
 namespace mv::gl::shape::detail
 {
-    class PolygonsShape : public Shape
+    class Polygon : public Shape
     {
     public:
-        auto doDraw() const -> void final
+        auto doDraw() const -> void override
         {
             glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(vertices.size()));
         }

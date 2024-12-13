@@ -2,11 +2,11 @@
 #define MV_FUNCTION_HPP
 
 #include <functional>
-#include <mv/gl/shape/detail/polygons_shape.hpp>
+#include <mv/gl/shape/detail/polygon.hpp>
 
 namespace mv::gl::shape
 {
-    class Function final : public detail::PolygonsShape
+    class Function final : public detail::Polygon
     {
     private:
         constexpr static auto step = 0.05F;

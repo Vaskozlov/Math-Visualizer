@@ -1,11 +1,11 @@
 #ifndef MV_PRISM_HPP
 #define MV_PRISM_HPP
 
-#include <mv/gl/shape/detail/polygons_shape.hpp>
+#include <mv/gl/shape/detail/polygon.hpp>
 
 namespace mv::gl::shape
 {
-    class Prism : public detail::PolygonsShape
+    class Prism : public detail::Polygon
     {
     public:
         explicit Prism(float radius, float height, uint32_t vertices_count);

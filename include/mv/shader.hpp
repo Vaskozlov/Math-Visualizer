@@ -45,6 +45,18 @@ namespace mv
             glUniform1f(glGetUniformLocation(program, name.c_str()), value);
         }
 
+        auto setMat2(const std::string &name, const glm::mat2 &value) const -> void
+        {
+            glUniformMatrix2fv(
+                glGetUniformLocation(program, name.data()), 1, GL_FALSE, glm::value_ptr(value));
+        }
+
+        auto setMat3(const std::string &name, const glm::mat3 &value) const -> void
+        {
+            glUniformMatrix3fv(
+                glGetUniformLocation(program, name.data()), 1, GL_FALSE, glm::value_ptr(value));
+        }
+
         auto setMat4(const std::string &name, const glm::mat4 &value) const -> void
         {
             glUniformMatrix4fv(
@@ -54,6 +66,12 @@ namespace mv
         auto setVec2(const std::string &name, const glm::vec2 &value) const -> void
         {
             glUniform2f(glGetUniformLocation(program, name.c_str()), value.x, value.y);
+        }
+
+        auto setVec3(const std::string &name, const glm::vec3 &value) const -> void
+        {
+            glUniform3f(
+                glGetUniformLocation(program, name.c_str()), value.x, value.y, value.z);
         }
 
         auto setVec4(const std::string &name, const glm::vec4 &value) const -> void

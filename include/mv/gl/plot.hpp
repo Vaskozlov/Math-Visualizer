@@ -5,7 +5,7 @@
 
 namespace mv::gl::shape
 {
-    class Plot : public Prism
+    class Plot : public detail::Polygon
     {
     public:
         explicit Plot(std::int32_t plot_size);

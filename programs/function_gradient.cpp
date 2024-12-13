@@ -5,7 +5,7 @@
 #include <imgui_stdlib.h>
 #include <mv/application_3d.hpp>
 #include <mv/gl/instance_parameters.hpp>
-#include <mv/gl/instancing.hpp>
+#include <mv/gl/instances_holder.hpp>
 #include <mv/gl/plot.hpp>
 #include <mv/gl/shape/function.hpp>
 #include <mv/gl/shape/sphere.hpp>
@@ -73,7 +73,7 @@ public:
         ImGui::StyleColorsLight();
         font = loadFont<"resources/fonts/JetBrainsMono-Medium.ttf">(45.0F);
 
-        camera.position = glm::vec3(0.0F, 12.0F, 10.0F);
+        camera.setPosition(glm::vec3(0.0F, 12.0F, 10.0F));
     }
 
     auto update() -> void override
@@ -114,7 +114,7 @@ public:
     auto tryToDrawFunctionWithUserFunction() -> void
     {
         try {
-            calculateFunctionPoints().await();
+            ccl::runtime::async(calculateFunctionPoints()).await();
         } catch (const std::exception &e) {
             programOutput = e.what();
         }

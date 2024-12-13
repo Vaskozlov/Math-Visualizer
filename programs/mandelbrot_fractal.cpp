@@ -3,8 +3,8 @@
 #include <battery/embed.hpp>
 #include <imgui.h>
 #include <mv/application_2d.hpp>
-#include <mv/gl/instancing.hpp>
-#include <mv/gl/vertices_binder.hpp>
+#include <mv/gl/instances_holder.hpp>
+#include <mv/gl/vertices_container.hpp>
 #include <mv/shader.hpp>
 
 enum class FractalType : std::size_t
@@ -228,7 +228,7 @@ public:
         }
 
         if (ImGui::Button("Center camera")) {
-            camera.position = glm::vec3(0.0F, 0.0F, 2.0F);
+            camera.setPosition(glm::vec3(0.0F, 0.0F, 2.0F));
         }
 
         ImGui::SameLine();
@@ -272,15 +272,15 @@ public:
 
     auto onMouseRelativeMovement(const double delta_x, const double delta_y) -> void override
     {
-        const auto scale = camera.zoom / 9000.0F;
+        const auto scale = camera.getZoom() / 9000.0F;
 
-        camera.position += camera.up * static_cast<float>(delta_y) * scale;
-        camera.position += camera.right * static_cast<float>(delta_x) * scale;
+        camera.relativeMove(camera.getUp() * static_cast<float>(delta_y) * scale);
+        camera.relativeMove(camera.getRight() * static_cast<float>(delta_x) * scale);
     }
 
     auto onScroll(const double x_offset, const double y_offset) -> void override
     {
-        const auto scale = static_cast<double>(camera.zoom) / 90.0;
+        const auto scale = static_cast<double>(camera.getZoom()) / 90.0;
         Application2D::onScroll(x_offset * scale, y_offset * scale);
     }
 
