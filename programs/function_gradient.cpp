@@ -6,7 +6,7 @@
 #include <mv/application_3d.hpp>
 #include <mv/gl/instance_parameters.hpp>
 #include <mv/gl/instances_holder.hpp>
-#include <mv/gl/plot.hpp>
+#include <mv/gl/plot_3d.hpp>
 #include <mv/gl/shape/function.hpp>
 #include <mv/gl/shape/sphere.hpp>
 #include <mv/shader.hpp>
@@ -22,9 +22,9 @@ private:
         {b::embed<"resources/shaders/fragment.frag">().str()},
     };
 
-    mv::gl::shape::Plot plot{12};
+    mv::gl::shape::Axes3D plot{12};
     mv::gl::InstancesHolder<mv::gl::InstanceParameters> instancing;
-    mv::gl::shape::Function function;
+    mv::gl::shape::Function3D function;
 
     double pressTime = 0.0;
     float gradientA = 0.03F;

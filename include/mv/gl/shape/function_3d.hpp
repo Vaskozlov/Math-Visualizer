@@ -1,25 +1,25 @@
-#ifndef MV_FUNCTION_HPP
-#define MV_FUNCTION_HPP
+#ifndef MV_FUNCTION_3D_HPP
+#define MV_FUNCTION_3D_HPP
 
 #include <functional>
 #include <mv/gl/shape/detail/polygon.hpp>
 
 namespace mv::gl::shape
 {
-    class Function final : public detail::Polygon
+    class Function3D final : public detail::Polygon
     {
     private:
         constexpr static auto step = 0.05F;
 
     public:
-        Function() = default;
+        Function3D() = default;
 
-        Function(const std::function<float(glm::vec2)> &function, const float space_size)
-          : Function(
+        Function3D(const std::function<float(glm::vec2)> &function, const float space_size)
+          : Function3D(
                 function, -space_size, -space_size, -space_size, space_size, space_size, space_size)
         {}
 
-        Function(
+        Function3D(
             const std::function<float(glm::vec2)> &function, const float min_x, const float min_y,
             const float min_z, const float max_x, const float max_y, const float max_z)
         {
@@ -32,4 +32,4 @@ namespace mv::gl::shape
     };
 }// namespace mv::gl::shape
 
-#endif /* MV_FUNCTION_HPP */
+#endif /* MV_FUNCTION_3D_HPP */

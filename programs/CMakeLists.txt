@@ -1,3 +1,20 @@
+function(mv_embed_resources PATH TARGET_NAME)
+    file(GLOB_RECURSE RESOURCE_FILES "${PATH}/*")
+
+    foreach (RESOURCE_FILE ${RESOURCE_FILES})
+        get_filename_component(FILENAME "${RESOURCE_FILE}" NAME)
+        if (NOT FILENAME MATCHES "^\\..*")
+            file(RELATIVE_PATH REL_PATH "${CMAKE_SOURCE_DIR}" "${RESOURCE_FILE}")
+            b_embed(
+                    ${TARGET_NAME}
+                    ${REL_PATH}
+            )
+        endif ()
+    endforeach ()
+endfunction()
+
+file(GLOB RESOURCE_FILES "resources/*")
+
 add_executable(
         mandelbrot_fractal
         programs/mandelbrot_fractal.cpp
@@ -26,50 +43,7 @@ b_embed_proxy_target(
         mandelbrot_fractal-resources
 )
 
-b_embed(
-        mandelbrot_fractal-resources
-        resources/shaders/fractal/default.vert
-)
-
-b_embed(
-        mandelbrot_fractal-resources
-        resources/shaders/fractal/with_offset.vert
-)
-
-b_embed(
-        mandelbrot_fractal-resources
-        resources/shaders/fractal/julia.frag
-)
-
-b_embed(
-        mandelbrot_fractal-resources
-        resources/shaders/fractal/mandelbrot.frag
-)
-
-b_embed(
-        mandelbrot_fractal-resources
-        resources/shaders/fractal/newton.frag
-)
-
-b_embed(
-        mandelbrot_fractal-resources
-        resources/shaders/fractal/common.glsl
-)
-
-b_embed(
-        mandelbrot_fractal-resources
-        resources/shaders/fractal/newton_classic.frag
-)
-
-b_embed(
-        mandelbrot_fractal-resources
-        resources/shaders/fractal/newton_sin.frag
-)
-
-b_embed(
-        mandelbrot_fractal-resources
-        resources/fonts/JetBrainsMono-Medium.ttf
-)
+mv_embed_resources("resources" mandelbrot_fractal-resources)
 
 add_executable(
         function_gradient
@@ -99,31 +73,7 @@ b_embed_proxy_target(
         function_gradient-resources
 )
 
-b_embed(
-        function_gradient-resources
-        resources/shaders/vertex.vert
-)
-
-b_embed(
-        function_gradient-resources
-        resources/shaders/fragment.frag
-)
-
-b_embed(
-        function_gradient-resources
-        resources/shaders/colored_shader.vert
-)
-
-
-b_embed(
-        function_gradient-resources
-        resources/shaders/static_instance.vert
-)
-
-b_embed(
-        function_gradient-resources
-        resources/fonts/JetBrainsMono-Medium.ttf
-)
+mv_embed_resources("resources" function_gradient-resources)
 
 add_executable(
         physics
@@ -153,28 +103,34 @@ b_embed_proxy_target(
         physics-resources
 )
 
-b_embed(
-        physics-resources
-        resources/shaders/vertex.vert
+mv_embed_resources("resources"  physics-resources)
+
+add_executable(
+        dft
+        programs/dft.cpp
 )
 
-b_embed(
-        physics-resources
-        resources/shaders/fragment.frag
+isl_set_target_flags(
+        dft
+        ${MV_STRICT_COMPILATION}
+        ""
+        ""
+        ""
+        ""
+        ${MV_HARDENING}
+        ${MV_LIBCPP}
+        ${MV_UNITY_BUILD}
 )
 
-b_embed(
-        physics-resources
-        resources/shaders/colored_shader.vert
+target_link_libraries(
+        dft
+        PUBLIC
+        math-visualizer
 )
 
-
-b_embed(
-        physics-resources
-        resources/shaders/static_instance.vert
+b_embed_proxy_target(
+        dft
+        dft-resources
 )
 
-b_embed(
-        physics-resources
-        resources/fonts/JetBrainsMono-Medium.ttf
-)
+mv_embed_resources("resources"  dft-resources)

@@ -1,8 +1,8 @@
-#include <mv/gl/shape/function.hpp>
+#include <mv/gl/shape/function_3d.hpp>
 
 namespace mv::gl::shape
 {
-    auto Function::evaluatePoints(
+    auto Function3D::evaluatePoints(
         const std::function<float(glm::vec2)> &function, const float min_x, const float min_y,
         const float min_z, const float max_x, const float max_y, const float max_z) -> void
     {

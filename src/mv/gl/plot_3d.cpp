@@ -1,16 +1,16 @@
 #include <glm/glm.hpp>
-#include <mv/gl/plot.hpp>
+#include <mv/gl/axes_3d.hpp>
 #include <numbers>
 
 namespace mv::gl::shape
 {
-    Plot::Plot(const std::int32_t plot_size)
+    Axes3D::Axes3D(const std::int32_t axis_size)
     {
-        Prism axes{0.008F, static_cast<float>(plot_size) * 2.0F, 4};
+        Prism axes{0.008F, static_cast<float>(axis_size) * 2.0F, 4};
 
         const auto original_points = axes.vertices;
 
-        for (std::int32_t i = -plot_size; i != plot_size + 1; ++i) {
+        for (std::int32_t i = -axis_size; i != axis_size + 1; ++i) {
             auto model1 = glm::rotate(
                 glm::translate(glm::mat4(1.0F), {static_cast<float>(i), 0.0F, 0.0F}),
                 std::numbers::pi_v<float> / 2.0F,

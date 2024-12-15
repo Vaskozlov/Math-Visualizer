@@ -4,6 +4,7 @@
 #include <imgui.h>
 #include <mv/application_2d.hpp>
 #include <mv/gl/instances_holder.hpp>
+#include <mv/gl/plot_2d.hpp>
 #include <mv/gl/vertices_container.hpp>
 #include <mv/shader.hpp>
 
@@ -61,6 +62,11 @@ private:
         },
     };
 
+    mv::Shader colorShader = mv::Shader{
+            {b::embed<"resources/shaders/colored_shader.vert">().str()},
+            {b::embed<"resources/shaders/fragment.frag">().str()},
+        };
+
     mv::gl::VerticesContainer<glm::vec3> mandelbrotVertices{
         {2.0F, 2.0F, 0.0F}, {2.0F, -2.0F, 0.0F},  {-2.0F, -2.0F, 0.0F},
         {2.0F, 2.0F, 0.0F}, {-2.0F, -2.0F, 0.0F}, {-2.0F, 2.0F, 0.0F},
@@ -75,6 +81,8 @@ private:
         {50.0F, 50.0F, 0.0F}, {50.0F, -50.0F, 0.0F},  {-50.0F, -50.0F, 0.0F},
         {50.0F, 50.0F, 0.0F}, {-50.0F, -50.0F, 0.0F}, {-50.0F, 50.0F, 0.0F},
     };
+
+    mv::gl::shape::Axes2D plot{2};
 
     ImFont *font;
     float fontScale = 0.5F;
@@ -110,6 +118,10 @@ public:
 
         newtonVertices.vbo.bind();
         newtonVertices.vao.bind(0, 3, GL_FLOAT, sizeof(glm::vec3), 0);
+
+        plot.loadData();
+        plot.vbo.bind();
+        plot.vao.bind(0, 3, GL_FLOAT, sizeof(glm::vec3), 0);
 
         camera.movementSpeed = 0.5F;
 
@@ -226,6 +238,13 @@ public:
         default:
             isl::unreachable();
         }
+
+        colorShader.use();
+        colorShader.setMat4("projection", getResultedViewMatrix());
+        colorShader.setMat4("model", glm::mat4(1.0F));
+        colorShader.setVec4("elementColor", glm::vec4(0.5F, 0.5F, 0.0F, 1.0F));
+
+        plot.draw();
 
         if (ImGui::Button("Center camera")) {
             camera.setPosition(glm::vec3(0.0F, 0.0F, 2.0F));
