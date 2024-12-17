@@ -4,15 +4,15 @@
 #include <imgui.h>
 #include <imgui_stdlib.h>
 #include <mv/application_3d.hpp>
+#include <mv/gl/axes_3d.hpp>
 #include <mv/gl/instance_parameters.hpp>
 #include <mv/gl/instances_holder.hpp>
-#include <mv/gl/plot_3d.hpp>
-#include <mv/gl/shape/function.hpp>
+#include <mv/gl/shape/function_3d.hpp>
 #include <mv/gl/shape/sphere.hpp>
 #include <mv/shader.hpp>
 #include <mvl/mvl.hpp>
 
-class FunctionGradientApplication final : public mv::Application3D
+class FunctionVisualizer3DApplication final : public mv::Application3D
 {
 private:
     std::array<char, 128> imguiWindowBuffer{};
@@ -22,16 +22,13 @@ private:
         {b::embed<"resources/shaders/fragment.frag">().str()},
     };
 
-    mv::gl::shape::Axes3D plot{12};
-    mv::gl::InstancesHolder<mv::gl::InstanceParameters> instancing;
+    mv::gl::shape::Axes3D axes3D{12};
     mv::gl::shape::Function3D function;
 
     double pressTime = 0.0;
-    float gradientA = 0.03F;
-    float gradientK = 1.0F;
     float evaluationTimeNs = 0.0;
     float fontScale = 0.33F;
-    ImFont *font;
+    ImFont *font = nullptr;
 
     std::string sourceCode = R"(
 def f(vec2 a) {
@@ -49,22 +46,16 @@ public:
         Application3D::init();
 
         setClearColor({0.8F, 0.8F, 0.8F, 1.0F});
-
-        instancing.models = {mv::gl::InstanceParameters{
-            .color = {1.0F, 0.0F, 0.0F, 1.0F},
-            .transformation = glm::translate(glm::mat4{1.0F}, {2.5F, 2.0F, 8.0F}),
-        }};
-
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
         function.loadData();
-        plot.loadData();
+        axes3D.loadData();
 
         function.vbo.bind();
         function.vao.bind(0, 3, GL_FLOAT, sizeof(glm::vec3), 0);
 
-        plot.vbo.bind();
-        plot.vao.bind(0, 3, GL_FLOAT, sizeof(glm::vec3), 0);
+        axes3D.vbo.bind();
+        axes3D.vao.bind(0, 3, GL_FLOAT, sizeof(glm::vec3), 0);
 
         colorShader.use();
         colorShader.setMat4("model", glm::mat4(1.0f));
@@ -105,7 +96,7 @@ public:
         function.draw();
 
         colorShader.setVec4("elementColor", glm::vec4(0.1f, 0.1f, 0.1f, 1.0f));
-        plot.draw();
+        axes3D.draw();
 
         ImGui::PopFont();
         ImGui::End();
@@ -201,7 +192,7 @@ public:
 
 auto main() -> int
 {
-    FunctionGradientApplication application{1000, 800, "Function Gradient", 16};
+    FunctionVisualizer3DApplication application{1000, 800, "Function visualizer", 16};
     application.run();
     return 0;
 }

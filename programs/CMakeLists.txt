@@ -46,12 +46,12 @@ b_embed_proxy_target(
 mv_embed_resources("resources" mandelbrot_fractal-resources)
 
 add_executable(
-        function_gradient
-        programs/function_gradient.cpp
+        function_visualizer
+        programs/function_visualizer.cpp
 )
 
 isl_set_target_flags(
-        function_gradient
+        function_visualizer
         ${MV_STRICT_COMPILATION}
         ""
         ""
@@ -63,17 +63,17 @@ isl_set_target_flags(
 )
 
 target_link_libraries(
-        function_gradient
+        function_visualizer
         PUBLIC
         math-visualizer
 )
 
 b_embed_proxy_target(
-        function_gradient
-        function_gradient-resources
+        function_visualizer
+        function_visualizer-resources
 )
 
-mv_embed_resources("resources" function_gradient-resources)
+mv_embed_resources("resources" function_visualizer-resources)
 
 add_executable(
         physics

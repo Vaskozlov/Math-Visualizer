@@ -1,6 +1,7 @@
 #include <battery/embed.hpp>
 #include <complex>
 #include <imgui.h>
+#include <imgui_stdlib.h>
 #include <isl/linalg/linspace.hpp>
 #include <mv/application_2d.hpp>
 #include <mv/application_3d.hpp>
@@ -52,12 +53,14 @@ private:
 
     std::array<bool, 8> selectedFrequencies{false, true, false, false, false, false, false, false};
 
-    int pointsCount = 2048 * 4;
-    int pointsDrawDivider = 32;
+    isl::u32 pointsCount = 2048 * 4;
+    isl::u32 pointsCountMin = 128;
+    isl::u32 pointsCountMax = 2048 * 16;
+    isl::u32 pointsDrawDivider = 32;
+    isl::u32 pointsDrawDividerMin = 1;
+    isl::u32 pointsDrawDividerMax = 128;
 
-    std::valarray<float> xLinearSpace =
-        isl::linalg::linspace<float>(0, 10, static_cast<size_t>(pointsCount));
-
+    std::valarray<float> xLinearSpace = isl::linalg::linspace<float>(0, 10, pointsCount);
     std::valarray<float> signalLinearSpace = std::valarray<float>(xLinearSpace.size());
 
 public:
@@ -188,7 +191,6 @@ public:
         colorShader.setMat4("model", glm::mat4(1.0F));
         colorShader.setVec4("elementColor", glm::vec4(1.0F, 0.301F, 0.0F, 1.0F));
         dftGraph.draw();
-        // resultedSignalGraph.draw();
 
         shaderWithPositioning.use();
         shaderWithPositioning.setMat4("projection", getResultedViewMatrix());
@@ -227,14 +229,17 @@ public:
             calculateDft();
         }
 
-        if (ImGui::SliderInt("Points count", &pointsCount, 128, 2048 * 16)) {
-            xLinearSpace =
-                isl::linalg::linspace<float>(0, 10, static_cast<std::size_t>(pointsCount));
+        if (ImGui::SliderScalar(
+                "Points count", ImGuiDataType_U32, &pointsCount, &pointsCountMin, &pointsCountMax,
+                "%u")) {
+            xLinearSpace = isl::linalg::linspace<float>(0, 10, pointsCount);
             calculateSignal();
             calculateDft();
         }
 
-        if (ImGui::SliderInt("Sphere draw divider", &pointsDrawDivider, 1, 128)) {
+        if (ImGui::SliderScalar(
+                "Sphere draw divider", ImGuiDataType_U32, &pointsDrawDivider, &pointsDrawDividerMin,
+                &pointsDrawDividerMax, "%u")) {
             calculateDft();
         }
 
