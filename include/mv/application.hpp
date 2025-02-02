@@ -30,6 +30,7 @@ namespace mv
         bool firstMouse = true;
         bool isInFocus = true;
         bool isMouseShowed = false;
+        bool showImgui = true;
 
     public:
         Application(int width, int height, std::string window_title, int multisampling_level = 4);

@@ -4,8 +4,8 @@
 #include <imgui.h>
 #include <imgui_stdlib.h>
 #include <mv/application_3d.hpp>
+#include <mv/color.hpp>
 #include <mv/gl/axes_3d.hpp>
-#include <mv/gl/instance_parameters.hpp>
 #include <mv/gl/instances_holder.hpp>
 #include <mv/gl/shape/function_3d.hpp>
 #include <mv/gl/shape/sphere.hpp>
@@ -45,7 +45,7 @@ public:
     {
         Application3D::init();
 
-        setClearColor({0.8F, 0.8F, 0.8F, 1.0F});
+        setClearColor(mv::Color::LIGHT_GRAY);
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
         function.loadData();
@@ -58,8 +58,8 @@ public:
         axes3D.vao.bind(0, 3, GL_FLOAT, sizeof(glm::vec3), 0);
 
         colorShader.use();
-        colorShader.setMat4("model", glm::mat4(1.0f));
-        colorShader.setVec4("elementColor", glm::vec4(0.5f, 0.5f, 0.0f, 1.0f));
+        colorShader.setMat4("model", glm::mat4(1.0F));
+        colorShader.setVec4("elementColor", mv::Color::OLIVE);
 
         ImGui::StyleColorsLight();
         font = loadFont<"resources/fonts/JetBrainsMono-Medium.ttf">(45.0F);
@@ -90,12 +90,12 @@ public:
         const glm::mat4 resulted_matrix = getResultedViewMatrix();
 
         colorShader.use();
-        colorShader.setVec4("elementColor", glm::vec4(0.5f, 0.5f, 0.0f, 1.0f));
+        colorShader.setVec4("elementColor", mv::Color::OLIVE);
         colorShader.setMat4("projection", resulted_matrix);
 
         function.draw();
 
-        colorShader.setVec4("elementColor", glm::vec4(0.1f, 0.1f, 0.1f, 1.0f));
+        colorShader.setVec4("elementColor", mv::Color::DARK_GRAY.darker());
         axes3D.draw();
 
         ImGui::PopFont();

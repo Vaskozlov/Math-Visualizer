@@ -5,6 +5,7 @@
 #include <isl/linalg/linspace.hpp>
 #include <mv/application_2d.hpp>
 #include <mv/application_3d.hpp>
+#include <mv/color.hpp>
 #include <mv/gl/axes_2d.hpp>
 #include <mv/gl/instances_holder.hpp>
 #include <mv/gl/shape/plot_2d.hpp>
@@ -92,7 +93,7 @@ public:
         ImGui::StyleColorsLight();
         font = loadFont<"resources/fonts/JetBrainsMono-Medium.ttf">(30.0F);
 
-        setClearColor({0.8F, 0.8F, 0.8F, 1.0F});
+        setClearColor(mv::Color::LIGHT_GRAY);
 
         calculateSignal();
         calculateDft();
@@ -140,7 +141,7 @@ public:
 
         for (std::size_t i = 0; i < x2.size(); i += pointsDrawDivider) {
             sphereInstances.models.emplace_back(
-                glm::vec4{0.1F, 0.8F, 0.1F, 1.0F},
+                mv::Color::LIGHT_GREEN,
                 glm::scale(
                     glm::translate(
                         glm::mat4(1.0F),
@@ -155,7 +156,7 @@ public:
         dftGraph.fill(x2, y2, lineWidth);
 
         sphereInstances.models.emplace_back(
-            glm::vec4{0.0F, 0.0F, 1.0F, 1.0F},
+            mv::Color::BLUE,
             glm::scale(
                 glm::translate(
                     glm::mat4(1.0F),
@@ -184,12 +185,12 @@ public:
         colorShader.setMat4("projection", getResultedViewMatrix());
         colorShader.setMat4(
             "model", glm::translate(glm::mat4(1.0F), glm::vec3{0.0F, 0.0F, -0.01F}));
-        colorShader.setVec4("elementColor", glm::vec4(0.0F, 0.0F, 0.0F, 1.0F));
+        colorShader.setVec4("elementColor", mv::Color::BLACK);
 
         plot.draw();
 
         colorShader.setMat4("model", glm::mat4(1.0F));
-        colorShader.setVec4("elementColor", glm::vec4(1.0F, 0.301F, 0.0F, 1.0F));
+        colorShader.setVec4("elementColor", mv::Color::DARK_ORANGE);
         dftGraph.draw();
 
         shaderWithPositioning.use();

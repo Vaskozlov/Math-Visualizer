@@ -268,6 +268,10 @@ public:
             glfwSetInputMode(
                 window, GLFW_CURSOR, isMouseShowed ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
         }
+
+        if (left_alt_pressed && glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS) {
+            showImgui = !showImgui;
+        }
     }
 
     auto onMouseRelativeMovement(const double delta_x, const double delta_y) -> void override
