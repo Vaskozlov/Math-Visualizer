@@ -1,7 +1,12 @@
 #ifndef MV_COLOR_HPP
 #define MV_COLOR_HPP
 
+#define GLM_ENABLE_EXPERIMENTAL
+
+#include <cmath>
 #include <glm/glm.hpp>
+#include <glm/gtx/color_space.hpp>
+#include <isl/isl.hpp>
 
 namespace mv
 {
@@ -24,9 +29,9 @@ namespace mv
             ISL_DECL auto lighter(const float scale = 1.5F) const noexcept -> ColorImpl
             {
                 return ColorImpl{
-                    std::max(r * scale, 1.0F),
-                    std::max(g * scale, 1.0F),
-                    std::max(b * scale, 1.0F),
+                    std::fmax(r * scale, 1.0F),
+                    std::fmax(g * scale, 1.0F),
+                    std::fmax(b * scale, 1.0F),
                     a,
                 };
             }
@@ -60,6 +65,38 @@ namespace mv
         static constexpr ColorImpl LIGHT_GREEN{0.1F, 0.8F, 0.1F, 1.0F};
         static constexpr ColorImpl DARK_ORANGE{1.0F, 0.3F, 0.0F, 1.0F};
     };
+
+    template<typename T>
+    struct RGBA
+    {
+        T r{};
+        T g{};
+        T b{};
+        T a{};
+    };
+
+    inline auto hsv2rgb(const float h, const float s, const float v) -> RGBA<std::uint8_t>
+    {
+        const auto color = glm::rgbColor(glm::vec3{h, s, v}) * glm::vec3(255.0F);
+
+        return RGBA<std::uint8_t>{
+            .r = static_cast<uint8_t>(color.r),
+            .g = static_cast<uint8_t>(color.g),
+            .b = static_cast<uint8_t>(color.b),
+            .a = 255,
+        };
+    }
+
+    template<std::integral T>
+    auto intToRainbowColor(T value, const T minValue, const T maxValue) -> RGBA<std::uint8_t>
+    {
+        value = std::clamp(value, minValue, maxValue);
+
+        const float hue =
+            360.0F * static_cast<float>(value - minValue) / static_cast<float>(maxValue - minValue);
+
+        return hsv2rgb(hue, 1.0F, 1.0F);
+    }
 }// namespace mv
 
 #endif /* MV_COLOR_HPP */

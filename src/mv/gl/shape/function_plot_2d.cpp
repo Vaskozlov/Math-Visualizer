@@ -1,4 +1,3 @@
-#include <fmt/format.h>
 #include <mv/gl/shape/plot_2d.hpp>
 
 namespace mv::gl::shape
@@ -39,7 +38,7 @@ namespace mv::gl::shape
         auto p1 = glm::vec3{initial_points[0].x, 0.0F, initial_points[0].y};
         auto p2 = glm::vec3{initial_points[1].x, 0.0F, initial_points[1].y};
 
-        for (size_t i = 1; i != x.size(); ++i) {
+        for (size_t i = 1; i < x.size(); ++i) {
             auto points_fragment =
                 createThickLineDots({x[i - 1], y[i - 1]}, {x[i], y[i]}, thickness);
 

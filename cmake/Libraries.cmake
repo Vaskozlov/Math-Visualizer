@@ -1,29 +1,37 @@
 include(cmake/CPM.cmake)
 
 find_package(Threads REQUIRED)
-find_package(glm CONFIG REQUIRED)
-find_package(fmt CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(imgui CONFIG REQUIRED)
 
-CPMAddPackage(
-        NAME ccl
-        GITHUB_REPOSITORY Vaskozlov/ccl-project
-        GIT_TAG main
+CPMFindPackage(
+        NAME fmt
+        GITHUB_REPOSITORY fmtlib/fmt
+        GIT_TAG 577fd3be883accf8629423ed77fcca8a24bccee2
+)
+
+CPMFindPackage(
+        NAME glm
+        GITHUB_REPOSITORY g-truc/glm
+        GIT_TAG 2d4c4b4dd31fde06cfffad7915c2b3006402322f
 )
 
 CPMAddPackage(
         NAME unordered_dense
         GITHUB_REPOSITORY martinus/unordered_dense
-        GIT_TAG main
+        GIT_TAG 73f3cbb237e84d483afafc743f1f14ec53e12314
 )
 
 CPMAddPackage(
         NAME battery-embed
         GITHUB_REPOSITORY batterycenter/embed
-        GIT_TAG main
+        GIT_TAG 465081903d97ff1ed05e1fd5d0b3c8032a4a26a6
 )
 
-include(${ccl_SOURCE_DIR}/cmake/Libraries.cmake)
+CPMAddPackage(
+        NAME ccl
+        GITHUB_REPOSITORY Vaskozlov/ccl-project
+        GIT_TAG a0e5191e0c4630af5f24f716ac9408920130b4f2
+)

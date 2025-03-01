@@ -1,8 +1,10 @@
 #include <battery/embed.hpp>
+#include <isl/shared_lib_loader.hpp>
 #include <mv/application_2d.hpp>
+#include <mv/gl/texture.hpp>
 #include <mv/gl/vertices_container.hpp>
+#include <mv/gl/waterfall.hpp>
 #include <mv/shader.hpp>
-#include <mvl/mvl.hpp>
 
 #include <imgui.h>
 #include <imgui_stdlib.h>
@@ -27,49 +29,35 @@ private:
         {b::embed<"resources/shaders/fragment.frag">().str()},
     };
 
+    mv::Shader textureShader = mv::Shader{
+        {b::embed<"resources/shaders/texture.vert">().str()},
+        {b::embed<"resources/shaders/texture.frag">().str()},
+    };
+
     static constexpr float cubeSize = 0.5F;
 
-    mv::gl::VerticesContainer<glm::vec3> cubeVertices{
-        {cubeSize, cubeSize, 0.0F}, {cubeSize, -cubeSize, 0.0F},  {-cubeSize, -cubeSize, 0.0F},
-        {cubeSize, cubeSize, 0.0F}, {-cubeSize, -cubeSize, 0.0F}, {-cubeSize, cubeSize, 0.0F},
-    };
+    mv::gl::Waterfall powerWaterfall{256, 256};
+    mv::gl::Waterfall azimuthWaterfall{256, 256};
+
+    std::string libraryPath;
 
     double pressTime = 0.0;
     ImFont *font;
     float fontScale = 0.33F;
 
-    double initialTime = 0.0;
-    bool running = false;
-
     bool disableInput = false;
 
-    double mu = 0.1;
-    double g = 9.8;
-    double k = 400.0;
-
-    std::array<Cube, 3> cubes = {
-        Cube{
-            .position = {-3.0F, 0.0F, 0.0F},
-            .color = {1.0F, 0.5F, 0.0F, 1.0F},
-            .mass = 1.0,
-            .velocity = 5.0,
-            .acceleration = 0.0,
-        },
-        Cube{
-            .position = {0.0F, 0.0F, 0.0F},
-            .color = {0.0F, 1.0F, 0.0F, 1.0F},
-            .mass = 1.0,
-            .velocity = 0.0,
-            .acceleration = 0.0,
-        },
-        Cube{
-            .position = {3.0F, 0.0F, 0.0F},
-            .color = {0.0F, 0.5F, 1.0F, 1.0F},
-            .mass = 2.0,
-            .velocity = 0.0,
-            .acceleration = 0.0,
-        },
+    mv::gl::VerticesContainer<glm::vec3> powerMapSize{
+        {1.0F, 1.0F, 0.0F}, {1.0F, 0.0F, 0.0F}, {0.0F, 0.0F, 0.0F},
+        {1.0F, 1.0F, 0.0F}, {0.0F, 0.0F, 0.0F}, {0.0F, 1.0F, 0.0F},
     };
+
+    mv::gl::VerticesContainer<glm::vec3> azimuthMapSize{
+        {1.0F, 1.0F, 0.0F}, {1.0F, 0.0F, 0.0F}, {0.0F, 0.0F, 0.0F},
+        {1.0F, 1.0F, 0.0F}, {0.0F, 0.0F, 0.0F}, {0.0F, 1.0F, 0.0F},
+    };
+
+    isl::SharedLibLoader shaderLib;
 
 public:
     using Application2D::Application2D;
@@ -82,14 +70,17 @@ public:
         ImGui::StyleColorsDark();
         font = loadFont<"resources/fonts/JetBrainsMono-Medium.ttf">(30.0F);
 
-        cubeVertices.loadData();
+        powerMapSize.loadData();
+        powerMapSize.vbo.bind();
+        powerMapSize.vao.bind(0, 3, GL_FLOAT, 3 * sizeof(float), 0);
+        powerMapSize.vao.bind(1, 2, GL_FLOAT, 3 * sizeof(float), 0);
 
-        cubeVertices.vbo.bind();
-        cubeVertices.vao.bind(0, 3, GL_FLOAT, sizeof(glm::vec3), 0);
+        azimuthMapSize.loadData();
+        azimuthMapSize.vbo.bind();
+        azimuthMapSize.vao.bind(0, 3, GL_FLOAT, 3 * sizeof(float), 0);
+        azimuthMapSize.vao.bind(1, 2, GL_FLOAT, 3 * sizeof(float), 0);
 
         camera.setPosition(glm::vec3(0.0F, 0.0F, 4.0F));
-
-        cubes[0].acceleration = -mu * g;
     }
 
     auto update() -> void override
@@ -103,40 +94,51 @@ public:
         ImGui::SetWindowFontScale(fontScale);
 
         ImGui::SliderFloat("Font scale", &fontScale, 0.1F, 3.0F, "%.3f");
+        ImGui::InputText("Lib path: ", &libraryPath);
 
-        if (ImGui::Button("Start")) {
-            running = true;
-            initialTime = glfwGetTime();
+        if (ImGui::Button("Load")) {
+            shaderLib = isl::SharedLibLoader::loadLibrary(libraryPath).value();
+
+            auto *function =
+                reinterpret_cast<void (*)()>(shaderLib.getSymbol("print_hello_world").value());
+
+            function();
         }
 
         ImGui::SameLine();
 
-        if (ImGui::Button("Stop")) {
-            running = false;
-        }
-
-        if (running) {
-            auto dt = static_cast<double>(deltaTime);
-            auto &[fi, se, th] = cubes;
-
-            fi.position[0] += dt * fi.velocity;
-            fi.velocity += dt * fi.acceleration;
-
-            if (se.position[0] - (fi.position[0] + cubeSize) <= 0.0) {
-                fi.acceleration = 0.0;
+        if (ImGui::Button("Reload")) {
+            if (!shaderLib.hasLibrary()) {
+                shaderLib = isl::SharedLibLoader::loadLibrary(libraryPath).value();
+            } else {
+                shaderLib.reload();
             }
+
+            auto *function =
+                reinterpret_cast<void (*)()>(shaderLib.getSymbol("print_hello_world").value());
+
+            function();
         }
 
-        shader.use();
-        shader.setMat4("projection", getResultedViewMatrix());
+        textureShader.use();
+        textureShader.setMat4("projection", getResultedViewMatrix());
 
-        cubeVertices.vao.bind();
+        powerWaterfall.bind();
+        powerWaterfall.reload();
 
-        for (std::size_t i = 0; i != cubes.size(); ++i) {
-            shader.setVec4("elementColor", cubes[i].color);
-            shader.setMat4("model", glm::translate(glm::mat4(1.0F), cubes[i].position));
-            glDrawArrays(GL_TRIANGLES, 0, cubeVertices.vertices.size());
-        }
+        textureShader.setMat4("model", glm::mat4(1.0F));
+
+        powerMapSize.vao.bind();
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, static_cast<GLsizei>(powerMapSize.vertices.size()));
+
+        azimuthWaterfall.bind();
+        azimuthWaterfall.reload();
+
+        textureShader.setMat4(
+            "model", glm::translate(glm::mat4(1.0F), glm::vec3{1.2F, 0.0F, 0.0F}));
+
+        azimuthMapSize.vao.bind();
+        glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(azimuthMapSize.vertices.size()));
 
         ImGui::PopFont();
         ImGui::End();
@@ -185,8 +187,11 @@ public:
     }
 };
 
+
 auto main() -> int
 {
     PhysicsApplication application{1000, 800, "Fractal visualization", 2};
     application.run();
+
+    return 0;
 }

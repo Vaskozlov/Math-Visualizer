@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <mv/gl/shape/function_3d.hpp>
 
 namespace mv::gl::shape
@@ -18,11 +19,8 @@ namespace mv::gl::shape
         vertices.reserve(x_steps * y_steps * 6U);
 
         for (std::size_t x_index = 0; x_index != x_steps; ++x_index) {
-            const auto x = from_x + (step * x_index);
+            const auto x = from_x + (step * static_cast<float>(x_index));
             const auto next_x = x + step;
-
-            assert(
-                x != next_x && "Floating point precision is not enough to compute this function");
 
             auto y = from_y;
             auto next_y = y + step;
@@ -43,10 +41,10 @@ namespace mv::gl::shape
                     continue;
                 }
 
-                f0 = std::max(std::min(f0, max_z), min_z);
-                f1 = std::max(std::min(f1, max_z), min_z);
-                f2 = std::max(std::min(f2, max_z), min_z);
-                f3 = std::max(std::min(f3, max_z), min_z);
+                f0 = std::clamp(f0, min_z, max_z);
+                f1 = std::clamp(f1, min_z, max_z);
+                f2 = std::clamp(f2, min_z, max_z);
+                f3 = std::clamp(f3, min_z, max_z);
 
                 const auto p0 = glm::vec3(x, y, f0);
                 const auto p1 = glm::vec3(x, next_y, f1);
@@ -62,10 +60,6 @@ namespace mv::gl::shape
                 vertices.push_back(p1);
 
                 y = std::exchange(next_y, next_y + step);
-
-                assert(
-                    y != next_y &&
-                    "Floating point precision is not enough to compute this function");
             }
         }
     }

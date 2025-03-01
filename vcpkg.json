@@ -2,13 +2,14 @@
   "name": "visualizer",
   "version": "0.0.1",
   "dependencies": [
-    "fmt",
     "glew",
     "glfw3",
-    "glm",
     {
       "name": "imgui",
-      "features": ["glfw-binding","opengl3-binding"]
+      "features": [
+        "glfw-binding",
+        "opengl3-binding"
+      ]
     }
   ]
 }
