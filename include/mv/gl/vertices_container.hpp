@@ -17,7 +17,7 @@ namespace mv::gl
 
         VerticesContainer() = default;
 
-        VerticesContainer(const std::initializer_list<T> &initial_points)
+        VerticesContainer(std::initializer_list<T> initial_points)
           : vertices(initial_points)
         {}
 

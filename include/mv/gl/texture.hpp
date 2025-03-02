@@ -4,26 +4,84 @@
 #include <battery/embed.hpp>
 #include <filesystem>
 #include <GL/glew.h>
+#include <isl/isl.hpp>
 
 namespace mv::gl
 {
+    enum struct TextureScaleFormat : std::uint8_t
+    {
+        LINEAR,
+        NEAREST,
+    };
+
+    enum struct TextureMode : std::uint8_t
+    {
+        R,
+        RG,
+        RGB,
+        RGBA,
+        I32,
+        U32,
+        F32,
+    };
+
+    enum struct TextureWrapMode : std::uint8_t
+    {
+        CLAMP_TO_BORDER,
+        CLAMP_TO_EDGE,
+        REPEAT,
+        MIRRORED_REPEAT,
+    };
+
+    inline TextureMode channelsToTextureMode(const std::uint8_t channels)
+    {
+        switch (channels) {
+        case 1:
+            return TextureMode::R;
+        case 2:
+            return TextureMode::RG;
+        case 3:
+            return TextureMode::RGB;
+        case 4:
+            return TextureMode::RGBA;
+        default:
+            isl::unreachable();
+        }
+    }
+
     class Texture
     {
     protected:
-        const unsigned char *data{};
+        const void *data{};
         int width{};
         int height{};
-        int channels{};
         GLuint textureId{};
+        TextureMode textureMode{};
+        TextureScaleFormat scaleFormat{TextureScaleFormat::LINEAR};
+        TextureWrapMode wrapMode{TextureWrapMode::CLAMP_TO_BORDER};
 
     public:
-        Texture(const unsigned char *buffer, int width, int height, int channels);
+        Texture(
+            const void *buffer, int width, int height, TextureWrapMode wrap_mode,
+            TextureMode texture_mode, TextureScaleFormat scale_format = TextureScaleFormat::LINEAR);
 
-        Texture(const unsigned char *buffer, int buffer_length);
+        Texture(
+            const unsigned char *buffer, int buffer_length, TextureWrapMode wrap_mode,
+            TextureScaleFormat scale_format = TextureScaleFormat::LINEAR);
 
-        explicit Texture(const std::filesystem::path &path);
+        explicit Texture(
+            const std::filesystem::path &path, TextureWrapMode wrap_mode,
+            TextureScaleFormat scale_format = TextureScaleFormat::LINEAR);
 
         ~Texture();
+
+        auto resize(const void *buffer, const std::size_t new_width, const std::size_t new_height)
+        {
+            data = buffer;
+            width = static_cast<int>(new_width);
+            height = static_cast<int>(new_height);
+            updateTexture();
+        }
 
         [[nodiscard]] auto getTextureId() const -> GLuint
         {
@@ -40,14 +98,14 @@ namespace mv::gl
             return static_cast<std::size_t>(height);
         }
 
-        [[nodiscard]] auto getChannels() const -> std::size_t
+        [[nodiscard]] auto getTextureMode() const -> TextureMode
         {
-            return static_cast<std::size_t>(channels);
+            return textureMode;
         }
 
-        auto bind() const -> void
+        auto bind(const int texture_number = GL_TEXTURE0) const -> void
         {
-            glActiveTexture(GL_TEXTURE0);
+            glActiveTexture(texture_number);
             glBindTexture(GL_TEXTURE_2D, textureId);
         }
 
@@ -57,12 +115,14 @@ namespace mv::gl
         }
 
         template<b::embed_string_literal fontPath>
-        [[nodiscard]] static auto loadEmbeddedTexture() -> Texture
+        [[nodiscard]] static auto
+            loadEmbeddedTexture(TextureWrapMode wrap_mode, TextureScaleFormat scale_format)
+                -> Texture
         {
             const auto *font_data = static_cast<const unsigned char *>(b::embed<fontPath>().data());
             const int font_data_size = static_cast<int>(b::embed<fontPath>().size());
 
-            return {font_data, font_data_size};
+            return {font_data, font_data_size, wrap_mode, scale_format};
         }
 
         auto updateTexture() const -> void;
