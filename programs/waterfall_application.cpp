@@ -1,6 +1,6 @@
-#include "waterfall.hpp"
+#include <mv/waterfall_application.hpp>
 
-static Waterfall *currentApp = nullptr;
+static mv::Waterfall *currentApp = nullptr;
 
 extern void setImagesSize(const std::size_t width, const std::size_t height)
 {
@@ -31,7 +31,7 @@ extern auto waitForContinue() -> void
 
 auto main() -> int
 {
-    Waterfall application{1000, 800, "Waterfall", 2};
+    mv::Waterfall application{1000, 800, "Waterfall", 2};
     currentApp = &application;
 
     std::thread th([]() {

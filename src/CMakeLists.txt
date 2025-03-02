@@ -38,7 +38,4 @@ b_embed_proxy_target(
         math-visualizer-resources
 )
 
-b_embed(
-        math-visualizer-resources
-        resources/grammar/mvl.cclp
-)
+mv_embed_resources("resources" math-visualizer-resources)

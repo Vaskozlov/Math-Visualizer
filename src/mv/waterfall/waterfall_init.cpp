@@ -1,0 +1,75 @@
+#include <mv/waterfall_application.hpp>
+
+namespace mv
+{
+    auto Waterfall::getWaterfallShaderHsvF32() -> Shader *
+    {
+        static Shader waterfallShaderHsvF32{
+            {
+                b::embed<"resources/shaders/waterfall/vertex_with_limits_f32.vert">().str(),
+            },
+            {
+                b::embed<"resources/shaders/waterfall/hsv/f32_rgba.frag">().str(),
+                b::embed<"resources/shaders/waterfall/hsv/hsv2rgb.glsl">().str(),
+            },
+        };
+
+        return &waterfallShaderHsvF32;
+    }
+
+    auto Waterfall::getWaterfallShaderLinearU32() -> Shader *
+    {
+        static Shader waterfallShaderLinearU32{
+            {
+                b::embed<"resources/shaders/waterfall/vertex_with_limits_f32.vert">().str(),
+            },
+            {
+                b::embed<"resources/shaders/waterfall/linear/u32_rgba.frag">().str(),
+                b::embed<"resources/shaders/waterfall/linear/linear_rgb.glsl">().str(),
+            },
+        };
+
+        return &waterfallShaderLinearU32;
+    }
+
+    auto Waterfall::init() -> void
+    {
+        Application2D::init();
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+        ImGui::StyleColorsDark();
+        font = loadFont<"resources/fonts/JetBrainsMono-Medium.ttf">(30.0F);
+
+        powerMapSize.loadData();
+        powerMapSize.vbo.bind();
+        powerMapSize.vao.bind(0, 3, GL_FLOAT, 3 * sizeof(float), 0);
+        powerMapSize.vao.bind(1, 2, GL_FLOAT, 3 * sizeof(float), 0);
+
+        azimuthMapSize.loadData();
+        azimuthMapSize.vbo.bind();
+        azimuthMapSize.vao.bind(0, 3, GL_FLOAT, 3 * sizeof(float), 0);
+        azimuthMapSize.vao.bind(1, 2, GL_FLOAT, 3 * sizeof(float), 0);
+
+        camera.setPosition({-1.0F, -1.0F, 1.0F});
+
+        powerWaterfallMask.setRange(0, 255);
+        azimuthWaterfall.reload();
+        azimuthWaterfallMask.reload();
+
+        powerWaterfall.reload();
+        powerWaterfallMask.reload();
+
+        waterfallShaderHsvF32->use();
+        waterfallShaderHsvF32->setInt("texture1", 0);
+        waterfallShaderHsvF32->setInt("texture2", 1);
+        waterfallShaderHsvF32->setMat4("projection", glm::mat4(1.0F));
+
+        waterfallShaderLinearU32->use();
+        waterfallShaderLinearU32->setInt("texture1", 0);
+        waterfallShaderLinearU32->setInt("texture2", 1);
+        waterfallShaderLinearU32->setMat4("projection", glm::mat4(1.0F));
+
+        updateAzimuthUniform();
+        updatePowerUniform();
+    }
+}// namespace mv

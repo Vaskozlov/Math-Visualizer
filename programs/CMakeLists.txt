@@ -76,12 +76,12 @@ b_embed_proxy_target(
 mv_embed_resources("resources" function_visualizer-resources)
 
 add_executable(
-        physics
-        programs/physics.cpp
+        waterfall
+        programs/waterfall_application.cpp
 )
 
 isl_set_target_flags(
-        physics
+        waterfall
         ${MV_STRICT_COMPILATION}
         ""
         ""
@@ -93,17 +93,17 @@ isl_set_target_flags(
 )
 
 target_link_libraries(
-        physics
+        waterfall
         PUBLIC
         math-visualizer
 )
 
 b_embed_proxy_target(
-        physics
-        physics-resources
+        waterfall
+        waterfall-resources
 )
 
-mv_embed_resources("resources"  physics-resources)
+mv_embed_resources("resources"  waterfall-resources)
 
 add_executable(
         dft

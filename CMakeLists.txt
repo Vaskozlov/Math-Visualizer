@@ -9,6 +9,7 @@ include_directories(stb)
 
 include(cmake/ProjectOptions.cmake)
 include(cmake/Libraries.cmake)
+include(cmake/Embed.cmake)
 include(src/CMakeLists.txt)
 include(programs/CMakeLists.txt)
 

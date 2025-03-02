@@ -1,6 +1,6 @@
 #define GLM_ENABLE_EXPERIMENTAL
 
-#include <mv/gl/waterfall.hpp>
+#include <mv/gl/waterfall_application.hpp>
 
 namespace mv::gl
 {
