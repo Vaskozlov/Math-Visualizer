@@ -9,7 +9,7 @@ namespace mv::gl::shape
     class Shape : public VerticesContainer<glm::vec3>
     {
     public:
-        Shape() = default;
+        using VerticesContainer::VerticesContainer;
 
         virtual ~Shape() = default;
 

@@ -8,6 +8,8 @@ namespace mv::gl::shape::detail
     class Polygon : public Shape
     {
     public:
+        using Shape::Shape;
+
         auto doDraw() const -> void override
         {
             glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(vertices.size()));

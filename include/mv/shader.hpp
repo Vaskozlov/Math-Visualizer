@@ -63,6 +63,11 @@ namespace mv
                 glGetUniformLocation(program, name.data()), 1, GL_FALSE, glm::value_ptr(value));
         }
 
+        auto setUvec2(const std::string &name, const glm::uvec2 &value) const -> void
+        {
+            glUniform2ui(glGetUniformLocation(program, name.c_str()), value.x, value.y);
+        }
+
         auto setVec2(const std::string &name, const glm::vec2 &value) const -> void
         {
             glUniform2f(glGetUniformLocation(program, name.c_str()), value.x, value.y);
@@ -70,8 +75,7 @@ namespace mv
 
         auto setVec3(const std::string &name, const glm::vec3 &value) const -> void
         {
-            glUniform3f(
-                glGetUniformLocation(program, name.c_str()), value.x, value.y, value.z);
+            glUniform3f(glGetUniformLocation(program, name.c_str()), value.x, value.y, value.z);
         }
 
         auto setVec4(const std::string &name, const glm::vec4 &value) const -> void
