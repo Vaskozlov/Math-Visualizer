@@ -89,6 +89,11 @@ namespace mv
             return zoom;
         }
 
+        [[nodiscard]] auto getPosition() const noexcept -> glm::vec3
+        {
+            return position;
+        }
+
         auto setPosition(const glm::vec3 &new_position) -> void
         {
             position = new_position;
