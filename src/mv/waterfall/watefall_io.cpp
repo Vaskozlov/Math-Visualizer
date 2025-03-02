@@ -10,10 +10,10 @@ namespace mv
             Application2D::processInput();
         }
 
-        const auto left_alt_pressed = glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS;
+        const auto left_shift_pressed = glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS;
         const auto key_g_pressed = glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS;
 
-        if (left_alt_pressed && key_g_pressed) {
+        if (left_shift_pressed && key_g_pressed) {
             const auto mode = glfwGetInputMode(window, GLFW_CURSOR);
             const double new_press_time = glfwGetTime();
 
