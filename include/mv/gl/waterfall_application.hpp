@@ -96,10 +96,11 @@ namespace mv::gl
                 const std::size_t x, const std::size_t y, const std::size_t width,
                 const std::size_t height, T color, const std::uint16_t line_thickness) const -> void
             {
-                const auto line_left_offset =
-                    static_cast<isl::ssize_t>(std::ceil(static_cast<float>(line_thickness) / 2.0f));
+                const auto line_left_offset = static_cast<isl::ssize_t>(
+                    std::floor(static_cast<float>(line_thickness) / 2.0f));
 
-                const auto line_right_offset = static_cast<std::size_t>(line_left_offset);
+                const auto line_right_offset =
+                    static_cast<isl::ssize_t>(std::ceil(static_cast<float>(line_thickness) / 2.0f));
 
                 const auto start_y = static_cast<std::size_t>(std::clamp<isl::ssize_t>(
                     static_cast<isl::ssize_t>(y) - line_left_offset, 0,

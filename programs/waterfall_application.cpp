@@ -10,10 +10,11 @@ extern void setImagesSize(const std::size_t width, const std::size_t height)
 }
 
 extern void drawRect(
-    const std::size_t x, const std::size_t y, const std::size_t width, const std::size_t height)
+    const std::size_t x, const std::size_t y, const std::size_t width, const std::size_t height,
+    const std::size_t line_thickness)
 {
-    currentApp->pushCommand([x, y, width, height]() {
-        currentApp->drawRect(x, y, width, height);
+    currentApp->pushCommand([x, y, width, height, line_thickness]() {
+        currentApp->drawRect(x, y, width, height, line_thickness);
     });
 }
 
@@ -40,7 +41,7 @@ auto main() -> int
         setImagesSize(1024, 1024);
         waitForContinue();
 
-        drawRect(400, 0, 30, 1024);
+        drawRect(400, 0, 30, 1024, 3);
 
         waitForContinue();
         reloadImages();
@@ -71,6 +72,7 @@ auto main() -> int
             }
         }
 
+        drawRect(800, 0, 1, azimuthWaterfall.getHeight(), 1);
         waitForContinue();
         reloadImages();
 

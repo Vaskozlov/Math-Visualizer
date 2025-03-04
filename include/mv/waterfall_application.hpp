@@ -125,10 +125,10 @@ namespace mv
 
         auto drawRect(
             const std::size_t x, const std::size_t y, const std::size_t width,
-            const std::size_t height) const -> void
+            const std::size_t height, const std::size_t line_thickness = 2) const -> void
         {
-            azimuthWaterfallMask.drawRectangleBorder(x, y, width, height, white, 2);
-            powerWaterfallMask.drawRectangleBorder(x, y, width, height, white, 2);
+            azimuthWaterfallMask.drawRectangleBorder(x, y, width, height, white, line_thickness);
+            powerWaterfallMask.drawRectangleBorder(x, y, width, height, white, line_thickness);
         }
 
         auto reloadImages() const -> void
