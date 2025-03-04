@@ -31,22 +31,21 @@ namespace mv
     }
 
 
-    auto Waterfall::onMouseRelativeMovement(const double delta_x, const double delta_y)
-        -> void
+    auto Waterfall::onMouseRelativeMovement(const double delta_x, const double delta_y) -> void
     {
-        const auto scale = camera.getZoom() / 9000.0F;
+        const auto scale = camera.getZoom() / 200.0F;
 
-        camera.relativeMove(camera.getUp() * static_cast<float>(delta_y) * scale);
-        camera.relativeMove(camera.getRight() * static_cast<float>(delta_x) * scale);
+        camera.relativeMove(camera.getUp() * static_cast<float>(delta_y) * scale, deltaTime);
+        camera.relativeMove(camera.getRight() * static_cast<float>(delta_x) * scale, deltaTime);
     }
 
-    auto Waterfall::changeWidthScale(const float scale_difference)
+    auto Waterfall::changeWidthScale(const float scale_difference) -> void
     {
         imageWidthScale += scale_difference;
         imageWidthScale = std::clamp(imageWidthScale, minWidthScale, maxWidthScale);
     }
 
-    auto Waterfall::changeHeightScale(const float scale_difference)
+    auto Waterfall::changeHeightScale(const float scale_difference) -> void
     {
         imageHeightScale += scale_difference;
         imageHeightScale = std::clamp(imageHeightScale, minHeightScale, maxHeightScale);

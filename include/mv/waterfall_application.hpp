@@ -1,7 +1,6 @@
 #ifndef MV_APPLICATION_WATERFALL_HPP
 #define MV_APPLICATION_WATERFALL_HPP
 
-#include <battery/embed.hpp>
 #include <isl/shared_lib_loader.hpp>
 #include <mv/application_2d.hpp>
 #include <mv/gl/shape/rectangle.hpp>
@@ -110,9 +109,9 @@ namespace mv
 
         auto onMouseRelativeMovement(double delta_x, double delta_y) -> void override;
 
-        auto changeWidthScale(float scale_difference);
+        auto changeWidthScale(float scale_difference) -> void;
 
-        auto changeHeightScale(float scale_difference);
+        auto changeHeightScale(float scale_difference) -> void;
 
         auto onScroll(double x_offset, double y_offset) -> void override;
 

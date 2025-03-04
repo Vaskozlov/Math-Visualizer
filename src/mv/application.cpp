@@ -1,4 +1,5 @@
 #include "mv/application.hpp"
+#include <battery/embed.hpp>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
@@ -9,6 +10,22 @@
 
 namespace mv
 {
+    auto Application::loadFont(const float font_size) const -> ImFont *
+    {
+        void *font_data = const_cast<char *>(
+            b::embed<"resources/fonts/JetBrainsMono-Medium.ttf">().data());// NOLINT
+
+        const int font_data_size =
+            static_cast<int>(b::embed<"resources/fonts/JetBrainsMono-Medium.ttf">().size());
+
+        ImFontConfig config;
+        config.FontDataOwnedByAtlas = false;
+
+        return imguiIO->Fonts->AddFontFromMemoryTTF(
+            font_data, font_data_size, font_size, &config,
+            imguiIO->Fonts->GetGlyphRangesCyrillic());
+    }
+
     Application::Application(
         const int width, const int height, std::string window_title, const int multisampling_level)
       : title{std::move(window_title)}

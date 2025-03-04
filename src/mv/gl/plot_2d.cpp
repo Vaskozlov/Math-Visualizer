@@ -4,9 +4,9 @@
 
 namespace mv::gl::shape
 {
-    Axes2D::Axes2D(const std::int32_t axis_size)
+    Axes2D::Axes2D(const std::int32_t axis_size, const float thickness)
     {
-        const Prism axes{0.008F, static_cast<float>(axis_size) * 2.0F, 4};
+        const Prism axes{thickness, static_cast<float>(axis_size) * 2.0F, 4};
 
         const auto &original_points = axes.vertices;
 

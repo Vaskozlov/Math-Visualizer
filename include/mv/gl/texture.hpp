@@ -1,7 +1,6 @@
 #ifndef MV_TEXTURE_HPP
 #define MV_TEXTURE_HPP
 
-#include <battery/embed.hpp>
 #include <filesystem>
 #include <GL/glew.h>
 #include <isl/isl.hpp>
@@ -112,17 +111,6 @@ namespace mv::gl
         static auto unbind() -> void
         {
             glBindTexture(GL_TEXTURE_2D, 0);
-        }
-
-        template<b::embed_string_literal fontPath>
-        [[nodiscard]] static auto
-            loadEmbeddedTexture(TextureWrapMode wrap_mode, TextureScaleFormat scale_format)
-                -> Texture
-        {
-            const auto *font_data = static_cast<const unsigned char *>(b::embed<fontPath>().data());
-            const int font_data_size = static_cast<int>(b::embed<fontPath>().size());
-
-            return {font_data, font_data_size, wrap_mode, scale_format};
         }
 
         auto updateTexture() const -> void;

@@ -2,8 +2,6 @@
 #define MV_APPLICATION_HPP
 
 #include <GL/glew.h>
-
-#include <battery/embed.hpp>
 #include <GLFW/glfw3.h>
 #include <imgui.h>
 #include <isl/isl.hpp>
@@ -88,19 +86,7 @@ namespace mv
 
         virtual auto onLeaveOrEnter(bool entered) -> void;
 
-        template<b::embed_string_literal fontPath>
-        [[nodiscard]] auto loadFont(const float font_size = 45.0F) const -> ImFont *
-        {
-            void *font_data = const_cast<char *>(b::embed<fontPath>().data());// NOLINT
-            const int font_data_size = static_cast<int>(b::embed<fontPath>().size());
-
-            ImFontConfig config;
-            config.FontDataOwnedByAtlas = false;
-
-            return imguiIO->Fonts->AddFontFromMemoryTTF(
-                font_data, font_data_size, font_size, &config,
-                imguiIO->Fonts->GetGlyphRangesCyrillic());
-        }
+        [[nodiscard]] auto loadFont(float font_size = 45.0F) const -> ImFont *;
     };
 }// namespace mv
 

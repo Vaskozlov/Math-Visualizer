@@ -6,6 +6,10 @@ namespace mv
     {
         pollTask();
 
+        int window_width;
+        int window_height;
+        glfwGetFramebufferSize(window, &window_width, &window_height);
+
         fmt::format_to_n(
             imguiWindowBufferTitle.data(), imguiWindowBufferTitle.size(),
             "Настройки. FPS: {:#.4}###SettingWindowTitle", ImGui::GetIO().Framerate);
@@ -71,13 +75,18 @@ namespace mv
         azimuthWaterfallMask.bind(GL_TEXTURE1);
 
         waterfallShaderHsvF32->use();
-        waterfallShaderHsvF32->setVec2("texOffset", glm::vec2(camera_vec.x, camera_vec.y) * 0.1F);
+        waterfallShaderLinearU32->setVec4(
+            "imageLimits", {0.0F, 0.0F, static_cast<float>(window_width) / 2.0F,
+                            static_cast<float>(window_height)});
+        waterfallShaderHsvF32->setVec2("texOffset", {camera_vec.x, camera_vec.y});
 
         azimuthMapSize.vao.bind();
         waterfallShaderLinearU32->setMat4(
             "model",
             glm::scale(
-                glm::translate(glm::mat4(1.0f), glm::vec3{-1.0F, -1.0F, 0.01F}),
+                glm::translate(
+                    glm::mat4(1.0f),
+                    {-0.5F * imageWidthScale - 0.5F, -1.0F * imageHeightScale, 0.0F}),
                 {imageWidthScale, imageHeightScale * 2.0F, 1.0F}));
         azimuthMapSize.draw();
 
@@ -85,14 +94,19 @@ namespace mv
         powerWaterfallMask.bind(GL_TEXTURE1);
 
         waterfallShaderLinearU32->use();
-        waterfallShaderLinearU32->setVec2(
-            "texOffset", glm::vec2(camera_vec.x, camera_vec.y) * 0.1F);
+        waterfallShaderLinearU32->setVec4(
+            "imageLimits",
+            {static_cast<float>(window_width) / 2.0F, 0.0F, static_cast<float>(window_width),
+             static_cast<float>(window_height)});
+        waterfallShaderLinearU32->setVec2("texOffset", {camera_vec.x, camera_vec.y});
 
         powerMapSize.vao.bind();
         waterfallShaderLinearU32->setMat4(
             "model",
             glm::scale(
-                glm::translate(glm::mat4(1.0f), glm::vec3{0.0F, -1.0F, 0.00F}),
+                glm::translate(
+                    glm::mat4(1.0f),
+                    {-0.5F * imageWidthScale + 0.5F, -1.0F * imageHeightScale, 0.0F}),
                 {imageWidthScale, imageHeightScale * 2.0F, 1.0F}));
         powerMapSize.draw();
 

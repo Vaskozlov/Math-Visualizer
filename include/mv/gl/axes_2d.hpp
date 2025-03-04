@@ -8,7 +8,7 @@ namespace mv::gl::shape
     class Axes2D : public detail::Polygon
     {
     public:
-        explicit Axes2D(std::int32_t axis_size);
+        explicit Axes2D(std::int32_t axis_size, float thickness = 0.008F);
     };
 }// namespace mv::gl::shape
 

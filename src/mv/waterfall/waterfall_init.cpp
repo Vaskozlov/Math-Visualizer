@@ -1,3 +1,4 @@
+#include <battery/embed.hpp>
 #include <mv/waterfall_application.hpp>
 
 namespace mv
@@ -37,8 +38,10 @@ namespace mv
         Application2D::init();
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
+        camera.movementSpeed /= 10.0F;
+
         ImGui::StyleColorsDark();
-        font = loadFont<"resources/fonts/JetBrainsMono-Medium.ttf">(30.0F);
+        font = loadFont(30.0F);
 
         powerMapSize.loadData();
         powerMapSize.vbo.bind();
@@ -50,9 +53,8 @@ namespace mv
         azimuthMapSize.vao.bind(0, 3, GL_FLOAT, 3 * sizeof(float), 0);
         azimuthMapSize.vao.bind(1, 2, GL_FLOAT, 3 * sizeof(float), 0);
 
-        camera.setPosition({-1.0F, -1.0F, 1.0F});
+        camera.setPosition({0.0F, 0.0F, 1.0F});
 
-        powerWaterfallMask.setRange(0, 255);
         azimuthWaterfall.reload();
         azimuthWaterfallMask.reload();
 

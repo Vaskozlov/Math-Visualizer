@@ -98,13 +98,6 @@ target_link_libraries(
         math-visualizer
 )
 
-b_embed_proxy_target(
-        waterfall
-        waterfall-resources
-)
-
-mv_embed_resources("resources"  waterfall-resources)
-
 add_executable(
         dft
         programs/dft.cpp
