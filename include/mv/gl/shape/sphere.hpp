@@ -15,6 +15,11 @@ namespace mv::gl::shape
         explicit Sphere(
             float radius, isl::u32 slices = defaultSlicesCount,
             isl::u32 stacks = defaultStacksCount);
+
+        auto doDraw() const -> void override
+        {
+            glDrawArrays(GL_TRIANGLE_STRIP, 0, static_cast<GLsizei>(vertices.size()));
+        }
     };
 }// namespace mv::gl::shape
 

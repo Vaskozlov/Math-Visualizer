@@ -7,6 +7,7 @@
 #include <ccl/parser/types.hpp>
 #include <isl/coroutine/task.hpp>
 #include <isl/string_view.hpp>
+#include <mvl/ast/math_node.hpp>
 #include <numbers>
 
 #define MVL_DECL CCL_DECL
@@ -39,6 +40,22 @@ namespace mvl
 
     auto newInterpreter(std::back_insert_iterator<std::string> output_buffer)
         -> astlang2::interpreter::Interpreter;
+
+    auto solve(isl::string_view input, double x, double y) -> double;
+
+    auto derivativeX(isl::string_view input, double x, double y) -> double;
+
+    auto derivativeY(isl::string_view input, double x, double y) -> double;
+
+    auto solve(ccl::parser::ast::SharedNode<ast::MathNode> root, double x, double y) -> double;
+
+    auto derivativeX(ccl::parser::ast::SharedNode<ast::MathNode> root, double x, double y)
+        -> double;
+
+    auto derivativeY(ccl::parser::ast::SharedNode<ast::MathNode> root, double x, double y)
+        -> double;
+
+    auto constructRoot(isl::string_view input) -> ccl::parser::ast::SharedNode<ast::MathNode>;
 }// namespace mvl
 
 #endif /* MVL_HPP */

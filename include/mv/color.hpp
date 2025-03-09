@@ -40,6 +40,14 @@ namespace mv
 
     struct Color : detail::ColorImpl
     {
+        using ColorImpl::ColorImpl;
+
+        Color() = default;
+
+        Color(const ColorImpl impl) noexcept// NOLINT
+          : ColorImpl{impl}
+        {}
+
         static constexpr ColorImpl WHITE{1.0F, 1.0F, 1.0F, 1.0F};
         static constexpr ColorImpl BLACK{0.0F, 0.0F, 0.0F, 1.0F};
         static constexpr ColorImpl RED{1.0F, 0.0F, 0.0F, 1.0F};

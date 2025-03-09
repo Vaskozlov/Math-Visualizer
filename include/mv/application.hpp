@@ -1,10 +1,13 @@
 #ifndef MV_APPLICATION_HPP
 #define MV_APPLICATION_HPP
 
+#include <deque>
+#include <functional>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <imgui.h>
 #include <isl/isl.hpp>
+#include <mutex>
 #include <mv/camera.hpp>
 
 namespace mv
@@ -29,6 +32,9 @@ namespace mv
         bool isInFocus = true;
         bool isMouseShowed = false;
         bool showImgui = true;
+
+        std::deque<std::function<void()>> onMainThreadExecutionQueue;
+        std::mutex onMainThreadExecutionQueueMutex;
 
     public:
         Application(int width, int height, std::string window_title, int multisampling_level = 4);
@@ -67,12 +73,18 @@ namespace mv
             glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
         }
 
+        auto submit(const std::function<void()> &func) -> void;
+
+        auto submit(const std::function<void(Application &)> &func) -> void;
+
+        auto submit(const std::function<void(const Application &)> &func) -> void;
+
         auto run() -> void;
 
         virtual auto init() -> void
         {}
 
-        virtual auto update() -> void = 0;
+        virtual auto update() -> void;
 
         virtual auto onResize(int width, int height) -> void;
 
@@ -85,6 +97,8 @@ namespace mv
         virtual auto processInput() -> void;
 
         virtual auto onLeaveOrEnter(bool entered) -> void;
+
+        virtual auto onMouseClick(int button, int action, int mods) -> void;
 
         [[nodiscard]] auto loadFont(float font_size = 45.0F) const -> ImFont *;
     };

@@ -168,7 +168,7 @@ public:
         sphere.vao.bindInstanceParameters(1, 1);
 
         ImGui::StyleColorsLight();
-        font = loadFont<"resources/fonts/JetBrainsMono-Medium.ttf">(30.0F);
+        font = loadFont(30.0F);
 
         setClearColor(mv::Color::LIGHT_GRAY);
 
@@ -207,8 +207,8 @@ public:
             "Result: (%f, %f), iterations: %zu, iteration dif: (%f, %f)", resultX, resultY,
             iteration, errorVector.x, errorVector.y);
 
-        ImGui::SliderFloat("Start x: %f", &inputX, -10.0F, 10.0F);
-        ImGui::SliderFloat("Start y: %f", &inputY, -10.0F, 10.0F);
+        ImGui::SliderFloat("Start x", &inputX, -10.0F, 10.0F);
+        ImGui::SliderFloat("Start y", &inputY, -10.0F, 10.0F);
 
         if (ImGui::Button("Compute")) {
             compute(inputX, inputY);
@@ -227,10 +227,10 @@ public:
         upperFunctionGraph.draw();
         lowerFunctionGraph.draw();
 
-        colorShader.setVec4("elementColor", mv::Color::RED);
+        colorShader.setVec4("elementColor", mv::Color::PINK);
 
-        shaderWithPositioning.use();
-        shaderWithPositioning.setMat4("projection", getResultedViewMatrix());
+        colorShader.setMat4("model", scale(glm::mat4(1.0F), glm::vec3(sphereRadius)));
+        sphere.draw();
 
         shaderWithPositioning.use();
         shaderWithPositioning.setMat4("projection", getResultedViewMatrix());

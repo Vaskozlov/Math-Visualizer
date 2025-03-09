@@ -121,9 +121,122 @@ target_link_libraries(
         math-visualizer
 )
 
-b_embed_proxy_target(
-        dft
-        dft-resources
+add_executable(
+        computation-2
+        programs/computation-2.cpp
 )
 
-mv_embed_resources("resources"  dft-resources)
+isl_set_target_flags(
+        computation-2
+        ${MV_STRICT_COMPILATION}
+        ""
+        ""
+        ""
+        ""
+        ${MV_HARDENING}
+        ${MV_LIBCPP}
+        ${MV_UNITY_BUILD}
+)
+
+target_link_libraries(
+        computation-2
+        PUBLIC
+        math-visualizer
+)
+
+b_embed_proxy_target(
+        computation-2
+        computation-2-resources
+)
+
+mv_embed_resources("resources" computation-2-resources)
+
+add_executable(
+        computation-2-part-2
+        programs/computation-2-part-2.cpp
+)
+
+isl_set_target_flags(
+        computation-2-part-2
+        ${MV_STRICT_COMPILATION}
+        ""
+        ""
+        ""
+        ""
+        ${MV_HARDENING}
+        ${MV_LIBCPP}
+        ${MV_UNITY_BUILD}
+)
+
+target_link_libraries(
+        computation-2-part-2
+        PUBLIC
+        math-visualizer
+)
+
+b_embed_proxy_target(
+        computation-2-part-2
+        computation-2-part-2-resources
+)
+
+mv_embed_resources("resources" computation-2-part-2-resources)
+
+add_executable(
+        equation
+        programs/equation.cpp
+)
+
+isl_set_target_flags(
+        equation
+        ${MV_STRICT_COMPILATION}
+        ""
+        ""
+        ""
+        ""
+        ${MV_HARDENING}
+        ${MV_LIBCPP}
+        ${MV_UNITY_BUILD}
+)
+
+target_link_libraries(
+        equation
+        PUBLIC
+        math-visualizer
+)
+
+b_embed_proxy_target(
+        equation
+        equation-resources
+)
+
+mv_embed_resources("resources" equation-resources)
+
+add_executable(
+        system
+        programs/system.cpp
+)
+
+isl_set_target_flags(
+        system
+        ${MV_STRICT_COMPILATION}
+        ""
+        ""
+        ""
+        ""
+        ${MV_HARDENING}
+        ${MV_LIBCPP}
+        ${MV_UNITY_BUILD}
+)
+
+target_link_libraries(
+        system
+        PUBLIC
+        math-visualizer
+)
+
+b_embed_proxy_target(
+        system
+        system-resources
+)
+
+mv_embed_resources("resources" system-resources)

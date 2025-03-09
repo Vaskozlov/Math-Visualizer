@@ -13,6 +13,7 @@
 #include <mv/gl/shape/sphere.hpp>
 #include <mv/gl/vertices_container.hpp>
 #include <mv/shader.hpp>
+#include <mvl/mvl.hpp>
 #include <numbers>
 #include <valarray>
 
@@ -21,7 +22,7 @@ class Computation2 final : public mv::Application2D
 private:
     constexpr static auto windowTitleBufferSize = 128;
 
-    constexpr static float epsilon = 1e-4F;
+    constexpr static float epsilon = 1e-5F;
     constexpr static std::size_t maxIterations = 1000;
 
     constexpr static glm::vec3 defaultCameraPosition{0.0F, 0.0F, 10.0F};
@@ -40,8 +41,10 @@ private:
 
     mv::gl::shape::Axes2D plot{12, 0.009F};
 
-    mv::gl::shape::Plot2D upperFunctionGraph;
+    mv::gl::shape::Plot2D functionGraph;
     mv::gl::shape::Plot2D dftGraph;
+
+    mv::gl::shape::Prism prism{0.03F, 20.0F, 4};
 
     mv::gl::shape::Sphere sphere{1.0F};
     mv::gl::InstancesHolder<mv::gl::InstanceParameters> sphereInstances;
@@ -51,7 +54,7 @@ private:
     float fontScale = 0.5F;
 
     std::valarray<float> functionX = isl::linalg::linspace<float>(-10, 10, 1000);
-    std::valarray<float> functionY;
+    std::valarray<float> functionY = functionX;
 
     float sphereRadius = 0.1F;
 
@@ -69,32 +72,152 @@ private:
 
     std::list<mv::gl::shape::Plot2D> rightRootsLines;
 
+    std::string input = "x^3-3.125*x^2-3.5*x+2.458";
+
+    float leftBorder = -5.0F;
+    float rightBorder = 5.0F;
+
+    ccl::parser::ast::SharedNode<mvl::ast::MathNode> root;
+
 public:
     using Application2D::Application2D;
 
-    static auto function(const float x) -> float
+    auto constructPlot() -> void
     {
-        return x * x * x - 3.125F * x * x - 3.5F * x + 2.458F;
+        for (std::size_t i = 0; i != functionX.size(); ++i) {
+            functionY[i] = root->compute(functionX[i], 0.0);
+        }
+
+        functionGraph.fill(functionX, functionY);
+        functionGraph.loadData();
+
+        sphereInstances.models.clear();
+
+        sphereInstances.models.emplace_back(
+            mv::Color::PINK,
+            glm::scale(
+                glm::translate(
+                    glm::mat4(1.0F),
+                    {
+                        0.0F,
+                        0.0F,
+                        0.01F,
+                    }),
+                glm::vec3{sphereRadius}));
+
+        chordMethod();
+        secantMethod();
+        iterationsMethod();
+        sphereInstances.loadData();
     }
 
-    static auto derivation(const float x) -> float
+    auto chordMethod() -> void
     {
-        return 3.0F * x * x - 6.25F * x - 3.5F;
+        auto left_border = leftBorder;
+        auto right_border = rightBorder;
+
+        auto f = [this](float x) {
+            return root->compute(x, 0.0);
+        };
+
+        float xi = left_border - (right_border - left_border) / (f(right_border) - f(left_border)) *
+                                     f(left_border);
+
+        std::size_t it = 0;
+
+        while (std::abs(f(xi)) > epsilon && it < maxIterations) {
+            sphereInstances.models.emplace_back(
+                mv::Color::LIGHT_GREEN,
+                glm::scale(
+                    glm::translate(
+                        glm::mat4(1.0F),
+                        {
+                            xi,
+                            0.0F,
+                            0.01F,
+                        }),
+                    glm::vec3{sphereRadius}));
+
+            auto left = f(leftBorder);
+            auto center = f(xi);
+
+            if (left * center < 0) {
+                right_border = xi;
+            } else {
+                left_border = xi;
+            }
+
+            xi = left_border -
+                 (right_border - left_border) / (f(right_border) - f(left_border)) * f(left_border);
+
+            ++it;
+        }
+
+        fmt::println("{} {} {}", it, xi, f(xi));
     }
 
-    static auto newtonIterationX(const float x0) -> float
+    auto secantMethod() -> void
     {
-        return x0 - function(x0) / derivation(x0);
+        auto x0 = leftBorder;
+        auto x1 = rightBorder;
+        std::size_t it = 0;
+
+        auto f = [this](float x) {
+            return root->compute(x, 0.0);
+        };
+
+        while (std::abs(f(x1)) > epsilon && it < maxIterations) {
+            auto new_x = x1 - f(x1) * (x1 - x0) / (f(x1) - f(x0));
+
+            ++it;
+
+            sphereInstances.models.emplace_back(
+                mv::Color::RED,
+                glm::scale(
+                    glm::translate(
+                        glm::mat4(1.0F),
+                        {
+                            new_x,
+                            0.0F,
+                            0.01F,
+                        }),
+                    glm::vec3{sphereRadius}));
+
+            x0 = x1;
+            x1 = new_x;
+        }
+
+        fmt::println("{} {} {}", it, x1, f(x1));
     }
 
-    static auto phi(const float x) -> float
+    auto iterationsMethod() -> void
     {
-        return (x * x * x - 3.125 * x * x + 2.458F) / 3.5F;
-    }
+        auto f = [this](float x) {
+            return root->compute(x, 0.0);
+        };
 
-    static auto simpleIteration(const float x) -> float
-    {
-        return phi(x);
+        auto xi = (leftBorder + rightBorder) / 2;
+        std::size_t it = 0;
+
+        while (std::abs(f(xi)) > epsilon && it < maxIterations) {
+            xi = xi - f(xi) / root->derivationX(xi, 0.0);
+            ++it;
+
+            sphereInstances.models.emplace_back(
+                mv::Color::NAVY,
+                glm::scale(
+                    glm::translate(
+                        glm::mat4(1.0F),
+                        {
+                            xi,
+                            0.0F,
+                            0.01F,
+                        }),
+                    glm::vec3{sphereRadius}));
+        }
+
+
+        fmt::println("{} {} {}", it, xi, f(xi));
     }
 
     auto init() -> void override
@@ -120,9 +243,13 @@ public:
         plot.vbo.bind();
         plot.vao.bind(0, 3, GL_FLOAT, sizeof(glm::vec3), 0);
 
-        upperFunctionGraph.loadData();
-        upperFunctionGraph.vbo.bind();
-        upperFunctionGraph.vao.bind(0, 3, GL_FLOAT, sizeof(glm::vec3), 0);
+        prism.loadData();
+        prism.vbo.bind();
+        prism.vao.bind(0, 3, GL_FLOAT, sizeof(glm::vec3), 0);
+
+        functionGraph.loadData();
+        functionGraph.vbo.bind();
+        functionGraph.vao.bind(0, 3, GL_FLOAT, sizeof(glm::vec3), 0);
 
         dftGraph.loadData();
         dftGraph.vbo.bind();
@@ -139,109 +266,7 @@ public:
 
         setClearColor(mv::Color::LIGHT_GRAY);
 
-        functionY = std::valarray<float>(functionX.size());
-
-        for (std::size_t i = 0; i < functionX.size(); ++i) {
-            const auto x = functionX[i];
-            functionY[i] = x * x * x - 3.125F * x * x - 3.5F * x + 2.458F;
-        }
-
-        upperFunctionGraph.fill(functionX, functionY, 0.07F);
-        upperFunctionGraph.loadData();
-
-        float xi = 6.0F;
-
-        while (std::abs(function(xi)) > epsilon && rightRootIterations < maxIterations) {
-            sphereInstances.models.emplace_back(
-                mv::Color::LIGHT_GREEN,
-                glm::scale(
-                    glm::translate(
-                        glm::mat4(1.0F),
-                        {
-                            xi,
-                            0.0F,
-                            0.01F,
-                        }),
-                    glm::vec3{sphereRadius}));
-
-            std::valarray<float> newX(3);
-            std::valarray<float> newY(3);
-
-            const auto new_xi = newtonIterationX(xi);
-
-            newX[0] = new_xi;
-            newX[1] = xi;
-
-            newY[0] = 0.0F;
-            newY[1] = function(xi);
-
-            xi = new_xi;
-            rightRootIterations++;
-
-            auto &line = rightRootsLines.emplace_back();
-            line.fill(newX, newY, 0.05F);
-            line.loadData();
-            line.vbo.bind();
-            line.vao.bind(0, 3, GL_FLOAT, sizeof(glm::vec3), 0);
-        }
-
-        rightRoot = xi;
-
-        xi = 0.0F;
-        while (std::abs(function(xi)) > epsilon && middleRootIterations < maxIterations) {
-            xi = simpleIteration(xi);
-
-            sphereInstances.models.emplace_back(
-                mv::Color::NAVY,
-                glm::scale(
-                    glm::translate(
-                        glm::mat4(1.0F),
-                        {
-                            xi,
-                            0.0F,
-                            0.01F,
-                        }),
-                    glm::vec3{sphereRadius}));
-
-            ++middleRootIterations;
-        }
-
-        middleRoot = xi;
-
-        auto a = -10.0F;
-        auto b = middleRoot - 1e-2F;
-        xi = (a + b) * 0.5F;
-
-        while (std::abs(function(xi)) > epsilon && leftRootIterations < maxIterations) {
-            xi = (a + b) * 0.5F;
-
-            if (function(a) * function(xi) > 0) {
-                a = xi;
-            } else {
-                b = xi;
-            }
-
-            ++leftRootIterations;
-
-            sphereInstances.models.emplace_back(
-                mv::Color::FOREST,
-                glm::scale(
-                    glm::translate(
-                        glm::mat4(1.0F),
-                        {
-                            xi,
-                            0.0F,
-                            0.01F,
-                        }),
-                    glm::vec3{sphereRadius}));
-        }
-
-        leftRoot = (a + b) * 0.5F;
         sphereInstances.loadData();
-
-        leftRootDelta = std::abs(function(leftRoot));
-        middleRoot = std::abs(function(middleRoot));
-        rightRootDelta = std::abs(function(rightRoot));
     }
 
     auto update() -> void override
@@ -254,12 +279,15 @@ public:
         ImGui::PushFont(font);
         ImGui::SetWindowFontScale(fontScale);
 
-        ImGui::Text(
-            "Left root: %f, iterations: %zu, delta: %f\n"
-            "Middle root: %f, iterations: %zu, delta: %f\n"
-            "Right root: %f, iterations: %zu, delta: %f\n",
-            leftRoot, leftRootIterations, leftRootDelta, middleRoot, middleRootIterations,
-            middleRootDelta, rightRoot, rightRootIterations, rightRootDelta);
+        ImGui::InputText("Equation", &input);
+
+        if (ImGui::Button("Solve")) {
+            root = mvl::constructRoot(input);
+            constructPlot();
+        }
+
+        ImGui::SliderFloat("Left border", &leftBorder, -20.0F, rightBorder);
+        ImGui::SliderFloat("Right border", &rightBorder, leftBorder, 20.0F);
 
         colorShader.use();
         colorShader.setMat4("projection", getResultedViewMatrix());
@@ -269,23 +297,21 @@ public:
 
         plot.draw();
 
+        colorShader.setVec4("elementColor", mv::Color::FOREST);
+        prism.drawAt(colorShader, {leftBorder, 0.0F, 0.0F});
+
+        colorShader.setVec4("elementColor", mv::Color::NAVY);
+        prism.drawAt(colorShader, {rightBorder, 0.0F, 0.0F});
+
         colorShader.setMat4("model", glm::mat4(1.0F));
         colorShader.setVec4("elementColor", mv::Color::DARK_ORANGE);
-        upperFunctionGraph.draw();
-
-        colorShader.setVec4("elementColor", mv::Color::RED);
-        for (auto const &right_lines : rightRootsLines) {
-            right_lines.draw();
-        }
+        functionGraph.draw();
 
         shaderWithPositioning.use();
         shaderWithPositioning.setMat4("projection", getResultedViewMatrix());
 
         shaderWithPositioning.use();
         shaderWithPositioning.setMat4("projection", getResultedViewMatrix());
-
-        sphere.vao.bind();
-        sphere.draw();
 
         sphere.vao.bind();
 

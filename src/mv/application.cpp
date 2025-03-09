@@ -61,6 +61,16 @@ namespace mv
         ImGui_ImplOpenGL3_Init("#version 330 core");
     }
 
+    auto Application::update() -> void
+    {
+        std::scoped_lock lock{onMainThreadExecutionQueueMutex};
+
+        while (!onMainThreadExecutionQueue.empty()) {
+            onMainThreadExecutionQueue.front()();
+            onMainThreadExecutionQueue.pop_front();
+        }
+    }
+
     auto Application::onResize(const int width, const int height) -> void
     {
         windowWidth = static_cast<float>(width);
@@ -106,6 +116,26 @@ namespace mv
         }
 
         camera.processMouseScroll(static_cast<float>(y_offset));
+    }
+
+    auto Application::submit(const std::function<void()> &func) -> void
+    {
+        const std::scoped_lock lock{onMainThreadExecutionQueueMutex};
+        onMainThreadExecutionQueue.push_back(func);
+    }
+
+    auto Application::submit(const std::function<void(Application &)> &func) -> void
+    {
+        submit([func, this]() {
+            func(*this);
+        });
+    }
+
+    auto Application::submit(const std::function<void(const Application &)> &func) -> void
+    {
+        submit([func, this]() {
+            func(*this);
+        });
     }
 
     auto Application::run() -> void
@@ -160,6 +190,9 @@ namespace mv
         isInFocus = entered;
         firstMouse = true;
     }
+
+    auto Application::onMouseClick(int, int, int) -> void
+    {}
 
     Application::~Application()
     {
