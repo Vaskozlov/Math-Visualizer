@@ -1,5 +1,5 @@
-#ifndef VALUE_HPP
-#define VALUE_HPP
+#ifndef MVL_AST_VALUE_HPP
+#define MVL_AST_VALUE_HPP
 
 #include <mvl/ast/math_node.hpp>
 
@@ -23,12 +23,10 @@ namespace mvl::ast
             }
 
             if (initial_nodes[0]->getType() == std::to_underlying(mvl::NodeTypes::SUB)) {
-                function = [](const double x) {
-                    return -x;
-                };
+                function = std::negate<double>{};
             } else {
-                function = [](const double x) {
-                    return x;
+                function = [](const double value) {
+                    return value;
                 };
             }
 

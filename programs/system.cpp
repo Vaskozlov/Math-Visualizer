@@ -26,7 +26,6 @@ class SystemOfEquations final : public mv::Application2D
 private:
     constexpr static auto windowTitleBufferSize = 128;
 
-    constexpr static float epsilon = 1e-4F;
     constexpr static double plotEpsilon = 5e-2;
     constexpr static std::size_t maxIterations = 1000;
 
@@ -92,6 +91,10 @@ private:
     float answerX = 0.0F;
     float answerY = 0.0F;
 
+    float epsilon = 1e-4F;
+
+    glm::vec2 iterationsDifference{0.0F, 0.0F};
+
     auto addSphere(
         std::vector<mv::gl::InstanceParameters> &container, const mv::Color color,
         const glm::vec3 position, const float scale = 1.0F) const -> void
@@ -107,7 +110,6 @@ public:
     auto compute(const float start_x, const float start_y) -> isl::Task<>
     {
         std::vector<mv::gl::InstanceParameters> new_spheres;
-
 
         auto x = start_x;
         auto y = start_y;
@@ -133,7 +135,9 @@ public:
 
             addSphere(new_spheres, mv::Color::RED, {x, y, 0.01F}, 0.8F);
 
-            if (std::abs(dx - prev_dx) < epsilon && std::abs(dy - prev_dy) < epsilon) {
+            iterationsDifference = glm::abs(glm::vec2{dx - prev_dx, dy - prev_dy});
+
+            if (iterationsDifference.x < epsilon && iterationsDifference.y < epsilon) {
                 break;
             }
 
@@ -240,16 +244,24 @@ public:
         ImGui::SetWindowFontScale(fontScale);
 
         ImGui::Text(
-            "Computed in %zu iterations, x = %f, y = %f\nStart point: (%f, %f)", iterations,
-            answerX, answerY, startX, startY);
+            "Computed in %zu iterations, x = %f, y = %f\n"
+            "Start point: (%f, %f)\n"
+            "Iterations difference: (%e, %e)",
+            iterations, answerX, answerY, startX, startY, iterationsDifference.x,
+            iterationsDifference.y);
 
         ImGui::InputText("Upper equation", &upperInput);
         ImGui::InputText("Lower equation", &lowerInput);
 
+        ImGui::SliderFloat("Epsilon", &epsilon, 1e-6F, 1.5e-4F, "%.3e");
+
         if (ImGui::Button("Draw")) {
             upperEquation = mvl::constructRoot(upperInput);
             lowerEquation = mvl::constructRoot(lowerInput);
-            ccl::runtime::getGlobalThreadPool().launch(drawPlot());
+
+            if (lowerEquation != nullptr && upperEquation != nullptr) {
+                ccl::runtime::getGlobalThreadPool().launch(drawPlot());
+            }
         }
 
         ImGui::SameLine();
@@ -258,7 +270,9 @@ public:
             upperEquation = mvl::constructRoot(upperInput);
             lowerEquation = mvl::constructRoot(lowerInput);
 
-            ccl::runtime::getGlobalThreadPool().launch(compute(startX, startY));
+            if (lowerEquation != nullptr && upperEquation != nullptr) {
+                ccl::runtime::getGlobalThreadPool().launch(compute(startX, startY));
+            }
         }
 
         colorShader.use();

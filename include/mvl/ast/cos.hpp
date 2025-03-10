@@ -1,5 +1,5 @@
-#ifndef COS_HPP
-#define COS_HPP
+#ifndef MVL_AST_COS_HPP
+#define MVL_AST_COS_HPP
 
 #include <mvl/ast/function.hpp>
 

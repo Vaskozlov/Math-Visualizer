@@ -1,13 +1,9 @@
-#ifndef FACTOR_HPP
-#define FACTOR_HPP
+#ifndef MVL_AST_FACTOR_HPP
+#define MVL_AST_FACTOR_HPP
 
 #include <ccl/parser/ast/terminal.hpp>
 #include <mvl/ast/math_node.hpp>
 
-namespace ccl::parser::ast
-{
-    class Terminal;
-}
 namespace mvl::ast
 {
     class Factor final : public MathNode

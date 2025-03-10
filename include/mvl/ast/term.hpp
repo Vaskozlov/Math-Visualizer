@@ -1,5 +1,5 @@
-#ifndef TERM_HPP
-#define TERM_HPP
+#ifndef MVL_AST_TERM_HPP
+#define MVL_AST_TERM_HPP
 
 #include <mvl/ast/math_node.hpp>
 
@@ -23,13 +23,9 @@ namespace mvl::ast
                 type = initial_nodes[1]->getType();
 
                 if (type == MathConstructor.getRuleId("\'*\'")) {
-                    function = [](double x, double y) {
-                        return x * y;
-                    };
+                    function = std::multiplies<double>{};
                 } else {
-                    function = [](double x, double y) {
-                        return x / y;
-                    };
+                    function = std::divides<double>{};
                 }
             }
         }

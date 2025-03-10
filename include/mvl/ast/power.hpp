@@ -1,5 +1,5 @@
-#ifndef POWER_HPP
-#define POWER_HPP
+#ifndef MVL_AST_POWER_HPP
+#define MVL_AST_POWER_HPP
 
 #include <mvl/ast/math_node.hpp>
 
@@ -23,8 +23,20 @@ namespace mvl::ast
 
         auto derivationX(const double x, const double y) const -> double override
         {
-            auto inner_derivation = callDerivationX(node.get(), x, y);
-            auto inner_value = callCompute(node.get(), x, y);
+            // if (power == nullptr) {
+            //     return callDerivationX(node.get(), x, y);
+            // }
+            //
+            // auto f = callCompute(node.get(), x, y);
+            // auto f_derivation = callDerivationX(node.get(), x, y);
+            //
+            // auto g = callCompute(power.get(), x, y);
+            // auto g_derivation = callDerivationX(power.get(), x, y);
+            //
+            // return std::pow(f, g) * (g * f_derivation / f + std::log(f) * g_derivation);
+
+            const auto inner_derivation = callDerivationX(node.get(), x, y);
+            const auto inner_value = callCompute(node.get(), x, y);
 
             if (power != nullptr) {
                 auto power = callCompute(this->power.get(), x, y);
@@ -37,8 +49,8 @@ namespace mvl::ast
 
         auto derivationY(double x, double y) const -> double override
         {
-            auto inner_derivation = callDerivationY(node.get(), x, y);
-            auto inner_value = callCompute(node.get(), x, y);
+            const auto inner_derivation = callDerivationY(node.get(), x, y);
+            const auto inner_value = callCompute(node.get(), x, y);
 
             if (power != nullptr) {
                 auto power = callCompute(this->power.get(), x, y);

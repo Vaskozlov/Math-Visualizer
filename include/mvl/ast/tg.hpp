@@ -1,5 +1,5 @@
-#ifndef TG_HPP
-#define TG_HPP
+#ifndef MVL_AST_TG_HPP
+#define MVL_AST_TG_HPP
 
 #include <mvl/ast/function.hpp>
 
@@ -22,6 +22,5 @@ namespace mvl::ast
         {}
     };
 }// namespace mvl::ast
-
 
 #endif /* TG_HPP */

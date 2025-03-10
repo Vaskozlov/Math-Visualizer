@@ -1,5 +1,5 @@
-#ifndef SIN_HPP
-#define SIN_HPP
+#ifndef MVL_AST_SIN_HPP
+#define MVL_AST_SIN_HPP
 
 #include <mvl/ast/function.hpp>
 

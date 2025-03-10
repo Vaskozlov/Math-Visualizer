@@ -1,10 +1,8 @@
-#ifndef MATH_NODE_HPP
-#define MATH_NODE_HPP
+#ifndef MVL_AST_MATH_NODE_HPP
+#define MVL_AST_MATH_NODE_HPP
 
-#include <ccl/lexer/tokenizer.hpp>
 #include <ccl/parser/dot/dot_repr.hpp>
 #include <ccl/parser/rules_reader/rules_reader.hpp>
-#include <isl/io.hpp>
 #include <mvl/math_grammar.hpp>
 
 namespace mvl

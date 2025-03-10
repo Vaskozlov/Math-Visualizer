@@ -1,5 +1,5 @@
-#ifndef FUNCTION_HPP
-#define FUNCTION_HPP
+#ifndef MVL_AST_FUNCTION_HPP
+#define MVL_AST_FUNCTION_HPP
 
 #include <mvl/ast/math_node.hpp>
 
@@ -32,8 +32,8 @@ namespace mvl::ast
 
         auto derivationY(const double x, const double y) const -> double override
         {
-            auto inner_value = callCompute(node.get(), x, y);
-            auto outer_value = callDerivationY(node.get(), x, y);
+            const auto inner_value = callCompute(node.get(), x, y);
+            const auto outer_value = callDerivationY(node.get(), x, y);
 
             return derivation(inner_value) * outer_value;
         }

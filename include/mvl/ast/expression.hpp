@@ -1,5 +1,5 @@
-#ifndef EXPRESSION_HPP
-#define EXPRESSION_HPP
+#ifndef MVL_AST_EXPRESSION_HPP
+#define MVL_AST_EXPRESSION_HPP
 
 #include <mvl/ast/math_node.hpp>
 
@@ -21,13 +21,9 @@ namespace mvl::ast
                 rhs = initial_nodes[2];
 
                 if (initial_nodes[1]->getType() == MathConstructor.getRuleId("\'+\'")) {
-                    function = [](double x, double y) {
-                        return x + y;
-                    };
+                    function = std::plus<double>{};
                 } else {
-                    function = [](double x, double y) {
-                        return x - y;
-                    };
+                    function = std::minus<double>{};
                 }
             }
         }
