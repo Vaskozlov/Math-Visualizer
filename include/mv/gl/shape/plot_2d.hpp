@@ -18,6 +18,6 @@ namespace mv::gl::shape
         auto fill(std::span<const float> x, std::span<const float> y, float thickness = 0.03F)
             -> void;
     };
-}// namespace mv::gl::shape
+} // namespace mv::gl::shape
 
 #endif /* MV_PLOT_2D_HPP */

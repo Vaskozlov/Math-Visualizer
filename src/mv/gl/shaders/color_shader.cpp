@@ -3,7 +3,7 @@
 
 namespace mv::gl
 {
-    Shader &getColorShader()
+    auto getColorShader() -> Shader &
     {
         static Shader colorShader{
             {b::embed<"resources/shaders/colored_shader.vert">().str()},
@@ -12,4 +12,4 @@ namespace mv::gl
 
         return colorShader;
     }
-}// namespace mv::gl
+} // namespace mv::gl

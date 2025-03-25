@@ -1,7 +1,6 @@
 #include <GL/glew.h>
-
-#include <mv/gl/gl_init.hpp>
 #include <mutex>
+#include <mv/gl/gl_init.hpp>
 
 namespace mv::gl
 {
@@ -34,4 +33,4 @@ namespace mv::gl
             doInit();
         }
     }
-}// namespace mv::gl
+} // namespace mv::gl

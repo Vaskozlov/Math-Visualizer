@@ -12,4 +12,4 @@ namespace mv::gl
 
         return shaderWithPositioning;
     }
-}// namespace mv::gl
+} // namespace mv::gl

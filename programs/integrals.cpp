@@ -38,6 +38,8 @@ private:
 
     mv::gl::shape::Prism prism{0.03F, 20.0F, 4};
 
+    mv::gl::shape::Sphere sphere{0.1F};
+
     ImFont *font;
     double pressTime = 0.0;
     float fontScale = 0.5F;
@@ -102,11 +104,13 @@ public:
         }
 
         auto new_y = functionX;
-        auto left_point_method = computeUsingRectangleMethodLeft();
-        auto middle_point_method = computeUsingRectangleMethodMiddle();
-        auto right_point_method = computeUsingRectangleMethodRight();
-        auto trapezoidal_method = computeUsingTrapezoidalMethod();
-        auto simpson_method = computeUsingSimpsonMethod();
+        auto &thread_pool = ccl::runtime::getGlobalThreadPool();
+
+        thread_pool.launch(computeUsingRectangleMethodLeft());
+        thread_pool.launch(computeUsingRectangleMethodMiddle());
+        thread_pool.launch(computeUsingRectangleMethodRight());
+        thread_pool.launch(computeUsingTrapezoidalMethod());
+        thread_pool.launch(computeUsingSimpsonMethod());
 
         for (std::size_t i = 0; i != new_y.size(); ++i) {
             new_y[i] = static_cast<float>(f(static_cast<double>(new_y[i])));
@@ -118,16 +122,10 @@ public:
             functionGraph.loadData();
         });
 
-        co_await left_point_method;
-        co_await middle_point_method;
-        co_await right_point_method;
-        co_await trapezoidal_method;
-        co_await simpson_method;
-
         co_return;
     }
 
-    template<std::invocable<double, double> F>
+    template <std::invocable<double, double> F>
     [[nodiscard]] auto
         rectangleMethod(const std::valarray<double> &partitions, F &&select_from_segment) const
         -> double
@@ -153,34 +151,27 @@ public:
 
     [[nodiscard]] auto trapezoidalMethod(const std::valarray<double> &partition) const -> double
     {
-        auto result = 0.0;
-        auto previous_x = partition[0];
         const auto delta = partition[1] - partition[0];
-        auto previous_f_value = f(previous_x);
+        auto result = (f(partition[0]) + f(partition[partition.size() - 1])) / 2.0;
 
-        for (const auto current_x : partition | std::views::drop(1)) {
-            const auto current_f_value = f(current_x);
+        for (std::size_t i = 1; i < partition.size() - 1; ++i) {
+            const auto v = f(partition[i]);
 
-            if (std::isinf(previous_f_value) || std::isinf(current_f_value)) {
-                previous_f_value = current_f_value;
-                previous_x = current_x;
+            if (std::isinf(v)) {
                 continue;
             }
 
-            result += (previous_f_value + current_f_value) * delta / 2.0;
-
-            previous_x = current_x;
-            previous_f_value = current_f_value;
+            result += v;
         }
 
-        return result;
+        return result * delta;
     }
 
     [[nodiscard]] auto simpsonsMethod(const std::valarray<double> &partition) const -> double
     {
         auto result = 0.0;
         auto previous_x = partition[0];
-        auto delta = partition[1] - partition[0];
+        const auto delta = partition[1] - partition[0];
         auto previous_f = f(previous_x);
 
         for (const auto current_x : partition | std::views::drop(1)) {
@@ -208,15 +199,14 @@ public:
         auto previous_value = 0.0;
         auto current_value = std::numeric_limits<double>::infinity();
 
-        while (std::abs(previous_value - current_value) > epsilon && n < maxIterations) {
+        while (std::abs(previous_value - current_value) > static_cast<double>(epsilon)
+               && n < maxIterations) {
             previous_value = current_value;
 
             const auto partitions = isl::linalg::linspace<double>(
                 static_cast<double>(leftBorder), static_cast<double>(rightBorder), n);
 
-            current_value = rectangleMethod(partitions, [](const double a, double) {
-                return a;
-            });
+            current_value = rectangleMethod(partitions, [](const double a, double) { return a; });
 
             n *= 2;
         }
@@ -235,15 +225,15 @@ public:
         auto previous_value = 0.0;
         auto current_value = std::numeric_limits<double>::infinity();
 
-        while (std::abs(previous_value - current_value) > epsilon && n < maxIterations) {
+        while (std::abs(previous_value - current_value) > static_cast<double>(epsilon)
+               && n < maxIterations) {
             previous_value = current_value;
 
             auto partitions = isl::linalg::linspace<double>(
                 static_cast<double>(leftBorder), static_cast<double>(rightBorder), n);
 
-            current_value = rectangleMethod(partitions, [](const double a, const double b) {
-                return std::midpoint(a, b);
-            });
+            current_value = rectangleMethod(
+                partitions, [](const double a, const double b) { return std::midpoint(a, b); });
 
             n *= 2;
         }
@@ -262,15 +252,14 @@ public:
         auto previous_value = 0.0;
         auto current_value = std::numeric_limits<double>::infinity();
 
-        while (std::abs(previous_value - current_value) > epsilon && n < maxIterations) {
+        while (std::abs(previous_value - current_value) > static_cast<double>(epsilon)
+               && n < maxIterations) {
             previous_value = current_value;
 
             const auto partitions = isl::linalg::linspace<double>(
                 static_cast<double>(leftBorder), static_cast<double>(rightBorder), n);
 
-            current_value = rectangleMethod(partitions, [](double, const double b) {
-                return b;
-            });
+            current_value = rectangleMethod(partitions, [](double, const double b) { return b; });
 
             n *= 2;
         }
@@ -289,14 +278,15 @@ public:
         auto previous_value = std::numeric_limits<double>::infinity();
         auto current_value = 0.0;
 
-        while (std::abs(previous_value - current_value) > epsilon && n < maxIterations) {
+        while (std::abs(previous_value - current_value) > static_cast<double>(epsilon)
+               && n < maxIterations) {
             previous_value = current_value;
 
             auto partitions = isl::linalg::linspace<double>(
                 static_cast<double>(leftBorder), static_cast<double>(rightBorder), n);
 
             current_value = trapezoidalMethod(partitions);
-            
+
             n *= 2;
         }
 
@@ -314,7 +304,8 @@ public:
         auto previous_value = 0.0;
         auto current_value = std::numeric_limits<double>::infinity();
 
-        while (std::abs(previous_value - current_value) > epsilon && n < maxIterations) {
+        while (std::abs(previous_value - current_value) > static_cast<double>(epsilon)
+               && n < maxIterations) {
             previous_value = current_value;
 
             auto partitions = isl::linalg::linspace<double>(
@@ -347,6 +338,10 @@ public:
         prism.vbo.bind();
         prism.vao.bind(0, 3, GL_FLOAT, sizeof(glm::vec3), 0);
 
+        sphere.loadData();
+        sphere.vbo.bind();
+        sphere.vao.bind(0, 3, GL_FLOAT, sizeof(glm::vec3), 0);
+
         functionGraph.loadData();
         functionGraph.vbo.bind();
         functionGraph.vao.bind(0, 3, GL_FLOAT, sizeof(glm::vec3), 0);
@@ -362,8 +357,10 @@ public:
         Application2D::update();
 
         fmt::format_to_n(
-            imguiWindowBuffer.data(), imguiWindowBuffer.size(),
-            "Настройки. FPS: {:#.4}###SettingWindowTitle", ImGui::GetIO().Framerate);
+            imguiWindowBuffer.data(),
+            imguiWindowBuffer.size(),
+            "Настройки. FPS: {:#.4}###SettingWindowTitle",
+            ImGui::GetIO().Framerate);
 
         ImGui::Begin(imguiWindowBuffer.data());
         ImGui::PushFont(font);
@@ -375,10 +372,16 @@ public:
             "Right point result %f, partitions count: %zu\n"
             "Trapezoidal result %f, partitions count: %zu\n"
             "Simpson result %f, partitions count: %zu",
-            rectangleMethodLeft, rectangleMethodLeftPartitionsCount, rectangleMethodMiddle,
-            rectangleMethodMiddlePartitionsCount, rectangleMethodRight,
-            rectangleMethodRightPartitionsCount, trapezoidalResult,
-            trapezoidalMethodPartitionsCount, simpsonsResult, simpsonsMethodPartitionsCount);
+            rectangleMethodLeft,
+            rectangleMethodLeftPartitionsCount,
+            rectangleMethodMiddle,
+            rectangleMethodMiddlePartitionsCount,
+            rectangleMethodRight,
+            rectangleMethodRightPartitionsCount,
+            trapezoidalResult,
+            trapezoidalMethodPartitionsCount,
+            simpsonsResult,
+            simpsonsMethodPartitionsCount);
 
         ImGui::InputText("Equation", &tmpInput);
 
@@ -413,6 +416,10 @@ public:
         prism.drawAt(colorShader, {rightBorder, 0.0F, 0.0F});
 
         colorShader.setMat4("model", glm::mat4(1.0F));
+        colorShader.setVec4("elementColor", mv::Color::PINK);
+
+        sphere.draw();
+
         colorShader.setVec4("elementColor", mv::Color::DARK_ORANGE);
         functionGraph.draw();
 

@@ -10,6 +10,6 @@ namespace mv::gl::shape
     public:
         explicit Axes3D(std::int32_t axis_size);
     };
-}// namespace mv::gl::shape
+} // namespace mv::gl::shape
 
 #endif /* MV_AXES_3D_HPP */

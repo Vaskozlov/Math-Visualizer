@@ -10,11 +10,15 @@ namespace mv::gl::shape
     public:
         Rectangle(const float x, const float y, const float width, const float height)
           : Polygon{
-                {x + width, y + height, 0.0F}, {x + width, y, 0.0F}, {x, y, 0.0F},
-                {x + width, y + height, 0.0F}, {x, y, 0.0F},         {x, y + height, 0.0F},
-            }
+                {x + width, y + height, 0.0F},
+                {x + width, y,          0.0F},
+                {x,         y,          0.0F},
+                {x + width, y + height, 0.0F},
+                {x,         y,          0.0F},
+                {x,         y + height, 0.0F},
+        }
         {}
     };
-}// namespace mv::gl::shape
+} // namespace mv::gl::shape
 
 #endif /* MV_SHAPE_RECTANGLE_HPP */

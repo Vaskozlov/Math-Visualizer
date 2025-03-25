@@ -15,9 +15,7 @@ namespace mvl::ast
           : MathNode{id}
         {
             if (initial_nodes.size() == 1) {
-                function = [](const double x) {
-                    return x;
-                };
+                function = [](const double x) { return x; };
                 node = initial_nodes[0];
                 return;
             }
@@ -25,9 +23,7 @@ namespace mvl::ast
             if (initial_nodes[0]->getType() == std::to_underlying(mvl::NodeTypes::SUB)) {
                 function = std::negate<double>{};
             } else {
-                function = [](const double value) {
-                    return value;
-                };
+                function = [](const double value) { return value; };
             }
 
             node = initial_nodes[1];
@@ -63,6 +59,6 @@ namespace mvl::ast
         }
     };
 
-}// namespace mvl::ast
+} // namespace mvl::ast
 
 #endif /* VALUE_HPP */

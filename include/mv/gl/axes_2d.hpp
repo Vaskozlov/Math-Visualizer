@@ -10,6 +10,6 @@ namespace mv::gl::shape
     public:
         explicit Axes2D(std::int32_t axis_size, float thickness = 0.008F);
     };
-}// namespace mv::gl::shape
+} // namespace mv::gl::shape
 
 #endif /* MV_AXES_2D_HPP */

@@ -5,7 +5,7 @@
 
 namespace mv::gl
 {
-    Shader &getColorShader();
-}
+    auto getColorShader() -> Shader &;
+} // namespace mv::gl
 
 #endif /* MV_GL_SHADERS_COLOR_SHADER_HPP */

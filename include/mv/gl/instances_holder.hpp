@@ -6,7 +6,7 @@
 
 namespace mv::gl
 {
-    template<typename T>
+    template <typename T>
     class InstancesHolder
     {
     public:
@@ -18,6 +18,6 @@ namespace mv::gl
             vbo.loadData(models.data(), sizeof(T) * models.size());
         }
     };
-}// namespace mv::gl
+} // namespace mv::gl
 
 #endif /* MV_INSTANCING_HPP */

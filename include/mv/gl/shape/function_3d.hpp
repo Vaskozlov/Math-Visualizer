@@ -30,6 +30,6 @@ namespace mv::gl::shape
             const std::function<float(glm::vec2)> &function, float min_x, float min_y, float min_z,
             float max_x, float max_y, float max_z) -> void;
     };
-}// namespace mv::gl::shape
+} // namespace mv::gl::shape
 
 #endif /* MV_FUNCTION_3D_HPP */

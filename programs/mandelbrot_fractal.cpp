@@ -1,5 +1,3 @@
-#define TRACY_ENABLE 1
-
 #include <battery/embed.hpp>
 #include <imgui.h>
 #include <mv/application_2d.hpp>
@@ -22,58 +20,70 @@ private:
     std::array<char, 128> imguiWindowBuffer{};
 
     mv::Shader mandelbrotFractalShader = mv::Shader{
-        {b::embed<"resources/shaders/fractal/default.vert">().str()},
+        {b::embed<"resources/shaders/fractal/default.vert">().str()   },
         {
-            b::embed<"resources/shaders/fractal/mandelbrot.frag">().str(),
-            b::embed<"resources/shaders/fractal/common.glsl">().str(),
-        },
+         b::embed<"resources/shaders/fractal/mandelbrot.frag">().str(),
+         b::embed<"resources/shaders/fractal/common.glsl">().str(),
+         },
     };
 
     mv::Shader juliaFractalShader = mv::Shader{
         {b::embed<"resources/shaders/fractal/with_offset.vert">().str()},
         {
-            b::embed<"resources/shaders/fractal/julia.frag">().str(),
-            b::embed<"resources/shaders/fractal/common.glsl">().str(),
-        },
+         b::embed<"resources/shaders/fractal/julia.frag">().str(),
+         b::embed<"resources/shaders/fractal/common.glsl">().str(),
+         },
     };
 
     mv::Shader newtonFractalShader = mv::Shader{
         {b::embed<"resources/shaders/fractal/default.vert">().str()},
         {
-            b::embed<"resources/shaders/fractal/newton.frag">().str(),
-            b::embed<"resources/shaders/fractal/common.glsl">().str(),
-        },
+         b::embed<"resources/shaders/fractal/newton.frag">().str(),
+         b::embed<"resources/shaders/fractal/common.glsl">().str(),
+         },
     };
 
     mv::Shader newtonClassicFractalShader = mv::Shader{
-        {b::embed<"resources/shaders/fractal/default.vert">().str()},
+        {b::embed<"resources/shaders/fractal/default.vert">().str()       },
         {
-            b::embed<"resources/shaders/fractal/newton_classic.frag">().str(),
-            b::embed<"resources/shaders/fractal/common.glsl">().str(),
-        },
+         b::embed<"resources/shaders/fractal/newton_classic.frag">().str(),
+         b::embed<"resources/shaders/fractal/common.glsl">().str(),
+         },
     };
 
     mv::Shader newtonSinFractalShader = mv::Shader{
-        {b::embed<"resources/shaders/fractal/default.vert">().str()},
+        {b::embed<"resources/shaders/fractal/default.vert">().str()   },
         {
-            b::embed<"resources/shaders/fractal/newton_sin.frag">().str(),
-            b::embed<"resources/shaders/fractal/common.glsl">().str(),
-        },
+         b::embed<"resources/shaders/fractal/newton_sin.frag">().str(),
+         b::embed<"resources/shaders/fractal/common.glsl">().str(),
+         },
     };
 
     mv::gl::VerticesContainer<glm::vec3> mandelbrotVertices{
-        {2.0F, 2.0F, 0.0F}, {2.0F, -2.0F, 0.0F},  {-2.0F, -2.0F, 0.0F},
-        {2.0F, 2.0F, 0.0F}, {-2.0F, -2.0F, 0.0F}, {-2.0F, 2.0F, 0.0F},
+        {2.0F,  2.0F,  0.0F},
+        {2.0F,  -2.0F, 0.0F},
+        {-2.0F, -2.0F, 0.0F},
+        {2.0F,  2.0F,  0.0F},
+        {-2.0F, -2.0F, 0.0F},
+        {-2.0F, 2.0F,  0.0F},
     };
 
     mv::gl::VerticesContainer<glm::vec3> juliaVertices{
-        {2.0F, 2.0F, 0.0F}, {2.0F, -2.0F, 0.0F},  {-2.0F, -2.0F, 0.0F},
-        {2.0F, 2.0F, 0.0F}, {-2.0F, -2.0F, 0.0F}, {-2.0F, 2.0F, 0.0F},
+        {2.0F,  2.0F,  0.0F},
+        {2.0F,  -2.0F, 0.0F},
+        {-2.0F, -2.0F, 0.0F},
+        {2.0F,  2.0F,  0.0F},
+        {-2.0F, -2.0F, 0.0F},
+        {-2.0F, 2.0F,  0.0F},
     };
 
     mv::gl::VerticesContainer<glm::vec3> newtonVertices{
-        {50.0F, 50.0F, 0.0F}, {50.0F, -50.0F, 0.0F},  {-50.0F, -50.0F, 0.0F},
-        {50.0F, 50.0F, 0.0F}, {-50.0F, -50.0F, 0.0F}, {-50.0F, 50.0F, 0.0F},
+        {50.0F,  50.0F,  0.0F},
+        {50.0F,  -50.0F, 0.0F},
+        {-50.0F, -50.0F, 0.0F},
+        {50.0F,  50.0F,  0.0F},
+        {-50.0F, -50.0F, 0.0F},
+        {-50.0F, 50.0F,  0.0F},
     };
 
     ImFont *font;
@@ -195,8 +205,10 @@ public:
     auto update() -> void override
     {
         fmt::format_to_n(
-            imguiWindowBuffer.data(), imguiWindowBuffer.size(),
-            "Настройки. FPS: {:#.4}###SettingWindowTitle", ImGui::GetIO().Framerate);
+            imguiWindowBuffer.data(),
+            imguiWindowBuffer.size(),
+            "Настройки. FPS: {:#.4}###SettingWindowTitle",
+            ImGui::GetIO().Framerate);
 
         ImGui::Begin(imguiWindowBuffer.data());
         ImGui::PushFont(font);
