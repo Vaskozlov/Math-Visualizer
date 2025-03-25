@@ -1,8 +1,4 @@
-#include <battery/embed.hpp>
 #include <ccl/runtime.hpp>
-#include <complex>
-#include <execution>
-#include <fmt/ranges.h>
 #include <future>
 #include <imgui.h>
 #include <imgui_stdlib.h>
@@ -13,12 +9,13 @@
 #include <mv/color.hpp>
 #include <mv/gl/axes_2d.hpp>
 #include <mv/gl/instances_holder.hpp>
+#include <mv/gl/shaders/color_shader.hpp>
+#include <mv/gl/shaders/shader_with_positioning.hpp>
 #include <mv/gl/shape/plot_2d.hpp>
 #include <mv/gl/shape/sphere.hpp>
 #include <mv/gl/vertices_container.hpp>
 #include <mv/shader.hpp>
 #include <mvl/mvl.hpp>
-#include <numbers>
 #include <valarray>
 
 class SystemOfEquations final : public mv::Application2D
@@ -33,15 +30,8 @@ private:
 
     std::array<char, windowTitleBufferSize> imguiWindowBuffer{};
 
-    mv::Shader colorShader = mv::Shader{
-        {b::embed<"resources/shaders/colored_shader.vert">().str()},
-        {b::embed<"resources/shaders/fragment.frag">().str()},
-    };
-
-    mv::Shader shaderWithPositioning = mv::Shader{
-        {b::embed<"resources/shaders/static_instance.vert">().str()},
-        {b::embed<"resources/shaders/fragment.frag">().str()},
-    };
+    mv::Shader &colorShader = mv::gl::getColorShader();
+    mv::Shader &shaderWithPositioning = mv::gl::getShaderWithPositioning();
 
     mv::gl::shape::Axes2D plot{12, 0.009F};
 
@@ -50,7 +40,7 @@ private:
     mv::gl::InstancesHolder<mv::gl::InstanceParameters> iterationsSpheres;
     mv::gl::InstancesHolder<mv::gl::InstanceParameters> plotSpheres;
 
-    ImFont *font;
+    ImFont *font{};
     double pressTime = 0.0;
     float fontScale = 0.5F;
 
@@ -58,22 +48,6 @@ private:
     std::valarray<float> functionY = functionX;
 
     float sphereRadius = 0.1F;
-
-    std::size_t rightRootIterations = 0;
-    float rightRoot = 0.0F;
-    float rightRootDelta = 0.0F;
-
-    std::size_t leftRootIterations = 0;
-    float leftRoot = 0.0F;
-    float leftRootDelta = 0.0F;
-
-    std::size_t middleRootIterations = 0;
-    float middleRoot = 0.0F;
-    float middleRootDelta = 0.0F;
-
-    std::list<mv::gl::shape::Plot2D> rightRootsLines;
-
-    std::string input;
 
     float leftBorder = -5.0F;
     float rightBorder = 5.0F;
@@ -90,7 +64,6 @@ private:
     std::size_t iterations = 0;
     float answerX = 0.0F;
     float answerY = 0.0F;
-
     float epsilon = 1e-4F;
 
     glm::vec2 iterationsDifference{0.0F, 0.0F};
@@ -110,6 +83,7 @@ public:
     auto compute(const float start_x, const float start_y) -> isl::Task<>
     {
         std::vector<mv::gl::InstanceParameters> new_spheres;
+        std::size_t it = 0;
 
         auto x = start_x;
         auto y = start_y;
@@ -117,7 +91,10 @@ public:
         auto prev_dx = std::numeric_limits<float>::infinity();
         auto prev_dy = std::numeric_limits<float>::infinity();
 
-        for (iterations = 0; iterations < maxIterations; ++iterations) {
+        auto iterations_difference = glm::vec2{std::numeric_limits<float>::infinity()};
+
+        while ((iterations_difference.x > epsilon || iterations_difference.y > epsilon) &&
+               it < maxIterations) {
             auto a = upperEquation->derivationX(x, y);
             auto b = upperEquation->derivationY(x, y);
 
@@ -127,32 +104,30 @@ public:
             auto f = upperEquation->compute(x, y);
             auto g = lowerEquation->compute(x, y);
 
-            auto dy = (-f + a / c * g) / (b - a / c * d);
-            auto dx = (-f - b * dy) / a;
+            auto dy = static_cast<float>((-f + a / c * g) / (b - a / c * d));
+            auto dx = static_cast<float>((-f - b * dy) / a);
 
-            x += static_cast<float>(dx);
-            y += static_cast<float>(dy);
+            x += dx;
+            y += dy;
 
             addSphere(new_spheres, mv::Color::RED, {x, y, 0.01F}, 0.8F);
 
-            iterationsDifference = glm::abs(glm::vec2{dx - prev_dx, dy - prev_dy});
-
-            if (iterationsDifference.x < epsilon && iterationsDifference.y < epsilon) {
-                break;
-            }
+            iterations_difference = glm::abs(glm::vec2{dx - prev_dx, dy - prev_dy});
 
             prev_dx = dx;
             prev_dy = dy;
+            ++it;
         }
 
-        answerX = x;
-        answerY = y;
+        addSphere(new_spheres, mv::Color::FOREST, {x, y, 0.01F});
 
-        addSphere(new_spheres, mv::Color::FOREST, {answerX, answerY, 0.01F});
-
-        submit([this, spheres = std::move(new_spheres)]() mutable {
+        submit([this, spheres = std::move(new_spheres), it, x, y, iterations_difference]() mutable {
             iterationsSpheres.models = std::move(spheres);
             iterationsSpheres.loadData();
+            iterations = it;
+            answerX = x;
+            answerY = y;
+            iterationsDifference = iterations_difference;
         });
 
         co_return;
@@ -246,7 +221,7 @@ public:
         ImGui::Text(
             "Computed in %zu iterations, x = %f, y = %f\n"
             "Start point: (%f, %f)\n"
-            "Iterations difference: (%e, %e)",
+            "Iterations difference: (%e, %e)\n",
             iterations, answerX, answerY, startX, startY, iterationsDifference.x,
             iterationsDifference.y);
 
@@ -303,9 +278,6 @@ public:
         shaderWithPositioning.use();
         shaderWithPositioning.setMat4("projection", getResultedViewMatrix());
 
-        shaderWithPositioning.use();
-        shaderWithPositioning.setMat4("projection", getResultedViewMatrix());
-
         sphere.vao.bind();
 
         glDrawArraysInstanced(
@@ -326,7 +298,7 @@ public:
         ImGui::End();
     }
 
-    glm::vec3 ScreenToWorldRay(double mouseX, double mouseY, int screenWidth, int screenHeight)
+    glm::vec3 screenToWorldRay(double mouseX, double mouseY, int screenWidth, int screenHeight)
     {
         float x = (2.0f * mouseX) / screenWidth - 1.0f;
         float y = 1.0f - (2.0f * mouseY) / screenHeight;// Flip Y-axis
@@ -347,7 +319,7 @@ public:
     }
 
     // Function to get a 2D point along the ray (at z = 0 plane)
-    glm::vec2 GetPointOn2DScene(glm::vec3 rayOrigin, glm::vec3 rayDirection, float zPlane = 0.0f)
+    glm::vec2 getPointOn2DScene(glm::vec3 rayOrigin, glm::vec3 rayDirection, float zPlane = 0.0f)
     {
         float t = (zPlane - rayOrigin.z) / rayDirection.z;// Solve for t when z = zPlane
         glm::vec3 worldPoint = rayOrigin + t * rayDirection;
@@ -363,8 +335,8 @@ public:
             int width, height;
             glfwGetWindowSize(window, &width, &height);
 
-            glm::vec3 rayDirection = ScreenToWorldRay(mouseX, mouseY, width, height);
-            glm::vec2 scenePoint = GetPointOn2DScene(
+            glm::vec3 rayDirection = screenToWorldRay(mouseX, mouseY, width, height);
+            glm::vec2 scenePoint = getPointOn2DScene(
                 camera.getPosition(), rayDirection, 0.0f);// Get 2D position on z = 0
 
             startX = scenePoint.x;

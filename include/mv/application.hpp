@@ -19,7 +19,7 @@ namespace mv
         std::string title;
         glm::vec4 clearColor{0.0F, 0.0F, 0.0F, 1.0F};
         GLFWwindow *window;
-        ImGuiIO *imguiIO;
+        ImGuiIO *imguiIO{};
         double lastMouseX = 0.0;
         double lastMouseY = 0.0;
         float deltaTime = 0.0f;

@@ -1,24 +1,21 @@
-#include <battery/embed.hpp>
 #include <ccl/runtime.hpp>
-#include <complex>
 #include <imgui.h>
 #include <imgui_stdlib.h>
 #include <isl/linalg/linspace.hpp>
-#include <list>
 #include <mv/application_2d.hpp>
 #include <mv/application_3d.hpp>
 #include <mv/color.hpp>
 #include <mv/gl/axes_2d.hpp>
 #include <mv/gl/instances_holder.hpp>
+#include <mv/gl/shaders/color_shader.hpp>
+#include <mv/gl/shaders/shader_with_positioning.hpp>
 #include <mv/gl/shape/plot_2d.hpp>
 #include <mv/gl/shape/sphere.hpp>
 #include <mv/gl/vertices_container.hpp>
 #include <mv/shader.hpp>
 #include <mvl/mvl.hpp>
-#include <numbers>
-#include <valarray>
 
-class Computation2 final : public mv::Application2D
+class Integrals final : public mv::Application2D
 {
 private:
     constexpr static auto windowTitleBufferSize = 128;
@@ -30,30 +27,25 @@ private:
 
     std::array<char, windowTitleBufferSize> imguiWindowBuffer{};
 
-    mv::Shader colorShader = mv::Shader{
-        {b::embed<"resources/shaders/colored_shader.vert">().str()},
-        {b::embed<"resources/shaders/fragment.frag">().str()},
-    };
+    mv::Shader &colorShader = mv::gl::getColorShader();
 
-    mv::Shader shaderWithPositioning = mv::Shader{
-        {b::embed<"resources/shaders/static_instance.vert">().str()},
-        {b::embed<"resources/shaders/fragment.frag">().str()},
-    };
+    mv::Shader &shaderWithPositioning = mv::gl::getShaderWithPositioning();
 
     mv::gl::shape::Axes2D plot{12, 0.009F};
 
     mv::gl::shape::Plot2D functionGraph;
-    mv::gl::shape::Plot2D dftGraph;
 
     mv::gl::shape::Prism prism{0.03F, 20.0F, 4};
 
     mv::gl::shape::Sphere chordSphere{1.0F};
     mv::gl::shape::Sphere secantSphere{1.0F};
     mv::gl::shape::Sphere newtonSphere{1.0F};
+    mv::gl::shape::Sphere iterationSphere{1.0F};
 
     mv::gl::InstancesHolder<mv::gl::InstanceParameters> chordSpheres;
     mv::gl::InstancesHolder<mv::gl::InstanceParameters> secantSpheres;
     mv::gl::InstancesHolder<mv::gl::InstanceParameters> newtonSpheres;
+    mv::gl::InstancesHolder<mv::gl::InstanceParameters> iterationSpheres;
 
     ImFont *font;
     double pressTime = 0.0;
@@ -63,8 +55,6 @@ private:
     std::valarray<float> functionY = functionX;
 
     float sphereRadius = 0.1F;
-
-    std::list<mv::gl::shape::Plot2D> rightRootsLines;
 
     std::string input = "x^3-3.125*x^2-3.5*x+2.458";
     std::string tmpInput = input;
@@ -77,11 +67,15 @@ private:
     std::size_t chordIterations{};
     std::size_t secantIterations{};
     std::size_t newtonIterations{};
+    std::size_t iterationsIterations{};
 
     float chordResult{};
     float secantResult{};
     float newtonResult{};
+    float iterationsResult{};
     float lineThickness = 0.03F;
+
+    bool iterationsMethodDerivationExceed = false;
 
 public:
     using Application2D::Application2D;
@@ -115,10 +109,11 @@ public:
         auto chord = ccl::runtime::async(chordMethod());
         auto secant = ccl::runtime::async(secantMethod());
         auto newton = ccl::runtime::async(newtonMethod());
+        auto iterations = ccl::runtime::async(iterationsMethod());
         auto new_y = functionX;
 
         for (std::size_t i = 0; i != new_y.size(); ++i) {
-            new_y[i] = f(new_y[i]);
+            new_y[i] = static_cast<float>(f(new_y[i]));
         }
 
         submit([this, y = std::move(new_y)]() mutable {
@@ -130,6 +125,65 @@ public:
         co_await chord;
         co_await secant;
         co_await newton;
+        co_await iterations;
+
+        co_return;
+    }
+
+    [[nodiscard]] auto iterationsMethodCountLambda() const -> std::pair<float, bool>
+    {
+        auto space = isl::linalg::linspace(leftBorder, rightBorder, 100);
+        auto max = 0.0F;
+        bool is_above_zero = true;
+
+        for (std::size_t i = 0; i != space.size(); ++i) {
+            const auto value = static_cast<float>(root->derivationX(space[i], 0.0F));
+            max = std::max(max, std::abs(value));
+            is_above_zero = is_above_zero && (value > 0.0F);
+        }
+
+        return {1.0F / max, is_above_zero};
+    }
+
+    auto iterationsMethod() -> isl::Task<>
+    {
+        auto new_spheres = std::vector<mv::gl::InstanceParameters>{};
+        auto x = std::midpoint(leftBorder, rightBorder);
+        std::size_t it = 0;
+        auto derivation_exceed = false;
+        auto [lambda, is_above_zero] = iterationsMethodCountLambda();
+
+        if (is_above_zero) {
+            lambda = -lambda;
+        }
+
+        while (std::abs(f(x)) > epsilon && it < maxIterations) {
+            x = x + lambda * static_cast<float>(f(x));
+            derivation_exceed =
+                derivation_exceed || (lambda * root->derivationX(x, 0.0) + 1.0) > 1.0;
+
+            new_spheres.emplace_back(
+                mv::Color::MAGENTA,
+                glm::scale(
+                    glm::translate(
+                        glm::mat4(1.0F),
+                        {
+                            x,
+                            0.0F,
+                            0.01F,
+                        }),
+                    glm::vec3{sphereRadius}));
+
+            ++it;
+        }
+
+        submit([this, spheres = std::move(new_spheres), x, it, derivation_exceed]() mutable {
+            iterationsIterations = it;
+            iterationsResult = x;
+            iterationSpheres.models = std::move(spheres);
+            iterationSpheres.loadData();
+            iterationsMethodDerivationExceed = derivation_exceed;
+        });
 
         co_return;
     }
@@ -158,10 +212,10 @@ public:
                         }),
                     glm::vec3{sphereRadius}));
 
-            auto left = f(leftBorder);
-            auto center = f(xi);
+            const auto left = f(leftBorder);
+            const auto center = f(xi);
 
-            if (left * center < 0) {
+            if (left * center < 0.0) {
                 right_border = xi;
             } else {
                 left_border = xi;
@@ -193,7 +247,7 @@ public:
         std::size_t it = 0;
 
         while (std::abs(f(x1)) > epsilon && it < maxIterations) {
-            auto new_x = x1 - f(x1) * (x1 - x0) / (f(x1) - f(x0));
+            auto new_x = x1 - static_cast<float>(f(x1) * (x1 - x0) / (f(x1) - f(x0)));
 
             new_spheres.emplace_back(
                 mv::Color::RED,
@@ -230,7 +284,7 @@ public:
         std::size_t it = 0;
 
         while (std::abs(f(xi)) > epsilon && it < maxIterations) {
-            xi = xi - f(xi) / root->derivationX(xi, 0.0);
+            xi = xi - static_cast<float>(f(xi) / root->derivationX(xi, 0.0));
             ++it;
 
             new_spheres.emplace_back(
@@ -275,10 +329,6 @@ public:
         functionGraph.vbo.bind();
         functionGraph.vao.bind(0, 3, GL_FLOAT, sizeof(glm::vec3), 0);
 
-        dftGraph.loadData();
-        dftGraph.vbo.bind();
-        dftGraph.vao.bind(0, 3, GL_FLOAT, sizeof(glm::vec3), 0);
-
         secantSphere.vbo.bind();
         secantSphere.vao.bind(0, 3, GL_FLOAT, sizeof(glm::vec3), 0);
 
@@ -296,6 +346,12 @@ public:
 
         newtonSpheres.vbo.bind();
         newtonSphere.vao.bindInstanceParameters(1, 1);
+
+        iterationSphere.vbo.bind();
+        iterationSphere.vao.bind(0, 3, GL_FLOAT, sizeof(glm::vec3), 0);
+
+        iterationSpheres.vbo.bind();
+        iterationSphere.vao.bindInstanceParameters(1, 1);
 
         ImGui::StyleColorsLight();
         font = loadFont(30.0F);
@@ -316,11 +372,14 @@ public:
         ImGui::SetWindowFontScale(fontScale);
 
         ImGui::Text(
-            "Chord Method iterations: %zu, x: %f, f(x): %.3e\n"
-            "Secant method iteration: %zu, x: %f, f(x): %.3e\n"
-            "Newton method iterations: %zu, x: %f, f(x): %.3e\n",
+            "Chord Method iterations (green): %zu, x: %f, f(x): %.3e\n"
+            "Secant method iteration (red): %zu, x: %f, f(x): %.3e\n"
+            "Newton method iterations (navy): %zu, x: %f, f(x): %.3e\n"
+            "Iterations method iterations (magnet): %zu (%s), x: %f, f(x): %.3e\n",
             chordIterations, chordResult, f(chordResult), secantIterations, secantResult,
-            f(secantResult), newtonIterations, newtonResult, f(newtonResult));
+            f(secantResult), newtonIterations, newtonResult, f(newtonResult), iterationsIterations,
+            iterationsMethodDerivationExceed ? "false" : "true", iterationsResult,
+            f(iterationsResult));
 
         ImGui::InputText("Equation", &tmpInput);
 
@@ -339,6 +398,7 @@ public:
 
         colorShader.use();
         colorShader.setMat4("projection", getResultedViewMatrix());
+
         colorShader.setMat4(
             "model", glm::translate(glm::mat4(1.0F), glm::vec3{0.0F, 0.0F, -0.02F}));
         colorShader.setVec4("elementColor", mv::Color::BLACK);
@@ -376,6 +436,11 @@ public:
 
         glDrawArraysInstanced(
             GL_TRIANGLE_STRIP, 0, newtonSphere.vertices.size(), newtonSpheres.models.size());
+
+        iterationSphere.vao.bind();
+
+        glDrawArraysInstanced(
+            GL_TRIANGLE_STRIP, 0, iterationSphere.vertices.size(), iterationSpheres.models.size());
 
         if (ImGui::Button("Center camera")) {
             camera.setPosition(defaultCameraPosition);
@@ -430,7 +495,7 @@ public:
 
 auto main() -> int
 {
-    Computation2 application{1000, 800, "Computation2", 2};
+    Integrals application{1000, 800, "Equation solver", 2};
     application.run();
     return 0;
 }

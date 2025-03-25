@@ -12,13 +12,14 @@ namespace mvl::ast
 
         Tg(const ccl::SmallId id, const ccl::parser::ast::SmallVectorOfNodes &initial_nodes)
           : Function{
-                id, initial_nodes[1], isl::SmallFunction<double(double)>{[](const double value) {
+                id, initial_nodes[1],
+                [](const double value) {
                     return std::tan(value);
-                }},
-                isl::SmallFunction<double(double)>{[](const double value) {
+                },
+                [](const double value) {
                     const auto c = std::cos(value);
                     return 1.0 / (c * c);
-                }}}
+                }}
         {}
     };
 }// namespace mvl::ast

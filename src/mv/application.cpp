@@ -122,6 +122,7 @@ namespace mv
     {
         const std::scoped_lock lock{onMainThreadExecutionQueueMutex};
         onMainThreadExecutionQueue.push_back(func);
+        glfwPostEmptyEvent();
     }
 
     auto Application::submit(const std::function<void(Application &)> &func) -> void

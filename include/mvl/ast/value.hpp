@@ -51,16 +51,15 @@ namespace mvl::ast
         auto getChildrenNodes() const
             -> isl::SmallFunction<ccl::parser::ast::SharedNode<>()> override
         {
-            return ChildrenNodesGenerator{
-                [index = 0, node = this->node]() mutable -> ccl::parser::ast::SharedNode<> {
-                    if (index > 0) {
-                        return nullptr;
-                    }
+            return [index = 0, node = this->node]() mutable -> ccl::parser::ast::SharedNode<> {
+                if (index > 0) {
+                    return nullptr;
+                }
 
-                    ++index;
+                ++index;
 
-                    return node;
-                }};
+                return node;
+            };
         }
     };
 

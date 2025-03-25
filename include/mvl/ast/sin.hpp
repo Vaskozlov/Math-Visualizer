@@ -12,12 +12,13 @@ namespace mvl::ast
 
         Sin(const ccl::SmallId id, const ccl::parser::ast::SmallVectorOfNodes &initial_nodes)
           : Function{
-                id, initial_nodes[1], isl::SmallFunction<double(double)>{[](const double value) {
+                id, initial_nodes[1],
+                [](const double value) {
                     return std::sin(value);
-                }},
-                isl::SmallFunction<double(double)>{[](const double value) {
+                },
+                [](const double value) {
                     return std::cos(value);
-                }}}
+                }}
         {}
     };
 }// namespace mvl::ast

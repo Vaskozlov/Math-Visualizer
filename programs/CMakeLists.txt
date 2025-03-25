@@ -204,13 +204,6 @@ target_link_libraries(
         math-visualizer
 )
 
-b_embed_proxy_target(
-        equation
-        equation-resources
-)
-
-mv_embed_resources("resources" equation-resources)
-
 add_executable(
         system
         programs/system.cpp
@@ -234,9 +227,26 @@ target_link_libraries(
         math-visualizer
 )
 
-b_embed_proxy_target(
-        system
-        system-resources
+add_executable(
+        integrals
+        programs/integrals.cpp
 )
 
-mv_embed_resources("resources" system-resources)
+isl_set_target_flags(
+        integrals
+        ${MV_STRICT_COMPILATION}
+        ""
+        ""
+        ""
+        ""
+        ${MV_HARDENING}
+        ${MV_LIBCPP}
+        ${MV_UNITY_BUILD}
+)
+
+target_link_libraries(
+        integrals
+        PUBLIC
+        math-visualizer
+)
+
