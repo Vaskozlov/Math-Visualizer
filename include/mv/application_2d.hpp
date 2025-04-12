@@ -12,6 +12,6 @@ namespace mv
 
         auto processInput() -> void override;
     };
-}// namespace mv
+} // namespace mv
 
 #endif /* MV_APPLICATION_2D_HPP */

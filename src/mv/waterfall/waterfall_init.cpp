@@ -7,30 +7,30 @@ namespace mv
     {
         static Shader waterfallShaderHsvF32{
             {
-                b::embed<"resources/shaders/waterfall/vertex_with_limits_f32.vert">().str(),
-            },
+             b::embed<"resources/shaders/waterfall/vertex_with_limits_f32.vert">().str(),
+             },
             {
-                b::embed<"resources/shaders/waterfall/hsv/f32_rgba.frag">().str(),
-                b::embed<"resources/shaders/waterfall/hsv/hsv2rgb.glsl">().str(),
-            },
+             b::embed<"resources/shaders/waterfall/hsv/f32_rgba.frag">().str(),
+             b::embed<"resources/shaders/waterfall/hsv/hsv2rgb.glsl">().str(),
+             },
         };
 
         return &waterfallShaderHsvF32;
     }
 
-    auto Waterfall::getWaterfallShaderLinearU32() -> Shader *
+    auto Waterfall::getWaterfallShaderLinearF32() -> Shader *
     {
-        static Shader waterfallShaderLinearU32{
+        static Shader waterfallShaderLinearF32{
             {
-                b::embed<"resources/shaders/waterfall/vertex_with_limits_f32.vert">().str(),
-            },
+             b::embed<"resources/shaders/waterfall/vertex_with_limits_f32.vert">().str(),
+             },
             {
-                b::embed<"resources/shaders/waterfall/linear/u32_rgba.frag">().str(),
-                b::embed<"resources/shaders/waterfall/linear/linear_rgb.glsl">().str(),
-            },
+             b::embed<"resources/shaders/waterfall/linear/f32_rgba.frag">().str(),
+             b::embed<"resources/shaders/waterfall/linear/linear_rgb.glsl">().str(),
+             },
         };
 
-        return &waterfallShaderLinearU32;
+        return &waterfallShaderLinearF32;
     }
 
     auto Waterfall::init() -> void
@@ -66,12 +66,12 @@ namespace mv
         waterfallShaderHsvF32->setInt("texture2", 1);
         waterfallShaderHsvF32->setMat4("projection", glm::mat4(1.0F));
 
-        waterfallShaderLinearU32->use();
-        waterfallShaderLinearU32->setInt("texture1", 0);
-        waterfallShaderLinearU32->setInt("texture2", 1);
-        waterfallShaderLinearU32->setMat4("projection", glm::mat4(1.0F));
+        waterfallShaderLinearF32->use();
+        waterfallShaderLinearF32->setInt("texture1", 0);
+        waterfallShaderLinearF32->setInt("texture2", 1);
+        waterfallShaderLinearF32->setMat4("projection", glm::mat4(1.0F));
 
         updateAzimuthUniform();
         updatePowerUniform();
     }
-}// namespace mv
+} // namespace mv

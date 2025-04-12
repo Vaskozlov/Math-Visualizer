@@ -10,6 +10,6 @@ namespace mv::gl
         glm::vec4 color;
         glm::mat4 transformation;
     };
-}
+} // namespace mv::gl
 
 #endif /* MV_GL_INSTANCE_PARAMETERS_HPP */

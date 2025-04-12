@@ -1,10 +1,10 @@
 #ifndef MV_APPLICATION_HPP
 #define MV_APPLICATION_HPP
 
-#include <deque>
-#include <functional>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <deque>
+#include <functional>
 #include <imgui.h>
 #include <isl/isl.hpp>
 #include <mutex>
@@ -102,6 +102,6 @@ namespace mv
 
         [[nodiscard]] auto loadFont(float font_size = 45.0F) const -> ImFont *;
     };
-}// namespace mv
+} // namespace mv
 
 #endif /* MV_APPLICATION_HPP */

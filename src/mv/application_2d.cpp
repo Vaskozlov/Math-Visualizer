@@ -27,4 +27,4 @@ namespace mv
             glfwPostEmptyEvent();
         }
     }
-}// namespace mv
+} // namespace mv

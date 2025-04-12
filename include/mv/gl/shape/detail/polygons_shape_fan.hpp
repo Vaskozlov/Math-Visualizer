@@ -13,6 +13,6 @@ namespace mv::gl::shape::detail
             glDrawArrays(GL_TRIANGLE_FAN, 0, vertices.size());
         }
     };
-}// namespace mv::gl::shape::detail
+} // namespace mv::gl::shape::detail
 
 #endif /* MV_POLYGONS_SHAPE_FAN_HPP */

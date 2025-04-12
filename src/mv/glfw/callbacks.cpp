@@ -45,4 +45,4 @@ namespace mv::glfw
         glfwSetScrollCallback(window, scrollCallback);
         glfwSetCursorEnterCallback(window, cursorEnterLeaveCallback);
     }
-}// namespace mv::glfw
+} // namespace mv::glfw

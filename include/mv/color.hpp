@@ -36,7 +36,7 @@ namespace mv
                 };
             }
         };
-    }// namespace detail
+    } // namespace detail
 
     struct Color : detail::ColorImpl
     {
@@ -44,7 +44,7 @@ namespace mv
 
         Color() = default;
 
-        Color(const ColorImpl impl) noexcept// NOLINT
+        Color(const ColorImpl impl) noexcept // NOLINT
           : ColorImpl{impl}
         {}
 
@@ -74,7 +74,7 @@ namespace mv
         static constexpr ColorImpl DARK_ORANGE{1.0F, 0.3F, 0.0F, 1.0F};
     };
 
-    template<typename T>
+    template <typename T>
     struct RGBA
     {
         T r{};
@@ -95,7 +95,7 @@ namespace mv
         };
     }
 
-    template<std::integral T>
+    template <std::integral T>
     auto intToRainbowColor(T value, const T minValue, const T maxValue) -> RGBA<std::uint8_t>
     {
         value = std::clamp(value, minValue, maxValue);
@@ -105,6 +105,6 @@ namespace mv
 
         return hsv2rgb(hue, 1.0F, 1.0F);
     }
-}// namespace mv
+} // namespace mv
 
 #endif /* MV_COLOR_HPP */

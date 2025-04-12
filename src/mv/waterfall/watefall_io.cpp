@@ -30,7 +30,6 @@ namespace mv
         }
     }
 
-
     auto Waterfall::onMouseRelativeMovement(const double delta_x, const double delta_y) -> void
     {
         const auto scale = camera.getZoom() / 200.0F;
@@ -58,14 +57,14 @@ namespace mv
         const int shift_key_state = glfwGetKey(window, GLFW_KEY_LEFT_SHIFT);
         const auto scale = static_cast<double>(camera.getZoom()) / 1000.0;
 
-        if ((shift_key_state == GLFW_PRESS && h_key_state == GLFW_PRESS) ||
-            (v_key_state == GLFW_FALSE && h_key_state == GLFW_FALSE)) {
+        if ((shift_key_state == GLFW_PRESS && h_key_state == GLFW_PRESS)
+            || (v_key_state == GLFW_FALSE && h_key_state == GLFW_FALSE)) {
             changeWidthScale(static_cast<float>(x_offset + y_offset) * scale);
         }
 
-        if ((shift_key_state == GLFW_PRESS && v_key_state == GLFW_PRESS) ||
-            (v_key_state == GLFW_FALSE && h_key_state == GLFW_FALSE)) {
+        if ((shift_key_state == GLFW_PRESS && v_key_state == GLFW_PRESS)
+            || (v_key_state == GLFW_FALSE && h_key_state == GLFW_FALSE)) {
             changeHeightScale(static_cast<float>(x_offset + y_offset) * scale);
         }
     }
-}// namespace mv
+} // namespace mv

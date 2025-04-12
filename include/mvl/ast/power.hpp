@@ -96,7 +96,6 @@ namespace mvl::ast
             };
         }
     };
-}// namespace mvl::ast
-
+} // namespace mvl::ast
 
 #endif /* POWER_HPP */

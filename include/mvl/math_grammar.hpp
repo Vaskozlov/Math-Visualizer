@@ -29,6 +29,6 @@ namespace mvl
     extern const isl::string_view MathGrammar;
 
     auto getMathNodeTypesMap() -> const std::unordered_map<std::string, ccl::SmallId> &;
-}// namespace mvl
+} // namespace mvl
 
 #endif /* MATH_GRAMMAR_HPP */

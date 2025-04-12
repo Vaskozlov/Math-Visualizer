@@ -7,8 +7,12 @@ namespace mv::gl
         const GLsizei offset) -> void
     {
         glVertexAttribPointer(
-            array_attribute, size, type, GL_FALSE, stride,
-            reinterpret_cast<const void *>(offset));// NOLINT
+            array_attribute,
+            size,
+            type,
+            GL_FALSE,
+            stride,
+            reinterpret_cast<const void *>(offset)); // NOLINT
 
         glEnableVertexAttribArray(array_attribute);
     }
@@ -51,12 +55,15 @@ namespace mv::gl
 
         for (GLsizei i = 0; i != sizeof(InstanceParameters) / sizeof(glm::vec4); ++i) {
             bindAttribute(
-                array_attribute + i, 4, GL_FLOAT, sizeof(InstanceParameters),
-                static_cast<GLsizei>(sizeof(glm::vec4)) * i);// NOLINT
+                array_attribute + i,
+                4,
+                GL_FLOAT,
+                sizeof(InstanceParameters),
+                static_cast<GLsizei>(sizeof(glm::vec4)) * i); // NOLINT
 
             glVertexAttribDivisor(array_attribute + i, divisor);
         }
 
         unbind();
     }
-}// namespace mv::gl
+} // namespace mv::gl

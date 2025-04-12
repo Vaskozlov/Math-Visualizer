@@ -1,4 +1,5 @@
 #include "mv/shader.hpp"
+
 #include <array>
 #include <fmt/format.h>
 #include <fstream>
@@ -26,7 +27,6 @@ namespace mv
 
         return shader;
     }
-
 
     static auto createProgram(const std::vector<GLuint> &shaders) -> GLuint
     {
@@ -71,4 +71,4 @@ namespace mv
             glDeleteShader(shader);
         }
     }
-}// namespace mv
+} // namespace mv

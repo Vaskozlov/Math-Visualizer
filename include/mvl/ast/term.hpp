@@ -83,28 +83,26 @@ namespace mvl::ast
         auto getChildrenNodes() const
             -> isl::SmallFunction<ccl::parser::ast::SharedNode<>()> override
         {
-            return
-                [index = 0, this]() mutable -> ccl::parser::ast::SharedNode<> {
-                    if (index > 1) {
-                        return nullptr;
-                    }
-
-                    if (index == 0) {
-                        ++index;
-                        return lhs;
-                    }
-
-                    if (rhs != nullptr) {
-                        ++index;
-                        return rhs;
-                    }
-
-                    ++index;
+            return [index = 0, this]() mutable -> ccl::parser::ast::SharedNode<> {
+                if (index > 1) {
                     return nullptr;
-                };
+                }
+
+                if (index == 0) {
+                    ++index;
+                    return lhs;
+                }
+
+                if (rhs != nullptr) {
+                    ++index;
+                    return rhs;
+                }
+
+                ++index;
+                return nullptr;
+            };
         }
     };
-}// namespace mvl::ast
-
+} // namespace mvl::ast
 
 #endif /* TERM_HPP */

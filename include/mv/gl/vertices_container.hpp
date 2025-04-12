@@ -7,7 +7,7 @@
 
 namespace mv::gl
 {
-    template<typename T>
+    template <typename T>
     class VerticesContainer
     {
     public:
@@ -26,6 +26,6 @@ namespace mv::gl
             vbo.loadData(vertices.data(), vertices.size() * sizeof(T));
         }
     };
-}// namespace mv::gl
+} // namespace mv::gl
 
 #endif /* MV_VBO_HPP */

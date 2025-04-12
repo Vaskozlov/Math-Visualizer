@@ -31,4 +31,4 @@ namespace mv::gl
         glBufferData(GL_ARRAY_BUFFER, data_size, data, mode);
         unbind();
     }
-}// namespace mv::gl
+} // namespace mv::gl

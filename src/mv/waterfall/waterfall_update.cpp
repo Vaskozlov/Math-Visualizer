@@ -4,6 +4,8 @@ namespace mv
 {
     auto Waterfall::update() -> void
     {
+        Application2D::update();
+
         pollTask();
 
         int window_width;
@@ -11,8 +13,10 @@ namespace mv
         glfwGetFramebufferSize(window, &window_width, &window_height);
 
         fmt::format_to_n(
-            imguiWindowBufferTitle.data(), imguiWindowBufferTitle.size(),
-            "Настройки. FPS: {:#.4}###SettingWindowTitle", ImGui::GetIO().Framerate);
+            imguiWindowBufferTitle.data(),
+            imguiWindowBufferTitle.size(),
+            "Настройки. FPS: {:#.4}###SettingWindowTitle",
+            ImGui::GetIO().Framerate);
 
         ImGui::Begin(imguiWindowBufferTitle.data());
         ImGui::PushFont(font);
@@ -45,19 +49,19 @@ namespace mv
             function();
         }
 
-        if (ImGui::SliderFloat("Azimuth middle", &azimuthMiddle, azimuthMin, azimuthMax)) {
+        if (ImGui::SliderFloat("Middle", &azimuthMiddle, azimuthMin, azimuthMax)) {
             updateAzimuthUniform();
         }
 
-        if (ImGui::SliderFloat("Azimuth side", &azimuthSide, azimuthMin, azimuthMax)) {
+        if (ImGui::SliderFloat("Side", &azimuthSide, azimuthMin, azimuthMax)) {
             updateAzimuthUniform();
         }
 
-        if (ImGui::SliderInt("Power low", &powerLow, minPower, maxPower)) {
+        if (ImGui::SliderFloat("Low", &powerLow, minPower, maxPower)) {
             updatePowerUniform();
         }
 
-        if (ImGui::SliderInt("Power high", &powerHigh, minPower, maxPower)) {
+        if (ImGui::SliderFloat("High", &powerHigh, minPower, maxPower)) {
             updatePowerUniform();
         }
 
@@ -75,13 +79,16 @@ namespace mv
         azimuthWaterfallMask.bind(GL_TEXTURE1);
 
         waterfallShaderHsvF32->use();
-        waterfallShaderLinearU32->setVec4(
-            "imageLimits", {0.0F, 0.0F, static_cast<float>(window_width) / 2.0F,
-                            static_cast<float>(window_height)});
+        waterfallShaderLinearF32->setVec4(
+            "imageLimits",
+            {0.0F,
+             0.0F,
+             static_cast<float>(window_width) / 2.0F,
+             static_cast<float>(window_height)});
         waterfallShaderHsvF32->setVec2("texOffset", {camera_vec.x, camera_vec.y});
 
         azimuthMapSize.vao.bind();
-        waterfallShaderLinearU32->setMat4(
+        waterfallShaderLinearF32->setMat4(
             "model",
             glm::scale(
                 glm::translate(
@@ -93,15 +100,17 @@ namespace mv
         powerWaterfall.bind(GL_TEXTURE0);
         powerWaterfallMask.bind(GL_TEXTURE1);
 
-        waterfallShaderLinearU32->use();
-        waterfallShaderLinearU32->setVec4(
+        waterfallShaderLinearF32->use();
+        waterfallShaderLinearF32->setVec4(
             "imageLimits",
-            {static_cast<float>(window_width) / 2.0F, 0.0F, static_cast<float>(window_width),
+            {static_cast<float>(window_width) / 2.0F,
+             0.0F,
+             static_cast<float>(window_width),
              static_cast<float>(window_height)});
-        waterfallShaderLinearU32->setVec2("texOffset", {camera_vec.x, camera_vec.y});
+        waterfallShaderLinearF32->setVec2("texOffset", {camera_vec.x, camera_vec.y});
 
         powerMapSize.vao.bind();
-        waterfallShaderLinearU32->setMat4(
+        waterfallShaderLinearF32->setMat4(
             "model",
             glm::scale(
                 glm::translate(
@@ -113,5 +122,4 @@ namespace mv
         ImGui::PopFont();
         ImGui::End();
     }
-
-}// namespace mv
+} // namespace mv

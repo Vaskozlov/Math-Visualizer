@@ -9,7 +9,7 @@ namespace mvl
 {
     extern ccl::parser::reader::RulesReader MathRulesReader;
     extern ccl::parser::reader::ParserBuilder &MathConstructor;
-}// namespace mvl
+} // namespace mvl
 
 namespace mvl::ast
 {
@@ -53,6 +53,6 @@ namespace mvl::ast
             bool is_left,
             const std::function<std::string(ccl::SmallId)> &id_converter) const -> void override;
     };
-}// namespace mvl::ast
+} // namespace mvl::ast
 
 #endif /* MATH_NODE_HPP */

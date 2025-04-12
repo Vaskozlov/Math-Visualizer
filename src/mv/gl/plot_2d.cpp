@@ -18,7 +18,8 @@ namespace mv::gl::shape
 
             auto model2 = glm::rotate(
                 glm::translate(glm::mat4(1.0F), {0.0F, 0.0F, static_cast<float>(i)}),
-                std::numbers::pi_v<float> * 0.5F, {0.0F, 1.0F, 0.0F});
+                std::numbers::pi_v<float> * 0.5F,
+                {0.0F, 1.0F, 0.0F});
 
             for (auto point : original_points) {
                 vertices.emplace_back(model1 * glm::vec4(point, 1.0F));
@@ -29,4 +30,4 @@ namespace mv::gl::shape
             }
         }
     }
-}// namespace mv::gl::shape
+} // namespace mv::gl::shape

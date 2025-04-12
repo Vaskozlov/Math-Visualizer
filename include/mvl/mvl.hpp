@@ -56,6 +56,6 @@ namespace mvl
         -> double;
 
     auto constructRoot(isl::string_view input) -> ccl::parser::ast::SharedNode<ast::MathNode>;
-}// namespace mvl
+} // namespace mvl
 
 #endif /* MVL_HPP */

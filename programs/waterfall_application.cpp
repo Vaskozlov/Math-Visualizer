@@ -1,33 +1,24 @@
 #include <mv/waterfall_application.hpp>
 
 static mv::Waterfall *currentApp = nullptr;
+static constexpr std::size_t ScaleX = 30'000;
+static constexpr std::size_t ScaleY = 1;
 
-extern void setImagesSize(const std::size_t width, const std::size_t height)
+struct Rect : public mv::Rect
 {
-    currentApp->pushCommand([width, height]() {
-        currentApp->resizeImages(width, height);
-    });
-}
+    Rect(
+        const std::size_t x, const std::size_t y, const std::size_t width, const std::size_t height)
+      : mv::Rect(x / ScaleX, y / ScaleY, width / ScaleX, height / ScaleY)
+    {}
+};
 
-extern void drawRect(
-    const std::size_t x, const std::size_t y, const std::size_t width, const std::size_t height,
-    const std::size_t line_thickness)
+std::pair<float, float> generateNoise()
 {
-    currentApp->pushCommand([x, y, width, height, line_thickness]() {
-        currentApp->drawRect(x, y, width, height, line_thickness);
-    });
-}
+    static std::mt19937_64 engine;
+    static std::normal_distribution<float> power_distribution(-10.0F, 10.0F);
+    static std::uniform_real_distribution<float> azimuth_distribution(0.0F, 360.0F);
 
-extern void reloadImages()
-{
-    currentApp->pushCommand([]() {
-        currentApp->reloadImages();
-    });
-}
-
-extern auto waitForContinue() -> void
-{
-    currentApp->waitForFlag();
+    return {azimuth_distribution(engine), power_distribution(engine)};
 }
 
 auto main() -> int
@@ -36,58 +27,58 @@ auto main() -> int
     currentApp = &application;
 
     std::thread th([]() {
-        waitForContinue();
+        currentApp->waitForFlag();
+        currentApp->submit([]() {
+            currentApp->resizeImages(30'000'000 / ScaleX, 500);
 
-        setImagesSize(1024, 1024);
-        waitForContinue();
-
-        drawRect(400, 0, 30, 1024, 3);
-
-        waitForContinue();
-        reloadImages();
-
-        std::mt19937_64 generator;
-        std::uniform_real_distribution<float> angle_distribution(0.0f, 360.0f);
-        std::uniform_real_distribution<float> high_angle_distribution(10.0F, 34.0F);
-        std::uniform_real_distribution<float> second_high_angle_distribution(40.0F, 50.0F);
-        std::uniform_int_distribution<std::uint32_t> power_distribution(0, 40);
-
-        std::uniform_int_distribution<std::uint32_t> high_power_distribution(100 / 2, 100);
-
-        const auto &azimuthWaterfall = currentApp->getAzimuthWaterfall();
-        const auto &powerWaterfall = currentApp->getPowerWaterfall();
-
-        for (std::size_t i = 0; i < azimuthWaterfall.getHeight(); ++i) {
-            for (std::size_t j = 0; j < azimuthWaterfall.getWidth(); ++j) {
-                if (j > 400 && j < 430) {
-                    if (j < 415) {
-                        azimuthWaterfall.setPixelValue(j, i, high_angle_distribution(generator));
-                    } else {
-                        azimuthWaterfall.setPixelValue(
-                            j, i, second_high_angle_distribution(generator));
-                    }
-                } else {
-                    azimuthWaterfall.setPixelValue(j, i, angle_distribution(generator));
+            for (std::size_t y = 0; y < currentApp->getAzimuthWaterfall().getHeight(); ++y) {
+                for (std::size_t x = 0; x < currentApp->getAzimuthWaterfall().getWidth(); ++x) {
+                    auto [az, power] = generateNoise();
+                    currentApp->getAzimuthWaterfall().setPixelValue(x, y, az);
+                    currentApp->getPowerWaterfall().setPixelValue(x, y, power);
                 }
             }
-        }
 
-        drawRect(800, 0, 1, azimuthWaterfall.getHeight(), 1);
-        waitForContinue();
-        reloadImages();
+            currentApp->reloadImages();
+        });
 
-        for (std::size_t i = 0; i < powerWaterfall.getHeight(); ++i) {
-            for (std::size_t j = 0; j < powerWaterfall.getWidth(); ++j) {
-                if (j > 400 && j < 430) {
-                    powerWaterfall.setPixelValue(j, i, high_power_distribution(generator));
-                } else {
-                    powerWaterfall.setPixelValue(j, i, power_distribution(generator));
-                }
+        std::vector<Rect> rects{
+            {0,          0,  100'000,   120},
+            {500'000,    40, 500'000,   10 },
+            {10'000'000, 60, 2'000'000, 20 },
+        };
+
+        currentApp->waitForFlag();
+
+        currentApp->submit([rects]() {
+            for (const auto &rect : rects) {
+                currentApp->getAzimuthWaterfall().fillRect(rect, 100);
+                currentApp->getPowerWaterfall().fillRect(rect, 100);
+                currentApp->drawRect(rect);
             }
-        }
+            currentApp->reloadImages();
+        });
 
-        waitForContinue();
-        reloadImages();
+        currentApp->waitForFlag();
+        currentApp->submit([]() {
+            currentApp->resizeImages(30'000'000 / ScaleX, 1000 / ScaleY);
+            currentApp->reloadImages();
+        });
+
+        std::vector<Rect> rects2{
+            {0,          500, 100'000,   120},
+            {500'000,    540, 500'000,   10 },
+            {10'000'000, 560, 2'000'000, 20 },
+        };
+
+        currentApp->submit([rects2]() {
+            for (const auto &rect : rects2) {
+                currentApp->getAzimuthWaterfall().fillRect(rect, 100);
+                currentApp->getPowerWaterfall().fillRect(rect, 100);
+                currentApp->drawRect(rect);
+            }
+            currentApp->reloadImages();
+        });
     });
 
     application.run();

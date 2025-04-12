@@ -4,6 +4,6 @@
 namespace mv::gl
 {
     void init();
-}
+} // namespace mv::gl
 
 #endif /* MV_GL_INIT_HPP */

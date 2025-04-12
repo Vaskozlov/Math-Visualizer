@@ -2,7 +2,6 @@
 #define MV_GLFW_CALLBACKS_HPP
 
 #include <GL/glew.h>
-
 #include <GLFW/glfw3.h>
 
 namespace mv::glfw
@@ -18,6 +17,6 @@ namespace mv::glfw
     auto mouseClickCallback(GLFWwindow *window, int button, int action, int mods) -> void;
 
     auto setupCallbacksForApplication(Application *application) -> void;
-}// namespace mv::glfw
+} // namespace mv::glfw
 
 #endif /* MV_GLFW_CALLBACKS_HPP */

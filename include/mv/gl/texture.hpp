@@ -1,8 +1,8 @@
 #ifndef MV_TEXTURE_HPP
 #define MV_TEXTURE_HPP
 
-#include <filesystem>
 #include <GL/glew.h>
+#include <filesystem>
 #include <isl/isl.hpp>
 
 namespace mv::gl
@@ -118,6 +118,6 @@ namespace mv::gl
     private:
         auto finishTextureConstruction() -> void;
     };
-}// namespace mv::gl
+} // namespace mv::gl
 
 #endif /* MV_TEXTURE_HPP */

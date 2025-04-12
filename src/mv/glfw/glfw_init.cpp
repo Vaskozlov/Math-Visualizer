@@ -1,11 +1,12 @@
 #include <GL/glew.h>
-
 #include <GLFW/glfw3.h>
 #include <mutex>
 #include <mv/glfw/glfw_init.hpp>
 
-namespace mv::glfw {
-    static auto doInit(const int major_version, const int minor_version) -> void {
+namespace mv::glfw
+{
+    static auto doInit(const int major_version, const int minor_version) -> void
+    {
         glfwInit();
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, major_version);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, minor_version);
@@ -16,7 +17,8 @@ namespace mv::glfw {
 #endif
     }
 
-    auto init(const int major_version, const int minor_version) -> void {
+    auto init(const int major_version, const int minor_version) -> void
+    {
         static bool initialized = false;
         static std::mutex mutex;
 

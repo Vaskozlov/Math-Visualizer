@@ -2,7 +2,6 @@
 #define MV_SHADER_HPP
 
 #include <GL/glew.h>
-
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -84,6 +83,6 @@ namespace mv
                 glGetUniformLocation(program, name.c_str()), value.x, value.y, value.z, value.w);
         }
     };
-}// namespace mv
+} // namespace mv
 
 #endif /* MV_SHADER_HPP */

@@ -1,16 +1,16 @@
 #ifndef MV_APPLICATION_WATERFALL_HPP
 #define MV_APPLICATION_WATERFALL_HPP
 
+#include <atomic>
+#include <imgui.h>
+#include <imgui_stdlib.h>
 #include <isl/shared_lib_loader.hpp>
 #include <mv/application_2d.hpp>
 #include <mv/gl/shape/rectangle.hpp>
 #include <mv/gl/texture.hpp>
 #include <mv/gl/waterfall_application.hpp>
+#include <mv/rect.hpp>
 #include <mv/shader.hpp>
-
-#include <atomic>
-#include <imgui.h>
-#include <imgui_stdlib.h>
 #include <random>
 
 namespace mv
@@ -24,9 +24,9 @@ namespace mv
         std::vector<std::function<void()>> commandsPipe;
 
         Shader *waterfallShaderHsvF32 = getWaterfallShaderHsvF32();
-        Shader *waterfallShaderLinearU32 = getWaterfallShaderLinearU32();
+        Shader *waterfallShaderLinearF32 = getWaterfallShaderLinearF32();
 
-        gl::Waterfall<std::uint32_t> powerWaterfall{imageSize, imageSize};
+        gl::Waterfall<float> powerWaterfall{imageSize, imageSize};
         gl::Waterfall<RGBA<std::uint8_t>> powerWaterfallMask{imageSize, imageSize};
 
         gl::Waterfall<float> azimuthWaterfall{imageSize, imageSize};
@@ -51,15 +51,15 @@ namespace mv
         float azimuthMiddle = 180.0F;
         float azimuthSide = 180.0F;
 
-        int powerLow = 0;
-        int powerHigh = 100;
+        float powerLow = -20.0F;
+        float powerHigh = 100.0F;
 
         std::mutex updateMutex;
 
         std::atomic_flag continueFlag{false};
 
         static auto getWaterfallShaderHsvF32() -> Shader *;
-        static auto getWaterfallShaderLinearU32() -> Shader *;
+        static auto getWaterfallShaderLinearF32() -> Shader *;
 
     public:
         static constexpr float minWidthScale = 1.0F;
@@ -71,8 +71,8 @@ namespace mv
         static constexpr float azimuthMin = 0.0F;
         static constexpr float azimuthMax = 360.0F;
 
-        static constexpr int minPower = 0;
-        static constexpr int maxPower = 100;
+        static constexpr float minPower = -20.0F;
+        static constexpr float maxPower = 100.0F;
 
         static constexpr RGBA<uint8_t> white{255, 255, 255, 255};
 
@@ -87,8 +87,8 @@ namespace mv
 
         auto updatePowerUniform() const -> void
         {
-            waterfallShaderLinearU32->use();
-            waterfallShaderLinearU32->setVec2("minMaxValue", glm::vec2{powerLow, powerHigh});
+            waterfallShaderLinearF32->use();
+            waterfallShaderLinearF32->setVec2("minMaxValue", glm::vec2{powerLow, powerHigh});
         }
 
         auto init() -> void override;
@@ -123,12 +123,10 @@ namespace mv
             azimuthWaterfallMask.resize(width, height);
         }
 
-        auto drawRect(
-            const std::size_t x, const std::size_t y, const std::size_t width,
-            const std::size_t height, const std::size_t line_thickness = 2) const -> void
+        auto drawRect(const Rect &rect, const std::size_t line_thickness = 2) const -> void
         {
-            azimuthWaterfallMask.drawRectangleBorder(x, y, width, height, white, line_thickness);
-            powerWaterfallMask.drawRectangleBorder(x, y, width, height, white, line_thickness);
+            azimuthWaterfallMask.drawRectangleBorder(rect, white, line_thickness);
+            powerWaterfallMask.drawRectangleBorder(rect, white, line_thickness);
         }
 
         auto reloadImages() const -> void
@@ -152,7 +150,7 @@ namespace mv
             return azimuthWaterfall;
         }
 
-        [[nodiscard]] auto getPowerWaterfall() const -> const gl::Waterfall<std::uint32_t> &
+        [[nodiscard]] auto getPowerWaterfall() const -> const gl::Waterfall<float> &
         {
             return powerWaterfall;
         }
@@ -169,6 +167,6 @@ namespace mv
             continueFlag.clear();
         }
     };
-}// namespace mv
+} // namespace mv
 
 #endif /* MV_APPLICATION_WATERFALL_HPP */

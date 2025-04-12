@@ -66,17 +66,13 @@ namespace mvl::ast
         auto compute(const double x, const double y) const -> double override
         {
             if (node->getType() == MathConstructor.getRuleId("NUMBER")) {
-                return std::stod(
-                    std::string{dynamic_cast<ccl::parser::ast::Terminal *>(node.get())
-                                    ->getToken()
-                                    .getRepr()});
+                return std::stod(std::string{
+                    dynamic_cast<ccl::parser::ast::Terminal *>(node.get())->getToken().getRepr()});
             }
 
             if (node->getType() == MathConstructor.getRuleId("FLOAT")) {
-                return std::stod(
-                    std::string{dynamic_cast<ccl::parser::ast::Terminal *>(node.get())
-                                    ->getToken()
-                                    .getRepr()});
+                return std::stod(std::string{
+                    dynamic_cast<ccl::parser::ast::Terminal *>(node.get())->getToken().getRepr()});
             }
 
             if (node->getType() == MathConstructor.getRuleId("X")) {
@@ -93,17 +89,16 @@ namespace mvl::ast
         auto getChildrenNodes() const
             -> isl::SmallFunction<ccl::parser::ast::SharedNode<>()> override
         {
-            return
-                [index = 0, this]() mutable -> ccl::parser::ast::SharedNode<> {
-                    if (index > 0) {
-                        return nullptr;
-                    }
+            return [index = 0, this]() mutable -> ccl::parser::ast::SharedNode<> {
+                if (index > 0) {
+                    return nullptr;
+                }
 
-                    ++index;
-                    return node;
-                };
+                ++index;
+                return node;
+            };
         }
     };
-}// namespace mvl::ast
+} // namespace mvl::ast
 
 #endif /* FACTOR_HPP */

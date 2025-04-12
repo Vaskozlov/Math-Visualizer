@@ -63,4 +63,4 @@ namespace mv::gl::shape
             }
         }
     }
-}// namespace mv::gl::shape
+} // namespace mv::gl::shape

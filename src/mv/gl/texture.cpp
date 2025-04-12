@@ -149,19 +149,28 @@ namespace mv::gl
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap_mode);
 
         glTexParameteri(
-            GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+            GL_TEXTURE_2D,
+            GL_TEXTURE_MIN_FILTER,
             scaleFormat == TextureScaleFormat::LINEAR ? GL_LINEAR_MIPMAP_LINEAR : GL_NEAREST);
 
         glTexParameteri(
-            GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
+            GL_TEXTURE_2D,
+            GL_TEXTURE_MAG_FILTER,
             scaleFormat == TextureScaleFormat::LINEAR ? GL_LINEAR : GL_NEAREST);
 
         glTexImage2D(
-            GL_TEXTURE_2D, 0, internal_format, width, height, 0, format, type,
+            GL_TEXTURE_2D,
+            0,
+            internal_format,
+            width,
+            height,
+            0,
+            format,
+            type,
             static_cast<const void *>(data));
 
         glGenerateMipmap(GL_TEXTURE_2D);
         unbind();
     }
 
-}// namespace mv::gl
+} // namespace mv::gl

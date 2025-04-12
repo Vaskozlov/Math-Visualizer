@@ -35,6 +35,6 @@ namespace mv::gl
         auto loadData(const void *data, std::size_t data_size, GLenum mode = GL_STATIC_DRAW) const
             -> void;
     };
-}// namespace mv::gl
+} // namespace mv::gl
 
 #endif /* MV_GL_VBO_HPP */

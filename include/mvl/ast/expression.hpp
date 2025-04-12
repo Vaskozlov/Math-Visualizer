@@ -89,6 +89,6 @@ namespace mvl::ast
             };
         }
     };
-}// namespace mvl::ast
+} // namespace mvl::ast
 
 #endif /* EXPRESSION_HPP */

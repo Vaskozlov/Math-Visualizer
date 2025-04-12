@@ -40,6 +40,6 @@ namespace mv::gl
 
         auto bindInstanceParameters(GLsizei array_attribute, GLint divisor) const -> void;
     };
-}// namespace mv::gl
+} // namespace mv::gl
 
 #endif /* MV_GL_VAO_HPP */

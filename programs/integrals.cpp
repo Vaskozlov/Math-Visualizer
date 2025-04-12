@@ -190,6 +190,9 @@ public:
             previous_f = current_f;
         }
 
+        fmt::println(
+            "Simpson value: {}, simpson paritions count: {}", result, partition.size() - 1);
+
         return result;
     }
 
@@ -199,7 +202,8 @@ public:
         auto previous_value = 0.0;
         auto current_value = std::numeric_limits<double>::infinity();
 
-        while (std::abs(previous_value - current_value) > static_cast<double>(epsilon)
+        while (std::abs(previous_value - current_value) / (std::pow(2, 2) - 1.0)
+                   > static_cast<double>(epsilon)
                && n < maxIterations) {
             previous_value = current_value;
 
@@ -225,7 +229,8 @@ public:
         auto previous_value = 0.0;
         auto current_value = std::numeric_limits<double>::infinity();
 
-        while (std::abs(previous_value - current_value) > static_cast<double>(epsilon)
+        while (std::abs(previous_value - current_value) / (std::pow(2, 2) - 1.0)
+                   > static_cast<double>(epsilon)
                && n < maxIterations) {
             previous_value = current_value;
 
@@ -252,7 +257,8 @@ public:
         auto previous_value = 0.0;
         auto current_value = std::numeric_limits<double>::infinity();
 
-        while (std::abs(previous_value - current_value) > static_cast<double>(epsilon)
+        while (std::abs(previous_value - current_value) / (std::pow(2, 1) - 1.0)
+                   > static_cast<double>(epsilon)
                && n < maxIterations) {
             previous_value = current_value;
 
@@ -278,7 +284,8 @@ public:
         auto previous_value = std::numeric_limits<double>::infinity();
         auto current_value = 0.0;
 
-        while (std::abs(previous_value - current_value) > static_cast<double>(epsilon)
+        while (std::abs(previous_value - current_value) / (std::pow(2, 2) - 1.0)
+                   > static_cast<double>(epsilon)
                && n < maxIterations) {
             previous_value = current_value;
 
@@ -300,19 +307,21 @@ public:
 
     auto computeUsingSimpsonMethod() -> isl::Task<>
     {
-        std::size_t n = 10;
+        std::size_t n = 2;
         auto previous_value = 0.0;
         auto current_value = std::numeric_limits<double>::infinity();
 
-        while (std::abs(previous_value - current_value) > static_cast<double>(epsilon)
+        while (std::abs(previous_value - current_value) / (std::pow(2, 4) - 1.0)
+                   > static_cast<double>(epsilon)
                && n < maxIterations) {
+
+            n *= 2;
             previous_value = current_value;
 
             auto partitions = isl::linalg::linspace<double>(
                 static_cast<double>(leftBorder), static_cast<double>(rightBorder), n);
 
             current_value = simpsonsMethod(partitions);
-            n *= 2;
         }
 
         submit([current_value, n, this]() {
@@ -359,7 +368,7 @@ public:
         fmt::format_to_n(
             imguiWindowBuffer.data(),
             imguiWindowBuffer.size(),
-            "Настройки. FPS: {:#.4}###SettingWindowTitle",
+            "Настройки. FPS: {:#.4}###SettingsWindowTitle",
             ImGui::GetIO().Framerate);
 
         ImGui::Begin(imguiWindowBuffer.data());
