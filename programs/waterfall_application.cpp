@@ -1,7 +1,7 @@
 #include <mv/waterfall_application.hpp>
 
 static mv::Waterfall *currentApp = nullptr;
-static constexpr std::size_t ScaleX = 30'000;
+static constexpr std::size_t ScaleX = 60'000;
 static constexpr std::size_t ScaleY = 1;
 
 struct Rect : public mv::Rect
@@ -29,7 +29,7 @@ auto main() -> int
     std::thread th([]() {
         currentApp->waitForFlag();
         currentApp->submit([]() {
-            currentApp->resizeImages(30'000'000 / ScaleX, 500);
+            currentApp->resizeImages(60'000'000 / ScaleX, 1000 / ScaleY);
 
             for (std::size_t y = 0; y < currentApp->getAzimuthWaterfall().getHeight(); ++y) {
                 for (std::size_t x = 0; x < currentApp->getAzimuthWaterfall().getWidth(); ++x) {
@@ -61,7 +61,7 @@ auto main() -> int
 
         currentApp->waitForFlag();
         currentApp->submit([]() {
-            currentApp->resizeImages(30'000'000 / ScaleX, 1000 / ScaleY);
+            currentApp->resizeImages(60'000'000 / ScaleX, 2000 / ScaleY);
             currentApp->reloadImages();
         });
 
