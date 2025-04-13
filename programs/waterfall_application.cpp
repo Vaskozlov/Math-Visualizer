@@ -1,8 +1,8 @@
 #include <mv/waterfall_application.hpp>
 
 static mv::Waterfall *currentApp = nullptr;
-static constexpr std::size_t ScaleX = 60'000;
-static constexpr std::size_t ScaleY = 1;
+static std::size_t ScaleY = 1;
+static std::size_t ScaleX = 4'000;
 
 struct Rect : public mv::Rect
 {
@@ -28,6 +28,14 @@ auto main() -> int
 
     std::thread th([]() {
         currentApp->waitForFlag();
+
+        currentApp->submit([]() {
+            GLint maxTextureSize;
+            glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
+            fmt::print("Max Texture Size: {} {}\n", maxTextureSize, 60'000'000 / ScaleX);
+            ScaleX = (60'000'000 + maxTextureSize) / maxTextureSize;
+        });
+
         currentApp->submit([]() {
             currentApp->resizeImages(60'000'000 / ScaleX, 1000 / ScaleY);
 
