@@ -73,13 +73,19 @@ namespace mv
             continueFlag.notify_one();
         }
 
+        ImGui::SameLine();
+
+        if (ImGui::Button("Center camera")) {
+            camera.setPosition({0.0F, 0.0F, 1.0F});
+        }
+
         const auto camera_vec = camera.getPosition();
 
         azimuthWaterfall.bind(GL_TEXTURE0);
         azimuthWaterfallMask.bind(GL_TEXTURE1);
 
         waterfallShaderHsvF32->use();
-        waterfallShaderLinearF32->setVec4(
+        waterfallShaderHsvF32->setVec4(
             "imageLimits",
             {0.0F,
              0.0F,
@@ -87,14 +93,15 @@ namespace mv
              static_cast<float>(window_height)});
         waterfallShaderHsvF32->setVec2("texOffset", {camera_vec.x, camera_vec.y});
 
-        azimuthMapSize.vao.bind();
-        waterfallShaderLinearF32->setMat4(
+        waterfallShaderHsvF32->setMat4(
             "model",
             glm::scale(
                 glm::translate(
                     glm::mat4(1.0f),
                     {-0.5F * imageWidthScale - 0.5F, -1.0F * imageHeightScale, 0.0F}),
                 {imageWidthScale, imageHeightScale * 2.0F, 1.0F}));
+
+        azimuthMapSize.vao.bind();
         azimuthMapSize.draw();
 
         powerWaterfall.bind(GL_TEXTURE0);
