@@ -11,6 +11,12 @@ vec3 floatToColor(float value, float min_value, float max_value);
 void main()
 {
     float value = texture(texture1, TexCoord).r;
+
+    if (isnan(value)) {
+        FragColor = vec4(0);
+        return;
+    }
+
     vec4 mask = texture(texture2, TexCoord);
 
     vec4 hsv_color = vec4(floatToColor(value, valueLimits.x, valueLimits.y), 255);

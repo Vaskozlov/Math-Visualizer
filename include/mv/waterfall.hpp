@@ -8,7 +8,7 @@
 #include <mv/application_2d.hpp>
 #include <mv/gl/shape/rectangle.hpp>
 #include <mv/gl/texture.hpp>
-#include <mv/gl/waterfall_application.hpp>
+#include <mv/gl/waterfall.hpp>
 #include <mv/rect.hpp>
 #include <mv/shader.hpp>
 #include <random>

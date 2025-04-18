@@ -87,11 +87,14 @@ namespace mv::gl
                 texture.resize(pixels.get(), new_width, new_height);
             }
 
-            auto clear() -> void
+            auto fill(T color) const -> void
             {
                 for (std::size_t i = 0; i < texture.getWidth() * texture.getHeight(); ++i) {
-                    pixels[i] = T{};
+                    pixels[i] = color;
                 }
+
+                texture.bind();
+                glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
 
                 reload();
             }
