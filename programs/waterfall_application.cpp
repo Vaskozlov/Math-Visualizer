@@ -4,87 +4,92 @@ static mv::Waterfall *currentApp = nullptr;
 static std::size_t ScaleY = 1;
 static std::size_t ScaleX = 4'000;
 
-struct Rect : public mv::Rect
-{
-    Rect(
-        const std::size_t x, const std::size_t y, const std::size_t width, const std::size_t height)
-      : mv::Rect(x / ScaleX, y / ScaleY, width / ScaleX, height / ScaleY)
-    {}
-};
+static constexpr std::size_t width = 30'000'000 / 500;
+
+static std::mt19937_64 engine;
+static std::normal_distribution<float> power_distribution(-10.0F, 10.0F);
+static std::uniform_real_distribution<float> azimuth_distribution1(70.0F, 110.0F);
+static std::uniform_real_distribution<float> azimuth_distribution2(180.0F, 210.0F);
 
 std::pair<float, float> generateNoise()
 {
-    static std::mt19937_64 engine;
-    static std::normal_distribution<float> power_distribution(-10.0F, 10.0F);
-    static std::uniform_real_distribution<float> azimuth_distribution(0.0F, 360.0F);
-
-    return {azimuth_distribution(engine), power_distribution(engine)};
+    return {azimuth_distribution1(engine), power_distribution(engine)};
 }
 
 auto main() -> int
 {
     mv::Waterfall application{1000, 800, "Waterfall", 2};
+
+    application.frequencyScale = 500.0;
+    application.timeScale = 1.0;
+
     currentApp = &application;
 
     std::thread th([]() {
-        currentApp->waitForFlag();
-
         currentApp->submit([]() {
-            GLint maxTextureSize;
-            glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
-            fmt::print("Max Texture Size: {} {}\n", maxTextureSize, 60'000'000 / ScaleX);
-            ScaleX = (60'000'000 + maxTextureSize) / maxTextureSize;
-        });
+            currentApp->resizeImages(width, 1000 / ScaleY);
+            currentApp->fill(std::numeric_limits<float>::quiet_NaN());
+            currentApp->fill(std::numeric_limits<float>::quiet_NaN());
 
-        currentApp->submit([]() {
-            currentApp->resizeImages(60'000'000 / ScaleX, 1000 / ScaleY);
-
-            for (std::size_t y = 0; y < currentApp->getAzimuthWaterfall().getHeight(); ++y) {
-                for (std::size_t x = 0; x < currentApp->getAzimuthWaterfall().getWidth(); ++x) {
+            for (std::size_t y = 0; y < 1000 / ScaleY; ++y) {
+                for (std::size_t x = 0; x < width; ++x) {
                     auto [az, power] = generateNoise();
-                    currentApp->getAzimuthWaterfall().setPixelValue(x, y, az);
-                    currentApp->getPowerWaterfall().setPixelValue(x, y, power);
+
+                    if (x < width / 2) {
+                        currentApp->setPixel(
+                            x,
+                            y,
+                            static_cast<mv::gl::float16>(azimuth_distribution1(engine)),
+                            static_cast<mv::gl::float16>(power));
+                    } else {
+                        currentApp->setPixel(
+                            x,
+                            y,
+                            static_cast<mv::gl::float16>(azimuth_distribution2(engine)),
+                            static_cast<mv::gl::float16>(power));
+                    }
                 }
             }
 
             currentApp->reloadImages();
         });
 
-        std::vector<Rect> rects{
-            {0,          0,  100'000,   120},
-            {500'000,    40, 500'000,   10 },
-            {10'000'000, 60, 2'000'000, 20 },
+        std::vector<mv::Rect> rects{
+            {0,          500, 100'000,    120 },
+            {500'000,    540, 500'000,    10  },
+            {10'000'000, 560, 10'000'000, 20  },
+            {29'000'000, 0,   1'000'000,  1000},
         };
 
-        currentApp->waitForFlag();
+        for (const auto &rect : rects) {
+            currentApp->addRect(rect);
+        }
 
-        currentApp->submit([rects]() {
-            for (const auto &rect : rects) {
-                currentApp->getAzimuthWaterfall().fillRect(rect, 100);
-                currentApp->getPowerWaterfall().fillRect(rect, 100);
-                currentApp->drawRect(rect);
-            }
-            currentApp->reloadImages();
-        });
+        currentApp->submit([]() { currentApp->drawDetections(); });
 
-        currentApp->waitForFlag();
         currentApp->submit([]() {
-            currentApp->resizeImages(60'000'000 / ScaleX, 2000 / ScaleY);
-            currentApp->reloadImages();
-        });
+            currentApp->resizeImages(width, 2000 / ScaleY);
 
-        std::vector<Rect> rects2{
-            {0,          500, 100'000,   120},
-            {500'000,    540, 500'000,   10 },
-            {10'000'000, 560, 2'000'000, 20 },
-        };
+            for (std::size_t y = 1000; y < 2000 / ScaleY; ++y) {
+                for (std::size_t x = 0; x < width; ++x) {
+                    auto [az, power] = generateNoise();
 
-        currentApp->submit([rects2]() {
-            for (const auto &rect : rects2) {
-                currentApp->getAzimuthWaterfall().fillRect(rect, 100);
-                currentApp->getPowerWaterfall().fillRect(rect, 100);
-                currentApp->drawRect(rect);
+                    if (x < width / 2) {
+                        currentApp->setPixel(
+                            x,
+                            y,
+                            static_cast<mv::gl::float16>(azimuth_distribution1(engine)),
+                            static_cast<mv::gl::float16>(power));
+                    } else {
+                        currentApp->setPixel(
+                            x,
+                            y,
+                            static_cast<mv::gl::float16>(azimuth_distribution2(engine)),
+                            static_cast<mv::gl::float16>(power));
+                    }
+                }
             }
+
             currentApp->reloadImages();
         });
     });
