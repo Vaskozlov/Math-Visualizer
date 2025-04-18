@@ -1,16 +1,22 @@
 #ifndef MV_APPLICATION_WATERFALL_HPP
 #define MV_APPLICATION_WATERFALL_HPP
 
+#include "gl/instances_holder.hpp"
+#include "gl/shaders/color_shader.hpp"
+#include "gl/shaders/shader_with_positioning.hpp"
+
 #include <atomic>
 #include <imgui.h>
 #include <imgui_stdlib.h>
 #include <isl/shared_lib_loader.hpp>
+#include <list>
 #include <mv/application_2d.hpp>
 #include <mv/gl/shape/rectangle.hpp>
 #include <mv/gl/texture.hpp>
 #include <mv/gl/waterfall.hpp>
 #include <mv/rect.hpp>
 #include <mv/shader.hpp>
+#include <numbers>
 #include <random>
 
 namespace mv
@@ -25,14 +31,15 @@ namespace mv
 
         Shader *waterfallShaderHsvF32 = getWaterfallShaderHsvF32();
         Shader *waterfallShaderLinearF32 = getWaterfallShaderLinearF32();
+        mv::Shader *colorShader = mv::gl::getShaderWithPositioning();
 
-        gl::Waterfall<float> powerWaterfall{imageSize, imageSize};
+        std::list<gl::Waterfall<gl::float16>> powerWaterfalls;
+        std::list<gl::Waterfall<gl::float16>> azimuthWaterfalls;
+
         gl::Waterfall<RGBA<std::uint8_t>> powerWaterfallMask{imageSize, imageSize};
-
-        gl::Waterfall<float> azimuthWaterfall{imageSize, imageSize};
         gl::Waterfall<RGBA<std::uint8_t>> azimuthWaterfallMask{imageSize, imageSize};
-
-        std::string libraryPath;
+        gl::InstancesHolder<gl::InstanceParameters> rectangleInstances;
+        gl::shape::Rectangle rectangle{0.0F, 0.0F, 1.0F, 1.0F};
 
         double pressTime = 0.0;
         ImFont *font;
@@ -43,10 +50,8 @@ namespace mv
         gl::shape::Rectangle powerMapSize{0.0F, 0.0F, 1.0F, 1.0F};
         gl::shape::Rectangle azimuthMapSize{0.0F, 0.0F, 1.0F, 1.0F};
 
-        isl::SharedLibLoader shaderLib;
-
-        float imageWidthScale = 1.0F;
-        float imageHeightScale = 1.0F;
+        float imageWidthScale = 0.9F;
+        float imageHeightScale = 0.9F;
 
         float azimuthMiddle = 180.0F;
         float azimuthSide = 180.0F;
@@ -54,25 +59,34 @@ namespace mv
         float powerLow = -20.0F;
         float powerHigh = 100.0F;
 
+        std::size_t maxTextureSize;
         std::mutex updateMutex;
 
         std::atomic_flag continueFlag{false};
+
+        std::size_t waterfallWidth{imageSize};
+        std::size_t waterfallHeight{imageSize};
+
+        std::vector<Rect> detections;
 
         static auto getWaterfallShaderHsvF32() -> Shader *;
         static auto getWaterfallShaderLinearF32() -> Shader *;
 
     public:
-        static constexpr float minWidthScale = 1.0F;
-        static constexpr float minHeightScale = 1.0F;
+        static constexpr float minWidthScale = 0.9F;
+        static constexpr float minHeightScale = 0.9F;
 
-        static constexpr float maxWidthScale = 20.0F;
-        static constexpr float maxHeightScale = 20.0F;
+        static constexpr float maxWidthScale = 300.0F;
+        static constexpr float maxHeightScale = 10.0F;
 
         static constexpr float azimuthMin = 0.0F;
         static constexpr float azimuthMax = 360.0F;
 
         static constexpr float minPower = -20.0F;
         static constexpr float maxPower = 100.0F;
+
+        double frequencyScale = 1.0F;
+        double timeScale = 1.0F;
 
         static constexpr RGBA<uint8_t> white{255, 255, 255, 255};
 
@@ -115,44 +129,30 @@ namespace mv
 
         auto onScroll(double x_offset, double y_offset) -> void override;
 
-        auto resizeImages(const std::size_t width, const std::size_t height) -> void
+        auto resizeImages(std::size_t width, std::size_t height) -> void;
+
+        auto addRect(const Rect &rect) -> void
         {
-            azimuthWaterfall.resize(width, height);
-            powerWaterfall.resize(width, height);
-            powerWaterfallMask.resize(width, height);
-            azimuthWaterfallMask.resize(width, height);
+            detections.emplace_back(rect);
         }
 
-        auto drawRect(const Rect &rect, const std::size_t line_thickness = 2) const -> void
+        auto fill(float value) const -> void;
+
+        auto reloadImages() const -> void;
+
+        auto setPixel(std::size_t x, std::size_t y, gl::float16 azimuth, gl::float16 power) const
+            -> void;
+
+        [[nodiscard]] auto getAzimuthWaterfalls() const
+            -> const std::list<gl::Waterfall<gl::float16>> &
         {
-            azimuthWaterfallMask.drawRectangleBorder(rect, white, line_thickness);
-            powerWaterfallMask.drawRectangleBorder(rect, white, line_thickness);
+            return azimuthWaterfalls;
         }
 
-        auto reloadImages() const -> void
+        [[nodiscard]] auto getPowerWaterfalls() const
+            -> const std::list<gl::Waterfall<gl::float16>> &
         {
-            azimuthWaterfall.reload();
-            powerWaterfall.reload();
-            azimuthWaterfallMask.reload();
-            powerWaterfallMask.reload();
-        }
-
-        auto setPixel(
-            const std::size_t x, const std::size_t y, const float azimuth,
-            const std::uint32_t power) const -> void
-        {
-            azimuthWaterfall.setPixelValue(x, y, azimuth);
-            powerWaterfall.setPixelValue(x, y, power);
-        }
-
-        [[nodiscard]] auto getAzimuthWaterfall() const -> const gl::Waterfall<float> &
-        {
-            return azimuthWaterfall;
-        }
-
-        [[nodiscard]] auto getPowerWaterfall() const -> const gl::Waterfall<float> &
-        {
-            return powerWaterfall;
+            return powerWaterfalls;
         }
 
         auto pushCommand(std::function<void()> command) -> void
@@ -166,6 +166,8 @@ namespace mv
             continueFlag.wait(false);
             continueFlag.clear();
         }
+
+        auto drawDetections() -> void;
     };
 } // namespace mv
 

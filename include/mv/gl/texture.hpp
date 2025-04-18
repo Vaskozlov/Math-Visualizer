@@ -22,6 +22,7 @@ namespace mv::gl
         I32,
         U32,
         F32,
+        F16
     };
 
     enum struct TextureWrapMode : std::uint8_t

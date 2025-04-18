@@ -140,6 +140,12 @@ namespace mv::gl
             type = GL_FLOAT;
             break;
 
+        case TextureMode::F16:
+            format = GL_RED;
+            internal_format = GL_R16F;
+            type = GL_HALF_FLOAT;
+            break;
+
         default:
             isl::unreachable();
         }

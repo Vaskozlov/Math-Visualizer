@@ -8,6 +8,6 @@ out vec4 vertexColor;
 
 void main()
 {
-    gl_Position = projection * aTransformation * vec4(aPos.x, aPos.z, aPos.y, 1.0f);
+    gl_Position = projection * aTransformation * vec4(aPos.x, aPos.y, aPos.z, 1.0f);
     vertexColor = aColor;
 }

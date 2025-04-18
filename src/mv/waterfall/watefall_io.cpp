@@ -1,4 +1,4 @@
-#include <mv/waterfall.hpp>
+#include <mv/waterfall_application.hpp>
 
 namespace mv
 {
@@ -34,8 +34,11 @@ namespace mv
     {
         const auto scale = camera.getZoom() / 200.0F;
 
-        camera.relativeMove(camera.getUp() * static_cast<float>(delta_y) * scale, deltaTime);
-        camera.relativeMove(camera.getRight() * static_cast<float>(delta_x) * scale, deltaTime);
+        camera.relativeMove(
+            camera.getUp() * static_cast<float>(delta_y) * scale / imageHeightScale, deltaTime);
+
+        camera.relativeMove(
+            camera.getRight() * static_cast<float>(delta_x) * scale / imageWidthScale, deltaTime);
     }
 
     auto Waterfall::changeWidthScale(const float scale_difference) -> void
@@ -64,7 +67,8 @@ namespace mv
 
         if ((shift_key_state == GLFW_PRESS && v_key_state == GLFW_PRESS)
             || (v_key_state == GLFW_FALSE && h_key_state == GLFW_FALSE)) {
-            changeHeightScale(static_cast<float>(x_offset + y_offset) * scale);
+            changeHeightScale(
+                static_cast<float>(x_offset + y_offset) * scale * maxHeightScale / maxWidthScale);
         }
     }
 } // namespace mv

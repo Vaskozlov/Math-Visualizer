@@ -2,6 +2,7 @@
 #define MV_WATERFALL_HPP
 
 #include <ccl/text/text_iterator.hpp>
+#include <glm/glm.hpp>
 #include <isl/range.hpp>
 #include <mv/color.hpp>
 #include <mv/gl/texture.hpp>
@@ -9,6 +10,24 @@
 
 namespace mv::gl
 {
+    struct float16
+    {
+    private:
+        glm::detail::hdata data = glm::detail::toFloat16(0.0F);
+
+    public:
+        float16() = default;
+
+        explicit float16(const float value)
+          : data{glm::detail::toFloat16(value)}
+        {}
+
+        explicit operator float() const
+        {
+            return glm::detail::toFloat32(data);
+        }
+    };
+
     namespace detail
     {
         template <typename T, TextureMode Mode>
@@ -92,9 +111,6 @@ namespace mv::gl
                 for (std::size_t i = 0; i < texture.getWidth() * texture.getHeight(); ++i) {
                     pixels[i] = color;
                 }
-
-                texture.bind();
-                glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
 
                 reload();
             }
@@ -207,6 +223,13 @@ namespace mv::gl
 
     template <>
     class Waterfall<float> : public detail::WaterfallBase<float, TextureMode::F32>
+    {
+    public:
+        using WaterfallBase::WaterfallBase;
+    };
+
+    template <>
+    class Waterfall<float16> : public detail::WaterfallBase<float16, TextureMode::F16>
     {
     public:
         using WaterfallBase::WaterfallBase;

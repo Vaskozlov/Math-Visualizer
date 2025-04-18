@@ -3,13 +3,13 @@
 
 namespace mv::gl
 {
-    auto getShaderWithPositioning() -> Shader &
+    auto getShaderWithPositioning() -> Shader *
     {
         static Shader shaderWithPositioning{
             {b::embed<"resources/shaders/static_instance.vert">().str()},
             {b::embed<"resources/shaders/fragment.frag">().str()},
         };
 
-        return shaderWithPositioning;
+        return &shaderWithPositioning;
     }
 } // namespace mv::gl

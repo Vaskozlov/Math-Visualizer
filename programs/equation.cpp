@@ -27,9 +27,9 @@ private:
 
     std::array<char, windowTitleBufferSize> imguiWindowBuffer{};
 
-    mv::Shader &colorShader = mv::gl::getColorShader();
+    mv::Shader *colorShader = mv::gl::getColorShader();
 
-    mv::Shader &shaderWithPositioning = mv::gl::getShaderWithPositioning();
+    mv::Shader *shaderWithPositioning = mv::gl::getShaderWithPositioning();
 
     mv::gl::shape::Axes2D plot{12, 0.009F};
 
@@ -196,8 +196,9 @@ public:
         auto right_border = rightBorder;
         std::size_t it = 0;
 
-        float xi = left_border - (right_border - left_border) / (f(right_border) - f(left_border)) *
-                                     f(left_border);
+        float xi =
+            left_border
+            - (right_border - left_border) / (f(right_border) - f(left_border)) * f(left_border);
 
         while (std::abs(f(xi)) > epsilon && it < maxIterations) {
             new_spheres.emplace_back(
@@ -221,12 +222,12 @@ public:
                 left_border = xi;
             }
 
-            xi = left_border -
-                 (right_border - left_border) / (f(right_border) - f(left_border)) * f(left_border);
+            xi = left_border
+                 - (right_border - left_border) / (f(right_border) - f(left_border))
+                       * f(left_border);
 
             ++it;
         }
-
 
         submit([this, spheres = std::move(new_spheres), xi, it]() mutable {
             chordIterations = it;
@@ -364,8 +365,10 @@ public:
         Application2D::update();
 
         fmt::format_to_n(
-            imguiWindowBuffer.data(), imguiWindowBuffer.size(),
-            "Настройки. FPS: {:#.4}###SettingWindowTitle", ImGui::GetIO().Framerate);
+            imguiWindowBuffer.data(),
+            imguiWindowBuffer.size(),
+            "Настройки. FPS: {:#.4}###SettingWindowTitle",
+            ImGui::GetIO().Framerate);
 
         ImGui::Begin(imguiWindowBuffer.data());
         ImGui::PushFont(font);
@@ -376,9 +379,18 @@ public:
             "Secant method iteration (red): %zu, x: %f, f(x): %.3e\n"
             "Newton method iterations (navy): %zu, x: %f, f(x): %.3e\n"
             "Iterations method iterations (magnet): %zu (%s), x: %f, f(x): %.3e\n",
-            chordIterations, chordResult, f(chordResult), secantIterations, secantResult,
-            f(secantResult), newtonIterations, newtonResult, f(newtonResult), iterationsIterations,
-            iterationsMethodDerivationExceed ? "false" : "true", iterationsResult,
+            chordIterations,
+            chordResult,
+            f(chordResult),
+            secantIterations,
+            secantResult,
+            f(secantResult),
+            newtonIterations,
+            newtonResult,
+            f(newtonResult),
+            iterationsIterations,
+            iterationsMethodDerivationExceed ? "false" : "true",
+            iterationsResult,
             f(iterationsResult));
 
         ImGui::InputText("Equation", &tmpInput);

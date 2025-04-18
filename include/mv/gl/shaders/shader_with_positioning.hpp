@@ -5,7 +5,7 @@
 
 namespace mv::gl
 {
-    auto getShaderWithPositioning() -> Shader &;
+    auto getShaderWithPositioning() -> Shader *;
 } // namespace mv::gl
 
 #endif /* MV_GL_SHADERS_SHADER_WITH_POSITIONING_HPP */

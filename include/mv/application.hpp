@@ -47,6 +47,18 @@ namespace mv
                 glm::radians(camera.getZoom()), windowWidth / windowHeight, zNear, zFar);
         }
 
+        [[nodiscard]] auto getCameraProjection(const float zoomX, const float zoomY) const
+            -> glm::mat4
+        {
+            return glm::ortho(
+                -1.0F * (1.0F / zoomX),
+                1.0F * (1.0F / zoomX),
+                -1.0F * (1.0F / zoomY),
+                1.0F * (1.0F / zoomY),
+                zNear,
+                zFar);
+        }
+
         [[nodiscard]] auto getCameraView() const -> glm::mat4
         {
             return camera.getViewMatrix();
