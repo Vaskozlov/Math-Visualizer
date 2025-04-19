@@ -216,7 +216,7 @@ namespace mv
             trans = glm::translate(
                 trans,
                 {
-                    static_cast<float>(detection.x) * freqScale - 1.0F,
+                    2.0F * static_cast<float>(detection.x) * freqScale - 1.0F,
                     static_cast<float>(detection.y)
                         / static_cast<float>(waterfallHeight * timeScale) * imageHeightScale,
                     0.0001F,
@@ -225,7 +225,7 @@ namespace mv
             trans = glm::scale(
                 trans,
                 {
-                    static_cast<float>(detection.width) * freqScale,
+                    static_cast<float>(2.0F * detection.width) * freqScale,
                     static_cast<float>(detection.height)
                         / static_cast<float>(waterfallHeight * timeScale) * imageHeightScale,
                     1.0F,
