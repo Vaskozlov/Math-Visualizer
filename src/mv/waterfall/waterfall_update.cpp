@@ -67,17 +67,19 @@ namespace mv
         ImGui::PushFont(font);
         ImGui::SetWindowFontScale(fontScale);
 
-        const auto camera_vec = camera.getPosition();
+        auto camera_vec = camera.getPosition();
 
         const auto offset_width_scale = 2.0F / static_cast<float>(azimuthWaterfalls.size());
 
         const auto freqScale = static_cast<float>(azimuthWaterfalls.size() * maxTextureSize)
                                / static_cast<float>(waterfallWidth);
 
+        frequencyPosition = (1.0F + camera_vec.x) * offset_width_scale * freqScale
+                            * static_cast<float>(waterfallWidth) * frequencyScale;
+
         ImGui::Text(
             "x-axis: %f\ny-axis: %f",
-            (1.0F + camera_vec.x) * offset_width_scale * freqScale
-                * static_cast<float>(waterfallWidth) * frequencyScale,
+            frequencyPosition,
             camera_vec.y * waterfallHeight * timeScale / imageHeightScale);
 
         ImGui::SliderFloat("Font scale", &fontScale, 0.2, 1.5);
@@ -106,6 +108,16 @@ namespace mv
         if (ImGui::SliderFloat(
                 "Image height scale", &imageHeightScale, minHeightScale, maxHeightScale)) {
             drawDetections();
+        }
+
+        if (ImGui::SliderFloat(
+                "Camera position", &frequencyPosition, 0.0F, waterfallWidth * frequencyScale),
+            "%e") {
+            camera_vec.x = frequencyPosition
+                               / (offset_width_scale * freqScale
+                                  * static_cast<float>(waterfallWidth) * frequencyScale)
+                           - 1.0F;
+            camera.setPosition(camera_vec);
         }
 
         if (ImGui::Button("Continue")) {

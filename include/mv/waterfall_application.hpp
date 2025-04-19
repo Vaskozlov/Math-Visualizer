@@ -58,7 +58,7 @@ namespace mv
 
         double pressTime = 0.0;
         ImFont *font;
-        float fontScale = 0.33F;
+        float fontScale = 0.5F;
 
         bool disableInput = false;
 
@@ -73,6 +73,8 @@ namespace mv
 
         float powerLow = -20.0F;
         float powerHigh = 100.0F;
+
+        float frequencyPosition = 0.0F;
 
         std::size_t maxTextureSize;
         std::mutex updateMutex;
