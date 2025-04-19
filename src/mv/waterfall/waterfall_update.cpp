@@ -74,11 +74,13 @@ namespace mv
         const auto freqScale = static_cast<float>(azimuthWaterfalls.size() * maxTextureSize)
                                / static_cast<float>(waterfallWidth);
 
-        frequencyPosition = (1.0F + camera_vec.x) * offset_width_scale * freqScale
-                            * static_cast<float>(waterfallWidth) * frequencyScale / 1e3F;
+        fmt::println("f: {}", freqScale);
+
+        frequencyPosition = (1.0F + camera_vec.x) * 0.5F / 1e3F
+                            * (azimuthWaterfalls.size() * maxTextureSize) * frequencyScale;
 
         ImGui::Text(
-            "x-axis: %f\ny-axis: %f",
+            "x-axis: %.0f\ny-axis: %.0f",
             frequencyPosition,
             camera_vec.y * waterfallHeight * timeScale / imageHeightScale);
 
@@ -115,10 +117,10 @@ namespace mv
                 &frequencyPosition,
                 0.0F,
                 waterfallWidth * frequencyScale / 1e3F)) {
-            camera_vec.x = 1e3F * frequencyPosition
-                               / (offset_width_scale * freqScale
-                                  * static_cast<float>(waterfallWidth) * frequencyScale)
-                           - 1.0F;
+            camera_vec.x =
+                frequencyPosition
+                    / (0.5F / 1e3F * (azimuthWaterfalls.size() * maxTextureSize) * frequencyScale)
+                - 1.0F;
             camera.setPosition(camera_vec);
         }
 
@@ -220,7 +222,12 @@ namespace mv
         rectangleInstances.models.clear();
         rectangleInstances.models.reserve(detections.size());
 
-        const auto freqScale = 1.0F / static_cast<float>(waterfallWidth * frequencyScale)
+        fmt::println(
+            "{}",
+            static_cast<float>(waterfallWidth)
+                / static_cast<float>(powerWaterfalls.size() * maxTextureSize));
+
+        const auto freqScale = 2.0F / static_cast<float>(waterfallWidth * frequencyScale)
                                * static_cast<float>(waterfallWidth)
                                / static_cast<float>(powerWaterfalls.size() * maxTextureSize);
 
@@ -230,7 +237,7 @@ namespace mv
             trans = glm::translate(
                 trans,
                 {
-                    2.0F * static_cast<float>(detection.x) * freqScale - 1.0F,
+                    static_cast<float>(detection.x) * freqScale - 1.0F,
                     static_cast<float>(detection.y)
                         / static_cast<float>(waterfallHeight * timeScale) * imageHeightScale,
                     0.0001F,
@@ -239,7 +246,7 @@ namespace mv
             trans = glm::scale(
                 trans,
                 {
-                    static_cast<float>(2.0F * detection.width) * freqScale,
+                    static_cast<float>(detection.width) * freqScale,
                     static_cast<float>(detection.height)
                         / static_cast<float>(waterfallHeight * timeScale) * imageHeightScale,
                     1.0F,
