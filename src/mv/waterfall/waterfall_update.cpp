@@ -71,11 +71,6 @@ namespace mv
 
         const auto offset_width_scale = 2.0F / static_cast<float>(azimuthWaterfalls.size());
 
-        const auto freqScale = static_cast<float>(azimuthWaterfalls.size() * maxTextureSize)
-                               / static_cast<float>(waterfallWidth);
-
-        fmt::println("f: {}", freqScale);
-
         frequencyPosition = (1.0F + camera_vec.x) * 0.5F / 1e3F
                             * (azimuthWaterfalls.size() * maxTextureSize) * frequencyScale;
 
