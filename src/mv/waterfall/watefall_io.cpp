@@ -51,6 +51,7 @@ namespace mv
     {
         imageHeightScale += scale_difference;
         imageHeightScale = std::clamp(imageHeightScale, minHeightScale, maxHeightScale);
+        drawDetections();
     }
 
     auto Waterfall::onScroll(const double x_offset, const double y_offset) -> void

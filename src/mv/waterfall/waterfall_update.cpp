@@ -98,8 +98,15 @@ namespace mv
             updatePowerUniform();
         }
 
-        ImGui::SliderFloat("Image width scale", &imageWidthScale, minWidthScale, maxWidthScale);
-        ImGui::SliderFloat("Image height scale", &imageHeightScale, minHeightScale, maxHeightScale);
+        if (ImGui::SliderFloat(
+                "Image width scale", &imageWidthScale, minWidthScale, maxWidthScale)) {
+            drawDetections();
+        }
+
+        if (ImGui::SliderFloat(
+                "Image height scale", &imageHeightScale, minHeightScale, maxHeightScale)) {
+            drawDetections();
+        }
 
         if (ImGui::Button("Continue")) {
             continueFlag.test_and_set();
@@ -210,7 +217,8 @@ namespace mv
                 trans,
                 {
                     static_cast<float>(detection.x) * freqScale - 1.0F,
-                    static_cast<float>(detection.y) / static_cast<float>(waterfallHeight),
+                    static_cast<float>(detection.y)
+                        / static_cast<float>(waterfallHeight * timeScale) * imageHeightScale,
                     0.0001F,
                 });
 
@@ -219,7 +227,7 @@ namespace mv
                 {
                     static_cast<float>(detection.width) * freqScale,
                     static_cast<float>(detection.height)
-                        / static_cast<float>(waterfallHeight * timeScale),
+                        / static_cast<float>(waterfallHeight * timeScale) * imageHeightScale,
                     1.0F,
                 });
 
