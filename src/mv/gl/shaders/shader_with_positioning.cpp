@@ -12,4 +12,19 @@ namespace mv::gl
 
         return &shaderWithPositioning;
     }
+
+    auto getHsvShaderWithModel() -> Shader *
+    {
+        static Shader shader{
+            {
+             b::embed<"resources/shaders/waterfall/hsv_static.vert">().str(),
+             },
+            {
+             b::embed<"resources/shaders/waterfall/hsv/hsv_static.frag">().str(),
+             b::embed<"resources/shaders/waterfall/hsv/hsv2rgb.glsl">().str(),
+             },
+        };
+
+        return &shader;
+    }
 } // namespace mv::gl

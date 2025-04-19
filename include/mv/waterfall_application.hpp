@@ -12,6 +12,7 @@
 #include <list>
 #include <mv/application_2d.hpp>
 #include <mv/gl/shape/rectangle.hpp>
+#include <mv/gl/shape/sphere.hpp>
 #include <mv/gl/texture.hpp>
 #include <mv/gl/waterfall.hpp>
 #include <mv/rect.hpp>
@@ -21,6 +22,18 @@
 
 namespace mv
 {
+    struct RectWithAzimuthAndPower : Rect
+    {
+        float azimuth{};
+        float power{};
+    };
+
+    struct RectangleInstance
+    {
+        glm::vec2 color;
+        glm::mat4 model;
+    };
+
     class Waterfall : public Application2D
     {
     private:
@@ -31,7 +44,8 @@ namespace mv
 
         Shader *waterfallShaderHsvF32 = getWaterfallShaderHsvF32();
         Shader *waterfallShaderLinearF32 = getWaterfallShaderLinearF32();
-        mv::Shader *colorShader = mv::gl::getShaderWithPositioning();
+        Shader *colorShader = gl::getShaderWithPositioning();
+        Shader *shaderHsvWithModel = gl::getHsvShaderWithModel();
 
         std::list<gl::Waterfall<gl::float16>> powerWaterfalls;
         std::list<gl::Waterfall<gl::float16>> azimuthWaterfalls;
@@ -40,6 +54,7 @@ namespace mv
         gl::Waterfall<RGBA<std::uint8_t>> azimuthWaterfallMask{imageSize, imageSize};
         gl::InstancesHolder<gl::InstanceParameters> rectangleInstances;
         gl::shape::Rectangle rectangle{0.0F, 0.0F, 1.0F, 1.0F};
+        gl::shape::Sphere sphere{0.1F};
 
         double pressTime = 0.0;
         ImFont *font;
@@ -67,7 +82,7 @@ namespace mv
         std::size_t waterfallWidth{imageSize};
         std::size_t waterfallHeight{imageSize};
 
-        std::vector<Rect> detections;
+        std::vector<RectWithAzimuthAndPower> detections;
 
         static auto getWaterfallShaderHsvF32() -> Shader *;
         static auto getWaterfallShaderLinearF32() -> Shader *;
@@ -76,7 +91,7 @@ namespace mv
         static constexpr float minWidthScale = 0.9F;
         static constexpr float minHeightScale = 0.9F;
 
-        static constexpr float maxWidthScale = 300.0F;
+        static constexpr float maxWidthScale = 500.0F;
         static constexpr float maxHeightScale = 10.0F;
 
         static constexpr float azimuthMin = 0.0F;
@@ -96,7 +111,19 @@ namespace mv
         {
             waterfallShaderHsvF32->use();
             waterfallShaderHsvF32->setVec2(
-                "minMaxValue", glm::vec2{azimuthMiddle - azimuthSide, azimuthMiddle + azimuthSide});
+                "minMaxValue",
+                glm::vec2{
+                    azimuthMiddle - azimuthSide,
+                    azimuthMiddle + azimuthSide,
+                });
+
+            shaderHsvWithModel->use();
+            shaderHsvWithModel->setVec2(
+                "minMaxValue",
+                glm::vec2{
+                    azimuthMiddle - azimuthSide,
+                    azimuthMiddle + azimuthSide,
+                });
         }
 
         auto updatePowerUniform() const -> void
@@ -131,9 +158,9 @@ namespace mv
 
         auto resizeImages(std::size_t width, std::size_t height) -> void;
 
-        auto addRect(const Rect &rect) -> void
+        auto addRect(const RectWithAzimuthAndPower &detection) -> void
         {
-            detections.emplace_back(rect);
+            detections.emplace_back(detection);
         }
 
         auto fill(float value) const -> void;

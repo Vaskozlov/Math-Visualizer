@@ -13,7 +13,7 @@ void main()
     uint value = texture(texture1, TexCoord).r;
     vec4 mask = texture(texture2, TexCoord);
 
-    vec4 hsv_color = vec4(hsvUintToRgb(value, valueLimits.x, valueLimits.y), 255);
+    vec4 hsv_color = vec4(hsvUintToRgb(value, valueLimits.x, valueLimits.y), 1.0);
     vec4 texColor = mix(hsv_color, mask, mask.a);
 
     if (texColor.a < 1e-8){

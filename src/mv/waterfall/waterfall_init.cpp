@@ -78,16 +78,6 @@ namespace mv
         azimuthWaterfallMask.reload();
         powerWaterfallMask.reload();
 
-        waterfallShaderHsvF32->use();
-        waterfallShaderHsvF32->setInt("texture1", 0);
-        waterfallShaderHsvF32->setInt("texture2", 1);
-        waterfallShaderHsvF32->setMat4("projection", glm::mat4(1.0F));
-
-        waterfallShaderLinearF32->use();
-        waterfallShaderLinearF32->setInt("texture1", 0);
-        waterfallShaderLinearF32->setInt("texture2", 1);
-        waterfallShaderLinearF32->setMat4("projection", glm::mat4(1.0F));
-
         updateAzimuthUniform();
         updatePowerUniform();
     }

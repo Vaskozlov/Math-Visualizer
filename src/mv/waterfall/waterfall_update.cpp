@@ -1,7 +1,16 @@
+#include <glm/gtx/color_space.hpp>
 #include <mv/waterfall_application.hpp>
 
 namespace mv
 {
+    glm::vec3 hsvFloatToRgb(float value, float min_value, float max_value)
+    {
+        float v = std::clamp(value, min_value, max_value);
+        float hue = 360.0F * (v - min_value) / (max_value - min_value);
+
+        return glm::hsvColor(glm::vec3(hue, 1.0F, 1.0F));
+    }
+
     auto Waterfall::resizeImages(const std::size_t width, const std::size_t height) -> void
     {
         waterfallWidth = width;
@@ -60,13 +69,18 @@ namespace mv
 
         const auto camera_vec = camera.getPosition();
 
-        const auto offset_width_scale = 2.0F / static_cast<float>(powerWaterfalls.size());
+        const auto offset_width_scale = 2.0F / static_cast<float>(azimuthWaterfalls.size());
+
+        const auto freqScale = static_cast<float>(azimuthWaterfalls.size() * maxTextureSize)
+                               / static_cast<float>(waterfallWidth);
 
         ImGui::Text(
             "x-axis: %f\ny-axis: %f",
-            waterfallWidth * static_cast<float>(powerWaterfalls.size() * maxTextureSize)
-                / waterfallWidth * (camera_vec.x + 2.0F) / 4.0F * frequencyScale,
-            (camera_vec.y + 1.0F) / 2.0F * waterfallHeight * timeScale);
+            (1.0F + camera_vec.x) * offset_width_scale * freqScale
+                * static_cast<float>(waterfallWidth) * frequencyScale,
+            camera_vec.y * waterfallHeight * timeScale / imageHeightScale);
+
+        ImGui::SliderFloat("Font scale", &fontScale, 0.2, 1.5);
 
         if (ImGui::SliderFloat("Middle", &azimuthMiddle, azimuthMin, azimuthMax)) {
             updateAzimuthUniform();
@@ -104,20 +118,10 @@ namespace mv
         waterfallShaderHsvF32->use();
         waterfallShaderHsvF32->setMat4("projection", projection);
 
-        waterfallShaderLinearF32->setVec4(
-            "imageLimits",
-            {0.0F,
-             0.0F,
-             static_cast<float>(window_width), // / 2.0F,
-             static_cast<float>(window_height)});
-
         float index = 0.0F;
 
         for (auto &waterfall : azimuthWaterfalls) {
             waterfall.bind(GL_TEXTURE0);
-            powerWaterfallMask.bind(GL_TEXTURE1);
-
-            waterfallShaderHsvF32->setVec2("texOffset", {0, 0});
 
             azimuthMapSize.vao.bind();
 
@@ -128,16 +132,16 @@ namespace mv
             const auto real_height_scale = imageHeightScale;
 
             auto trans = glm::mat4(1.0F);
-            trans = glm::translate(trans, {index * offset_width_scale, 0.0F, 0.0F});
+            trans = glm::translate(trans, {index * offset_width_scale - 1.0F, 0.0F, 0.0F});
             trans = glm::scale(trans, {real_width_scale, real_height_scale, 1.0F});
 
-            waterfallShaderLinearF32->setMat4("model", trans);
+            waterfallShaderHsvF32->setMat4("model", trans);
             azimuthMapSize.draw();
             index += 1.0F;
         }
 
-        colorShader->use();
-        colorShader->setMat4("projection", projection);
+        shaderHsvWithModel->use();
+        shaderHsvWithModel->setMat4("projection", projection);
 
         rectangle.vao.bind();
 
@@ -187,7 +191,7 @@ namespace mv
             ->setPixelValue(x % maxTextureSize, y, azimuth);
 
         std::next(powerWaterfalls.begin(), x / maxTextureSize)
-            ->setPixelValue(x % maxTextureSize, y, azimuth);
+            ->setPixelValue(x % maxTextureSize, y, power);
     }
 
     auto Waterfall::drawDetections() -> void
@@ -199,26 +203,34 @@ namespace mv
                                * static_cast<float>(waterfallWidth)
                                / static_cast<float>(powerWaterfalls.size() * maxTextureSize);
 
-        for (const auto &[x, y, width, height] : detections) {
+        for (const auto &detection : detections) {
             auto trans = glm::mat4(1.0F);
 
             trans = glm::translate(
                 trans,
                 {
-                    static_cast<float>(x) * freqScale,
-                    static_cast<float>(y) / static_cast<float>(waterfallHeight),
+                    static_cast<float>(detection.x) * freqScale - 1.0F,
+                    static_cast<float>(detection.y) / static_cast<float>(waterfallHeight),
                     0.0001F,
                 });
 
             trans = glm::scale(
                 trans,
                 {
-                    static_cast<float>(width) * freqScale,
-                    static_cast<float>(height) / static_cast<float>(waterfallHeight * timeScale),
+                    static_cast<float>(detection.width) * freqScale,
+                    static_cast<float>(detection.height)
+                        / static_cast<float>(waterfallHeight * timeScale),
                     1.0F,
                 });
 
-            rectangleInstances.models.emplace_back(mv::Color::RED, trans);
+            rectangleInstances.models.emplace_back(
+                glm::vec4{
+                    detection.azimuth,
+                    0.8F,
+                    0.0F,
+                    0.0F,
+                },
+                trans);
         }
 
         rectangleInstances.loadData();
