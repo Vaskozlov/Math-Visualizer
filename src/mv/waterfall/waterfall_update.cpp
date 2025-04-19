@@ -222,11 +222,6 @@ namespace mv
         rectangleInstances.models.clear();
         rectangleInstances.models.reserve(detections.size());
 
-        fmt::println(
-            "{}",
-            static_cast<float>(waterfallWidth)
-                / static_cast<float>(powerWaterfalls.size() * maxTextureSize));
-
         const auto freqScale = 2.0F / static_cast<float>(waterfallWidth * frequencyScale)
                                * static_cast<float>(waterfallWidth)
                                / static_cast<float>(powerWaterfalls.size() * maxTextureSize);
