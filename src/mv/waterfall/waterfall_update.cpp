@@ -234,7 +234,7 @@ namespace mv
             rectangleInstances.models.emplace_back(
                 glm::vec4{
                     detection.azimuth,
-                    0.8F,
+                    0.3F,
                     0.0F,
                     0.0F,
                 },
