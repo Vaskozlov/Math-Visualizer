@@ -75,7 +75,7 @@ namespace mv
                                / static_cast<float>(waterfallWidth);
 
         frequencyPosition = (1.0F + camera_vec.x) * offset_width_scale * freqScale
-                            * static_cast<float>(waterfallWidth) * frequencyScale;
+                            * static_cast<float>(waterfallWidth) * frequencyScale / 1e3F;
 
         ImGui::Text(
             "x-axis: %f\ny-axis: %f",
@@ -114,9 +114,8 @@ namespace mv
                 "Camera position",
                 &frequencyPosition,
                 0.0F,
-                waterfallWidth * frequencyScale,
-                "%.3e")) {
-            camera_vec.x = frequencyPosition
+                waterfallWidth * frequencyScale / 1e3F)) {
+            camera_vec.x = 1e3F * frequencyPosition
                                / (offset_width_scale * freqScale
                                   * static_cast<float>(waterfallWidth) * frequencyScale)
                            - 1.0F;
