@@ -112,7 +112,7 @@ namespace mv
 
         if (ImGui::SliderFloat(
                 "Camera position", &frequencyPosition, 0.0F, waterfallWidth * frequencyScale),
-            "%e") {
+            "%.3e") {
             camera_vec.x = frequencyPosition
                                / (offset_width_scale * freqScale
                                   * static_cast<float>(waterfallWidth) * frequencyScale)
