@@ -132,6 +132,11 @@ namespace mv
             waterfallShaderLinearF32->setVec2("minMaxValue", glm::vec2{powerLow, powerHigh});
         }
 
+        auto clearDetections() -> void
+        {
+            detections.clear();
+        }
+
         auto init() -> void override;
 
         auto pollTask() -> void
