@@ -36,7 +36,7 @@ namespace mv
 
     class Waterfall : public Application2D
     {
-    private:
+    protected:
         static constexpr std::size_t imageSize = 512;
 
         std::array<char, 128> imguiWindowBufferTitle{};
@@ -85,6 +85,11 @@ namespace mv
         std::size_t waterfallHeight{imageSize};
 
         std::vector<RectWithAzimuthAndPower> detections;
+
+        bool showAzimuthPoints{true};
+        bool showPowerPoints{};
+        bool showDetectionAzimuth{true};
+        bool showDetectionPower{};
 
         static auto getWaterfallShaderHsvF32() -> Shader *;
         static auto getWaterfallShaderLinearF32() -> Shader *;
