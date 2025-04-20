@@ -1,6 +1,6 @@
 #version 330 core
 
-in vec2 vertexColor;
+in vec3 vertexColor;
 in vec2 valueLimits;
 out vec4 FragColor;
 
@@ -16,10 +16,10 @@ void main()
     }
 
     if (isinf(value)) {
-        FragColor = vec4(1.0, 1.0, 1.0, vertexColor.g);
+        FragColor = vec4(1.0, 1.0, 1.0, vertexColor.b);
         return;
     }
 
-    FragColor = vec4(hsvFloatToRgb(value, valueLimits.x, valueLimits.y), vertexColor.g);
+    FragColor = vec4(hsvFloatToRgb(value, valueLimits.x, valueLimits.y), vertexColor.b);
 }
 

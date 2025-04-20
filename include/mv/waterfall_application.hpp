@@ -46,6 +46,7 @@ namespace mv
         Shader *waterfallShaderLinearF32 = getWaterfallShaderLinearF32();
         Shader *colorShader = gl::getShaderWithPositioning();
         Shader *shaderHsvWithModel = gl::getHsvShaderWithModel();
+        Shader *shaderLinearWithModel = gl::getLinearShaderWithModel();
 
         std::list<gl::Waterfall<gl::float16>> powerWaterfalls;
         std::list<gl::Waterfall<gl::float16>> azimuthWaterfalls;
@@ -136,7 +137,20 @@ namespace mv
         auto updatePowerUniform() const -> void
         {
             waterfallShaderLinearF32->use();
-            waterfallShaderLinearF32->setVec2("minMaxValue", glm::vec2{powerLow, powerHigh});
+            waterfallShaderLinearF32->setVec2(
+                "minMaxValue",
+                glm::vec2{
+                    powerLow,
+                    powerHigh,
+                });
+
+            shaderLinearWithModel->use();
+            shaderLinearWithModel->setVec2(
+                "minMaxValue",
+                glm::vec2{
+                    powerLow,
+                    powerHigh,
+                });
         }
 
         auto clearDetections() -> void
@@ -207,6 +221,18 @@ namespace mv
         }
 
         auto drawDetections() -> void;
+
+    private:
+        auto drawAzimuthWaterfalls(const glm::mat4 &projection, float offset_width_scale) const
+            -> void;
+
+        auto drawPowerWaterfalls(const glm::mat4 &projection, float offset_width_scale) const
+            -> void;
+
+        auto drawAzimuthDetections(const glm::mat4 &projection, float offset_width_scale) const
+            -> void;
+
+        auto drawPowerDetections(const glm::mat4 &projection, float offset_width_scale) const -> void;
     };
 } // namespace mv
 

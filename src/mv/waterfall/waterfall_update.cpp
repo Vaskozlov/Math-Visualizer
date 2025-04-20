@@ -156,29 +156,20 @@ namespace mv
         const auto projection =
             getCameraProjection(imageWidthScale, imageHeightScale) * getCameraView();
 
-        waterfallShaderHsvF32->use();
-        waterfallShaderHsvF32->setMat4("projection", projection);
+        if (showAzimuthPoints) {
+            drawAzimuthWaterfalls(projection, offset_width_scale);
+        }
 
-        float index = 0.0F;
+        if (showPowerPoints) {
+            drawPowerWaterfalls(projection, offset_width_scale);
+        }
 
-        for (auto &waterfall : azimuthWaterfalls) {
-            waterfall.bind(GL_TEXTURE0);
+        if (showDetectionAzimuth) {
+            drawAzimuthDetections(projection, offset_width_scale);
+        }
 
-            azimuthMapSize.vao.bind();
-
-            const auto real_width_scale = offset_width_scale
-                                          * static_cast<float>(waterfall.getWidth())
-                                          / static_cast<float>(maxTextureSize);
-
-            const auto real_height_scale = imageHeightScale;
-
-            auto trans = glm::mat4(1.0F);
-            trans = glm::translate(trans, {index * offset_width_scale - 1.0F, 0.0F, 0.0F});
-            trans = glm::scale(trans, {real_width_scale, real_height_scale, 1.0F});
-
-            waterfallShaderHsvF32->setMat4("model", trans);
-            azimuthMapSize.draw();
-            index += 1.0F;
+        if (showDetectionPower) {
+            drawPowerDetections(projection, offset_width_scale);
         }
 
         shaderHsvWithModel->use();
@@ -267,8 +258,8 @@ namespace mv
             rectangleInstances.models.emplace_back(
                 glm::vec4{
                     detection.azimuth,
+                    detection.power,
                     0.3F,
-                    0.0F,
                     0.0F,
                 },
                 trans);
@@ -277,4 +268,84 @@ namespace mv
         rectangleInstances.loadData();
     }
 
+    auto Waterfall::drawAzimuthWaterfalls(
+        const glm::mat4 &projection, const float offset_width_scale) const -> void
+    {
+        waterfallShaderHsvF32->use();
+        waterfallShaderHsvF32->setMat4("projection", projection);
+
+        float index = 0.0F;
+
+        for (auto &waterfall : azimuthWaterfalls) {
+            waterfall.bind(GL_TEXTURE0);
+
+            azimuthMapSize.vao.bind();
+
+            const auto real_width_scale = offset_width_scale
+                                          * static_cast<float>(waterfall.getWidth())
+                                          / static_cast<float>(maxTextureSize);
+
+            const auto real_height_scale = imageHeightScale;
+
+            auto trans = glm::mat4(1.0F);
+            trans = glm::translate(trans, {index * offset_width_scale - 1.0F, 0.0F, 0.0F});
+            trans = glm::scale(trans, {real_width_scale, real_height_scale, 1.0F});
+
+            waterfallShaderHsvF32->setMat4("model", trans);
+            azimuthMapSize.draw();
+            index += 1.0F;
+        }
+    }
+
+    auto Waterfall::drawPowerWaterfalls(
+        const glm::mat4 &projection, const float offset_width_scale) const -> void
+    {
+        waterfallShaderLinearF32->use();
+        waterfallShaderLinearF32->setMat4("projection", projection);
+
+        float index = 0.0F;
+
+        for (auto &waterfall : powerWaterfalls) {
+            waterfall.bind(GL_TEXTURE0);
+
+            azimuthMapSize.vao.bind();
+
+            const auto real_width_scale = offset_width_scale
+                                          * static_cast<float>(waterfall.getWidth())
+                                          / static_cast<float>(maxTextureSize);
+
+            const auto real_height_scale = imageHeightScale;
+
+            auto trans = glm::mat4(1.0F);
+            trans = glm::translate(trans, {index * offset_width_scale - 1.0F, 0.0F, 0.0F});
+            trans = glm::scale(trans, {real_width_scale, real_height_scale, 1.0F});
+
+            waterfallShaderLinearF32->setMat4("model", trans);
+            azimuthMapSize.draw();
+            index += 1.0F;
+        }
+    }
+
+    auto Waterfall::drawAzimuthDetections(const glm::mat4 &projection, const float) const -> void
+    {
+        shaderHsvWithModel->use();
+        shaderHsvWithModel->setMat4("projection", projection);
+
+        rectangle.vao.bind();
+
+        glDrawArraysInstanced(
+            GL_TRIANGLE_FAN, 0, rectangle.vertices.size(), rectangleInstances.models.size());
+    }
+
+    auto Waterfall::drawPowerDetections(
+        const glm::mat4 &projection, const float offset_width_scale) const -> void
+    {
+        shaderLinearWithModel->use();
+        shaderLinearWithModel->setMat4("projection", projection);
+
+        rectangle.vao.bind();
+
+        glDrawArraysInstanced(
+            GL_TRIANGLE_FAN, 0, rectangle.vertices.size(), rectangleInstances.models.size());
+    }
 } // namespace mv

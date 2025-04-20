@@ -8,6 +8,8 @@ namespace mv::gl
     auto getShaderWithPositioning() -> Shader *;
 
     auto getHsvShaderWithModel() -> Shader *;
+
+    auto getLinearShaderWithModel() -> Shader *;
 } // namespace mv::gl
 
 #endif /* MV_GL_SHADERS_SHADER_WITH_POSITIONING_HPP */

@@ -6,12 +6,12 @@ layout(location = 2) in mat4 aTransformation;
 uniform mat4 projection;
 uniform vec2 minMaxValue;
 
-out vec2 vertexColor;
+out vec3 vertexColor;
 out vec2 valueLimits;
 
 void main()
 {
     gl_Position = projection * aTransformation * vec4(aPos.x, aPos.y, aPos.z, 1.0f);
-    vertexColor = vec2(aColor.x, aColor.y);
+    vertexColor = vec3(aColor.x, aColor.y, aColor.z);
     valueLimits = minMaxValue;
 }
