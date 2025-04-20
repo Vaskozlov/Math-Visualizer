@@ -66,8 +66,8 @@ namespace mv
         gl::shape::Rectangle powerMapSize{0.0F, 0.0F, 1.0F, 1.0F};
         gl::shape::Rectangle azimuthMapSize{0.0F, 0.0F, 1.0F, 1.0F};
 
-        float imageWidthScale = 0.9F;
-        float imageHeightScale = 0.9F;
+        float imageWidthScale = 1.0F;
+        float imageHeightScale = 1.1F;
 
         float azimuthMiddle = 180.0F;
         float azimuthSide = 180.0F;
@@ -86,6 +86,8 @@ namespace mv
         std::size_t waterfallHeight{imageSize};
 
         std::vector<RectWithAzimuthAndPower> detections;
+
+        glm::vec2 waterfallStart{-0.9F, -0.9F};
 
         bool showAzimuthPoints{true};
         bool showPowerPoints{};
@@ -114,6 +116,8 @@ namespace mv
         static constexpr RGBA<uint8_t> white{255, 255, 255, 255};
 
         using Application2D::Application2D;
+
+        ~Waterfall() override;
 
         auto updateAzimuthUniform() const -> void
         {
@@ -214,10 +218,16 @@ namespace mv
             commandsPipe.emplace_back(std::move(command));
         }
 
-        auto waitForFlag() -> void
+        auto waitForFlag() -> bool
         {
             continueFlag.wait(false);
+
+            if (!continueFlag.test()) {
+                return false;
+            }
+
             continueFlag.clear();
+            return true;
         }
 
         auto drawDetections() -> void;
@@ -232,7 +242,8 @@ namespace mv
         auto drawAzimuthDetections(const glm::mat4 &projection, float offset_width_scale) const
             -> void;
 
-        auto drawPowerDetections(const glm::mat4 &projection, float offset_width_scale) const -> void;
+        auto drawPowerDetections(const glm::mat4 &projection, float offset_width_scale) const
+            -> void;
     };
 } // namespace mv
 

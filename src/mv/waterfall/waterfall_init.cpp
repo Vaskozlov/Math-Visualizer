@@ -33,10 +33,17 @@ namespace mv
         return &waterfallShaderLinearF32;
     }
 
+    Waterfall::~Waterfall()
+    {
+        continueFlag.notify_all();
+    }
+
     auto Waterfall::init() -> void
     {
         Application2D::init();
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        isMouseShowed = true;
 
         GLint max_texture_size;
         glGetIntegerv(GL_MAX_TEXTURE_SIZE, &max_texture_size);

@@ -1,16 +1,7 @@
-#include <glm/gtx/color_space.hpp>
 #include <mv/waterfall_application.hpp>
 
 namespace mv
 {
-    glm::vec3 hsvFloatToRgb(float value, float min_value, float max_value)
-    {
-        float v = std::clamp(value, min_value, max_value);
-        float hue = 360.0F * (v - min_value) / (max_value - min_value);
-
-        return glm::hsvColor(glm::vec3(hue, 1.0F, 1.0F));
-    }
-
     auto Waterfall::resizeImages(const std::size_t width, const std::size_t height) -> void
     {
         waterfallWidth = width;
@@ -52,10 +43,6 @@ namespace mv
         Application2D::update();
 
         pollTask();
-
-        int window_width;
-        int window_height;
-        glfwGetFramebufferSize(window, &window_width, &window_height);
 
         fmt::format_to_n(
             imguiWindowBufferTitle.data(),
@@ -240,9 +227,10 @@ namespace mv
             trans = glm::translate(
                 trans,
                 {
-                    static_cast<float>(detection.x) * frequency_scale - 1.0F,
+                    static_cast<float>(detection.x) * frequency_scale + waterfallStart.x,
                     static_cast<float>(detection.y)
-                        / static_cast<float>(waterfallHeight * timeScale) * imageHeightScale,
+                            / static_cast<float>(waterfallHeight * timeScale) * imageHeightScale
+                        + waterfallStart.y,
                     0.0001F,
                 });
 
@@ -276,8 +264,8 @@ namespace mv
 
         float index = 0.0F;
 
-        for (auto &waterfall : azimuthWaterfalls) {
-            waterfall.bind(GL_TEXTURE0);
+        for (const auto &waterfall : azimuthWaterfalls) {
+            waterfall.bind();
 
             azimuthMapSize.vao.bind();
 
@@ -288,7 +276,7 @@ namespace mv
             const auto real_height_scale = imageHeightScale;
 
             auto trans = glm::mat4(1.0F);
-            trans = glm::translate(trans, {index * offset_width_scale - 1.0F, 0.0F, 0.0F});
+            trans = glm::translate(trans, {index * offset_width_scale + waterfallStart.x, waterfallStart.y, 0.0F});
             trans = glm::scale(trans, {real_width_scale, real_height_scale, 1.0F});
 
             waterfallShaderHsvF32->setMat4("model", trans);
@@ -306,7 +294,7 @@ namespace mv
         float index = 0.0F;
 
         for (auto &waterfall : powerWaterfalls) {
-            waterfall.bind(GL_TEXTURE0);
+            waterfall.bind();
 
             azimuthMapSize.vao.bind();
 
@@ -317,7 +305,7 @@ namespace mv
             const auto real_height_scale = imageHeightScale;
 
             auto trans = glm::mat4(1.0F);
-            trans = glm::translate(trans, {index * offset_width_scale - 1.0F, 0.0F, 0.0F});
+            trans = glm::translate(trans, {index * offset_width_scale + waterfallStart.x, waterfallStart.y, 0.0F});
             trans = glm::scale(trans, {real_width_scale, real_height_scale, 1.0F});
 
             waterfallShaderLinearF32->setMat4("model", trans);
