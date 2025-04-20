@@ -62,7 +62,7 @@ namespace mv
             2.0
             / (frequencyScale * static_cast<double>(azimuthWaterfalls.size() * maxTextureSize)));
 
-        frequencyPosition = (1.0F + camera_vec.x) / frequency_scale / 1e3F;
+        frequencyPosition = (-waterfallStart.x + camera_vec.x) / frequency_scale / 1e3F;
 
         ImGui::Text(
             "x-axis: %.0f\ny-axis: %.0f",
@@ -103,7 +103,7 @@ namespace mv
                 0.0F,
                 waterfallWidth * frequencyScale / 1e3F,
                 "%.0f")) {
-            camera_vec.x = frequencyPosition * frequency_scale * 1e3F - 1.0F;
+            camera_vec.x = frequencyPosition * frequency_scale * 1e3F + waterfallStart.x;
             camera.setPosition(camera_vec);
         }
 
@@ -276,7 +276,8 @@ namespace mv
             const auto real_height_scale = imageHeightScale;
 
             auto trans = glm::mat4(1.0F);
-            trans = glm::translate(trans, {index * offset_width_scale + waterfallStart.x, waterfallStart.y, 0.0F});
+            trans = glm::translate(
+                trans, {index * offset_width_scale + waterfallStart.x, waterfallStart.y, 0.0F});
             trans = glm::scale(trans, {real_width_scale, real_height_scale, 1.0F});
 
             waterfallShaderHsvF32->setMat4("model", trans);
@@ -305,7 +306,8 @@ namespace mv
             const auto real_height_scale = imageHeightScale;
 
             auto trans = glm::mat4(1.0F);
-            trans = glm::translate(trans, {index * offset_width_scale + waterfallStart.x, waterfallStart.y, 0.0F});
+            trans = glm::translate(
+                trans, {index * offset_width_scale + waterfallStart.x, waterfallStart.y, 0.0F});
             trans = glm::scale(trans, {real_width_scale, real_height_scale, 1.0F});
 
             waterfallShaderLinearF32->setMat4("model", trans);
