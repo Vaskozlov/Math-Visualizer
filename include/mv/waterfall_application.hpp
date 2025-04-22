@@ -35,8 +35,11 @@ namespace mv
 
     class Waterfall : public Application2D
     {
-    protected:
+    private:
         std::array<char, 128> imguiWindowBufferTitle{};
+        std::array<char, 128> timeFormattingBuffer{};
+
+    protected:
         std::vector<std::function<void()>> commandsPipe;
 
         Shader *waterfallShaderHsvF32 = getWaterfallShaderHsvF32();
@@ -117,43 +120,9 @@ namespace mv
 
         ~Waterfall() override;
 
-        auto updateAzimuthUniform() const -> void
-        {
-            waterfallShaderHsvF32->use();
-            waterfallShaderHsvF32->setVec2(
-                "minMaxValue",
-                glm::vec2{
-                    azimuthMiddle - azimuthSide,
-                    azimuthMiddle + azimuthSide,
-                });
+        auto updateAzimuthUniform() const -> void;
 
-            shaderHsvWithModel->use();
-            shaderHsvWithModel->setVec2(
-                "minMaxValue",
-                glm::vec2{
-                    azimuthMiddle - azimuthSide,
-                    azimuthMiddle + azimuthSide,
-                });
-        }
-
-        auto updatePowerUniform() const -> void
-        {
-            waterfallShaderLinearF32->use();
-            waterfallShaderLinearF32->setVec2(
-                "minMaxValue",
-                glm::vec2{
-                    powerLow,
-                    powerHigh,
-                });
-
-            shaderLinearWithModel->use();
-            shaderLinearWithModel->setVec2(
-                "minMaxValue",
-                glm::vec2{
-                    powerLow,
-                    powerHigh,
-                });
-        }
+        auto updatePowerUniform() const -> void;
 
         auto clearDetections() -> void
         {

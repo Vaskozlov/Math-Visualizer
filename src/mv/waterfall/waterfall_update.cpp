@@ -2,6 +2,44 @@
 
 namespace mv
 {
+    auto Waterfall::updateAzimuthUniform() const -> void
+    {
+        waterfallShaderHsvF32->use();
+        waterfallShaderHsvF32->setVec2(
+            "minMaxValue",
+            glm::vec2{
+                azimuthMiddle - azimuthSide,
+                azimuthMiddle + azimuthSide,
+            });
+
+        shaderHsvWithModel->use();
+        shaderHsvWithModel->setVec2(
+            "minMaxValue",
+            glm::vec2{
+                azimuthMiddle - azimuthSide,
+                azimuthMiddle + azimuthSide,
+            });
+    }
+
+    auto Waterfall::updatePowerUniform() const -> void
+    {
+        waterfallShaderLinearF32->use();
+        waterfallShaderLinearF32->setVec2(
+            "minMaxValue",
+            glm::vec2{
+                powerLow,
+                powerHigh,
+            });
+
+        shaderLinearWithModel->use();
+        shaderLinearWithModel->setVec2(
+            "minMaxValue",
+            glm::vec2{
+                powerLow,
+                powerHigh,
+            });
+    }
+
     auto Waterfall::resizeToFit(
         const double max_frequency, const std::size_t max_time, const gl::float16 default_azimuth,
         const gl::float16 default_power) -> void
@@ -30,30 +68,22 @@ namespace mv
         for (; i < width / maxTextureSize; ++i) {
             if (powerWaterfalls.size() == i) {
                 powerWaterfalls.emplace_back(maxTextureSize, height, default_power);
-            } else {
-                std::next(powerWaterfalls.begin(), i)
-                    ->resize(maxTextureSize, height, default_power);
-            }
-
-            if (azimuthWaterfalls.size() == i) {
                 azimuthWaterfalls.emplace_back(maxTextureSize, height, default_azimuth);
             } else {
-                std::next(azimuthWaterfalls.begin(), i)
+                std::next(powerWaterfalls.begin(), static_cast<std::ptrdiff_t>(i))
+                    ->resize(maxTextureSize, height, default_power);
+                std::next(azimuthWaterfalls.begin(), static_cast<std::ptrdiff_t>(i))
                     ->resize(maxTextureSize, height, default_azimuth);
             }
         }
 
         if (powerWaterfalls.size() == i) {
             powerWaterfalls.emplace_back(width % maxTextureSize, height, default_power);
-        } else {
-            std::next(powerWaterfalls.begin(), i)
-                ->resize(width % maxTextureSize, height, default_power);
-        }
-
-        if (azimuthWaterfalls.size() == i) {
             azimuthWaterfalls.emplace_back(width % maxTextureSize, height, default_azimuth);
         } else {
-            std::next(azimuthWaterfalls.begin(), i)
+            std::next(powerWaterfalls.begin(), static_cast<std::ptrdiff_t>(i))
+                ->resize(width % maxTextureSize, height, default_power);
+            std::next(azimuthWaterfalls.begin(), static_cast<std::ptrdiff_t>(i))
                 ->resize(width % maxTextureSize, height, default_azimuth);
         }
 
@@ -84,13 +114,26 @@ namespace mv
             2.0
             / (frequencyScale * static_cast<double>(azimuthWaterfalls.size() * maxTextureSize)));
 
-        frequencyPosition = (-waterfallStart.x + camera_vec.x) / frequency_scale / 1e3F;
+        frequencyPosition = (camera_vec.x - waterfallStart.x) / frequency_scale / 1e3F;
 
-        timePosition = (-waterfallStart.y + camera_vec.y) * timeScale / imageHeightScale
+        timePosition = (camera_vec.y - waterfallStart.y) * timeScale / imageHeightScale
                        * static_cast<double>(waterfallHeight);
 
+        const std::time_t time = static_cast<int64_t>(timePosition + timeStartOffset);
+        ;
+
+        fmt::format_to_n(
+            timeFormattingBuffer.data(),
+            timeFormattingBuffer.size(),
+            "{:%Y-%m-%d %H:%M:%S}.{:03}",
+            fmt::localtime(time),
+            time % 1000);
+
         ImGui::Text(
-            "x-axis: %.0f\ny-axis: %.0f", frequencyPosition, timePosition + timeStartOffset);
+            "x-axis: %.0f\ny-axis: %.0f %s",
+            frequencyPosition,
+            timePosition + timeStartOffset,
+            timeFormattingBuffer.data());
 
         ImGui::SliderFloat("Font scale", &fontScale, 0.2, 1.5);
 
@@ -131,10 +174,12 @@ namespace mv
         }
 
         if (ImGui::SliderFloat(
-                "Timeline", &timePosition, 0.0F, timeScale * waterfallHeight, "%.f")) {
-            camera_vec.y =
-                timePosition / (timeScale / imageHeightScale * static_cast<double>(waterfallHeight))
-                + waterfallStart.y;
+                "Timeline", &timePosition, 0.0F, timeScale * waterfallHeight, "%.0f")) {
+            camera_vec.y = timePosition
+                               / static_cast<float>(
+                                   timeScale / static_cast<double>(imageHeightScale)
+                                   * static_cast<double>(waterfallHeight))
+                           + waterfallStart.y;
             camera.setPosition(camera_vec);
         }
 
@@ -219,10 +264,10 @@ namespace mv
         y = static_cast<std::size_t>(
             std::round((static_cast<double>(y) - timeStartOffset) / timeScale));
 
-        std::next(azimuthWaterfalls.begin(), x / maxTextureSize)
+        std::next(azimuthWaterfalls.begin(), static_cast<std::ptrdiff_t>(x / maxTextureSize))
             ->setPixelValue(x % maxTextureSize, y, azimuth);
 
-        std::next(powerWaterfalls.begin(), x / maxTextureSize)
+        std::next(powerWaterfalls.begin(), static_cast<std::ptrdiff_t>(x / maxTextureSize))
             ->setPixelValue(x % maxTextureSize, y, power);
     }
 
@@ -254,7 +299,8 @@ namespace mv
                 {
                     static_cast<float>(detection.width) * frequency_scale,
                     static_cast<float>(detection.height)
-                        / static_cast<float>(waterfallHeight * timeScale) * imageHeightScale,
+                        / static_cast<float>(static_cast<double>(waterfallHeight) * timeScale)
+                        * imageHeightScale,
                     1.0F,
                 });
 

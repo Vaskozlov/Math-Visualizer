@@ -9,7 +9,7 @@ namespace mvl::ast
     {
     public:
         ccl::parser::ast::SharedNode<> node;
-        ccl::parser::ast::SharedNode<> power;
+        ccl::parser::ast::SharedNode<> powerNode;
 
         Power(const ccl::SmallId id, const ccl::parser::ast::SmallVectorOfNodes &initial_nodes)
           : MathNode{id}
@@ -17,7 +17,7 @@ namespace mvl::ast
             node = initial_nodes[0];
 
             if (initial_nodes.size() != 1) {
-                power = initial_nodes[2];
+                powerNode = initial_nodes[2];
             }
         }
 
@@ -38,8 +38,8 @@ namespace mvl::ast
             const auto inner_derivation = callDerivationX(node.get(), x, y);
             const auto inner_value = callCompute(node.get(), x, y);
 
-            if (power != nullptr) {
-                auto power = callCompute(this->power.get(), x, y);
+            if (powerNode != nullptr) {
+                auto power = callCompute(this->powerNode.get(), x, y);
 
                 return inner_derivation * power * std::pow(inner_value, power - 1);
             }
@@ -52,8 +52,8 @@ namespace mvl::ast
             const auto inner_derivation = callDerivationY(node.get(), x, y);
             const auto inner_value = callCompute(node.get(), x, y);
 
-            if (power != nullptr) {
-                auto power = callCompute(this->power.get(), x, y);
+            if (powerNode != nullptr) {
+                auto power = callCompute(this->powerNode.get(), x, y);
 
                 return inner_derivation * power * std::pow(inner_value, power - 1);
             }
@@ -65,8 +65,8 @@ namespace mvl::ast
         {
             const auto value = callCompute(node.get(), x, y);
 
-            if (power != nullptr) {
-                const auto p = callCompute(power.get(), x, y);
+            if (powerNode != nullptr) {
+                const auto p = callCompute(powerNode.get(), x, y);
                 return std::pow(value, p);
             }
 
@@ -86,9 +86,9 @@ namespace mvl::ast
                     return node;
                 }
 
-                if (power != nullptr) {
+                if (powerNode != nullptr) {
                     ++index;
-                    return power;
+                    return powerNode;
                 }
 
                 ++index;

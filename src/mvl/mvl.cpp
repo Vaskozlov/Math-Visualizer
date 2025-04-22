@@ -15,7 +15,7 @@ namespace mvl
     static ccl::parser::reader::ParserBuilder &constructor = reader.getParserBuilder();
     static const ccl::lexer::LexicalAnalyzer &lexer = constructor.getLexicalAnalyzer();
     static const auto token_to_string = constructor.getIdToNameTranslationFunction();
-    static const ccl::parser::GllParser parser = constructor.buildGLL();
+    static const ccl::parser::GllParser mvlParser = constructor.buildGLL();
     static const auto conversion_table =
         astlang2::ast::AstlangNode::buildConversionTable(constructor);
 
@@ -23,7 +23,7 @@ namespace mvl
         -> isl::Task<astlang2::ast::SharedNode<astlang2::ast::AstlangNode>>
     {
         auto tokenizer = lexer.getTokenizer(source, filename);
-        auto [nodes, algorithm] = parser.parse(tokenizer);
+        auto [nodes, algorithm] = mvlParser.parse(tokenizer);
 
         if (nodes.size() != 1) {
             throw std::runtime_error{"Failed to parse the input"};
@@ -76,19 +76,19 @@ namespace mvl
 
     auto constructRoot(const isl::string_view input) -> ccl::parser::ast::SharedNode<ast::MathNode>
     {
-        static const auto &lexer = MathConstructor.getLexicalAnalyzer();
+        static const auto &mvl_lexer = MathConstructor.getLexicalAnalyzer();
         static auto to_str = MathConstructor.getIdToNameTranslationFunction();
         static auto parser = MathConstructor.buildGLL();
 
-        auto tokenizer = lexer.getTokenizer(input, "");
+        auto tokenizer = mvl_lexer.getTokenizer(input, "");
         auto [nodes, algorithm] = parser.parse(tokenizer);
         assert(nodes.size() < 2);
 
         nodes.front()->print("", false, to_str);
 
-        const auto conversion_table = ast::MathNode::buildConversionTable(MathConstructor);
+        const auto cvt_table = ast::MathNode::buildConversionTable(MathConstructor);
         auto *row_root = nodes.front().get();
-        row_root->cast(conversion_table);
+        row_root->cast(cvt_table);
 
         nodes.front().updateDeleter<ccl::parser::ast::Node>();
 
