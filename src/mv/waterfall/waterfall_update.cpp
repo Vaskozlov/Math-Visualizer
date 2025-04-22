@@ -119,8 +119,7 @@ namespace mv
         timePosition = (camera_vec.y - waterfallStart.y) * timeScale / imageHeightScale
                        * static_cast<double>(waterfallHeight);
 
-        const std::time_t time = static_cast<int64_t>(timePosition + timeStartOffset);
-        ;
+        const std::time_t time = static_cast<int64_t>(timePosition + timeStartOffset / 1000.0);
 
         fmt::format_to_n(
             timeFormattingBuffer.data(),
