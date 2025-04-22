@@ -51,12 +51,7 @@ namespace mv
             -> glm::mat4
         {
             return glm::ortho(
-                -1.0F * (1.0F / zoomX),
-                1.0F * (1.0F / zoomX),
-                -1.0F * (1.0F / zoomY),
-                1.0F * (1.0F / zoomY),
-                zNear,
-                zFar);
+                -1.0F / zoomX, 1.0F / zoomX, -1.0F / zoomY, 1.0F / zoomY, zNear, zFar);
         }
 
         [[nodiscard]] auto getCameraView() const -> glm::mat4

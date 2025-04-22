@@ -38,8 +38,10 @@ namespace mv::gl
             Texture texture;
 
         public:
-            WaterfallBase(const int width, const int height)
-              : pixels(std::make_unique<T[]>(static_cast<std::size_t>(width * height))) // NOLINT
+            WaterfallBase(const int width, const int height, const T color)
+              : pixels(
+                    std::make_unique_for_overwrite<T[]>(
+                        static_cast<std::size_t>(width * height))) // NOLINT
               , texture{
                     pixels.get(),
                     width,
@@ -48,7 +50,9 @@ namespace mv::gl
                     Mode,
                     TextureScaleFormat::NEAREST,
                 }
-            {}
+            {
+                std::fill(pixels.get(), pixels.get() + width * height, color);
+            }
 
             [[nodiscard]] auto getWidth() const -> std::size_t
             {
@@ -73,6 +77,10 @@ namespace mv::gl
             auto setPixelValue(const std::size_t x, const std::size_t y, const T &value) const
                 -> void
             {
+                if (x > texture.getWidth() || y > texture.getHeight()) {
+                    return;
+                }
+
                 pixels[y * texture.getWidth() + x] = value;
             }
 
@@ -91,10 +99,13 @@ namespace mv::gl
                 Texture::unbind();
             }
 
-            auto resize(const std::size_t new_width, const std::size_t new_height) -> void
+            auto resize(const std::size_t new_width, const std::size_t new_height, const T color)
+                -> void
             {
-                std::unique_ptr<T[]> new_pixels = std::make_unique<T[]>(
+                std::unique_ptr<T[]> new_pixels = std::make_unique_for_overwrite<T[]>(
                     static_cast<std::size_t>(new_width * new_height)); // NOLINT
+
+                std::fill(new_pixels.get(), new_pixels.get() + new_width * new_height, color);
 
                 for (std::size_t y = 0; y < std::min(texture.getHeight(), new_height); ++y) {
                     for (std::size_t x = 0; x < std::min(texture.getWidth(), new_width); ++x) {

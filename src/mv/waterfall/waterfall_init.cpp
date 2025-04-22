@@ -82,9 +82,6 @@ namespace mv
             waterfall.reload();
         }
 
-        azimuthWaterfallMask.reload();
-        powerWaterfallMask.reload();
-
         updateAzimuthUniform();
         updatePowerUniform();
     }

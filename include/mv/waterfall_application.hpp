@@ -1,16 +1,15 @@
 #ifndef MV_APPLICATION_WATERFALL_HPP
 #define MV_APPLICATION_WATERFALL_HPP
 
-#include "gl/instances_holder.hpp"
-#include "gl/shaders/color_shader.hpp"
-#include "gl/shaders/shader_with_positioning.hpp"
-
 #include <atomic>
 #include <imgui.h>
 #include <imgui_stdlib.h>
 #include <isl/shared_lib_loader.hpp>
 #include <list>
 #include <mv/application_2d.hpp>
+#include <mv/gl/instances_holder.hpp>
+#include <mv/gl/shaders/color_shader.hpp>
+#include <mv/gl/shaders/shader_with_positioning.hpp>
 #include <mv/gl/shape/rectangle.hpp>
 #include <mv/gl/shape/sphere.hpp>
 #include <mv/gl/texture.hpp>
@@ -37,8 +36,6 @@ namespace mv
     class Waterfall : public Application2D
     {
     protected:
-        static constexpr std::size_t imageSize = 512;
-
         std::array<char, 128> imguiWindowBufferTitle{};
         std::vector<std::function<void()>> commandsPipe;
 
@@ -51,8 +48,6 @@ namespace mv
         std::list<gl::Waterfall<gl::float16>> powerWaterfalls;
         std::list<gl::Waterfall<gl::float16>> azimuthWaterfalls;
 
-        gl::Waterfall<RGBA<std::uint8_t>> powerWaterfallMask{imageSize, imageSize};
-        gl::Waterfall<RGBA<std::uint8_t>> azimuthWaterfallMask{imageSize, imageSize};
         gl::InstancesHolder<gl::InstanceParameters> rectangleInstances;
         gl::shape::Rectangle rectangle{0.0F, 0.0F, 1.0F, 1.0F};
         gl::shape::Sphere sphere{0.1F};
@@ -76,14 +71,15 @@ namespace mv
         float powerHigh = 100.0F;
 
         float frequencyPosition = 0.0F;
+        float timePosition = 0.0;
 
         std::size_t maxTextureSize;
         std::mutex updateMutex;
 
         std::atomic_flag continueFlag{false};
 
-        std::size_t waterfallWidth{imageSize};
-        std::size_t waterfallHeight{imageSize};
+        std::size_t waterfallWidth{};
+        std::size_t waterfallHeight{};
 
         std::vector<RectWithAzimuthAndPower> detections;
 
@@ -111,7 +107,9 @@ namespace mv
         static constexpr float maxPower = 100.0F;
 
         double frequencyScale = 1.0F;
+        double frequencyStartOffset = 0.0;
         double timeScale = 1.0F;
+        double timeStartOffset = 0.0;
 
         static constexpr RGBA<uint8_t> white{255, 255, 255, 255};
 
@@ -186,7 +184,13 @@ namespace mv
 
         auto onScroll(double x_offset, double y_offset) -> void override;
 
-        auto resizeImages(std::size_t width, std::size_t height) -> void;
+        auto resizeImages(
+            std::size_t width, std::size_t height, gl::float16 default_azimuth,
+            gl::float16 default_power) -> void;
+
+        auto resizeToFit(
+            double max_frequency, std::size_t max_time, gl::float16 default_azimuth,
+            gl::float16 default_power) -> void;
 
         auto addRect(const RectWithAzimuthAndPower &detection) -> void
         {

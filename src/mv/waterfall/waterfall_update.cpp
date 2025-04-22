@@ -2,7 +2,25 @@
 
 namespace mv
 {
-    auto Waterfall::resizeImages(const std::size_t width, const std::size_t height) -> void
+    auto Waterfall::resizeToFit(
+        const double max_frequency, const std::size_t max_time, const gl::float16 default_azimuth,
+        const gl::float16 default_power) -> void
+    {
+        resizeImages(
+            static_cast<std::size_t>(
+                std::ceil((max_frequency - frequencyStartOffset) / frequencyScale)),
+            static_cast<std::size_t>(
+                std::ceil((static_cast<double>(max_time) - timeStartOffset) / timeScale))
+                + 1,
+            default_azimuth,
+            default_power);
+    }
+
+    auto Waterfall::resizeImages(
+        const std::size_t width,
+        const std::size_t height,
+        const gl::float16 default_azimuth,
+        const gl::float16 default_power) -> void
     {
         waterfallWidth = width;
         waterfallHeight = height;
@@ -11,28 +29,32 @@ namespace mv
 
         for (; i < width / maxTextureSize; ++i) {
             if (powerWaterfalls.size() == i) {
-                powerWaterfalls.emplace_back(maxTextureSize, height);
+                powerWaterfalls.emplace_back(maxTextureSize, height, default_power);
             } else {
-                std::next(powerWaterfalls.begin(), i)->resize(maxTextureSize, height);
+                std::next(powerWaterfalls.begin(), i)
+                    ->resize(maxTextureSize, height, default_power);
             }
 
             if (azimuthWaterfalls.size() == i) {
-                azimuthWaterfalls.emplace_back(maxTextureSize, height);
+                azimuthWaterfalls.emplace_back(maxTextureSize, height, default_azimuth);
             } else {
-                std::next(azimuthWaterfalls.begin(), i)->resize(maxTextureSize, height);
+                std::next(azimuthWaterfalls.begin(), i)
+                    ->resize(maxTextureSize, height, default_azimuth);
             }
         }
 
         if (powerWaterfalls.size() == i) {
-            powerWaterfalls.emplace_back(width % maxTextureSize, height);
+            powerWaterfalls.emplace_back(width % maxTextureSize, height, default_power);
         } else {
-            std::next(powerWaterfalls.begin(), i)->resize(width % maxTextureSize, height);
+            std::next(powerWaterfalls.begin(), i)
+                ->resize(width % maxTextureSize, height, default_power);
         }
 
         if (azimuthWaterfalls.size() == i) {
-            azimuthWaterfalls.emplace_back(width % maxTextureSize, height);
+            azimuthWaterfalls.emplace_back(width % maxTextureSize, height, default_azimuth);
         } else {
-            std::next(azimuthWaterfalls.begin(), i)->resize(width % maxTextureSize, height);
+            std::next(azimuthWaterfalls.begin(), i)
+                ->resize(width % maxTextureSize, height, default_azimuth);
         }
 
         drawDetections();
@@ -64,10 +86,11 @@ namespace mv
 
         frequencyPosition = (-waterfallStart.x + camera_vec.x) / frequency_scale / 1e3F;
 
+        timePosition = (-waterfallStart.y + camera_vec.y) * timeScale / imageHeightScale
+                       * static_cast<double>(waterfallHeight);
+
         ImGui::Text(
-            "x-axis: %.0f\ny-axis: %.0f",
-            frequencyPosition,
-            camera_vec.y * waterfallHeight * timeScale / imageHeightScale);
+            "x-axis: %.0f\ny-axis: %.0f", frequencyPosition, timePosition + timeStartOffset);
 
         ImGui::SliderFloat("Font scale", &fontScale, 0.2, 1.5);
 
@@ -98,12 +121,20 @@ namespace mv
         }
 
         if (ImGui::SliderFloat(
-                "Camera position",
+                "Frequency position",
                 &frequencyPosition,
                 0.0F,
                 waterfallWidth * frequencyScale / 1e3F,
                 "%.0f")) {
             camera_vec.x = frequencyPosition * frequency_scale * 1e3F + waterfallStart.x;
+            camera.setPosition(camera_vec);
+        }
+
+        if (ImGui::SliderFloat(
+                "Timeline", &timePosition, 0.0F, timeScale * waterfallHeight, "%.f")) {
+            camera_vec.y =
+                timePosition / (timeScale / imageHeightScale * static_cast<double>(waterfallHeight))
+                + waterfallStart.y;
             camera.setPosition(camera_vec);
         }
 
@@ -118,27 +149,16 @@ namespace mv
             camera.setPosition({0.0F, 0.0F, 1.0F});
         }
 
-        if (ImGui::Checkbox("Azimuth points", &showAzimuthPoints)) {
-            showPowerPoints = !showPowerPoints;
-        }
+        ImGui::Checkbox("Azimuth points", &showAzimuthPoints);
 
         ImGui::SameLine();
-
-        if (ImGui::Checkbox("Power points", &showPowerPoints)) {
-            showAzimuthPoints = !showAzimuthPoints;
-        }
+        ImGui::Checkbox("Power points", &showPowerPoints);
 
         ImGui::SameLine();
-
-        if (ImGui::Checkbox("Azimuth detections", &showDetectionAzimuth)) {
-            showDetectionPower = !showDetectionPower;
-        }
+        ImGui::Checkbox("Azimuth detections", &showDetectionAzimuth);
 
         ImGui::SameLine();
-
-        if (ImGui::Checkbox("Power detections", &showDetectionPower)) {
-            showDetectionAzimuth = !showDetectionAzimuth;
-        }
+        ImGui::Checkbox("Power detections", &showDetectionPower);
 
         const auto projection =
             getCameraProjection(imageWidthScale, imageHeightScale) * getCameraView();
@@ -158,14 +178,6 @@ namespace mv
         if (showDetectionPower) {
             drawPowerDetections(projection, offset_width_scale);
         }
-
-        shaderHsvWithModel->use();
-        shaderHsvWithModel->setMat4("projection", projection);
-
-        rectangle.vao.bind();
-
-        glDrawArraysInstanced(
-            GL_TRIANGLE_FAN, 0, rectangle.vertices.size(), rectangleInstances.models.size());
 
         ImGui::PopFont();
         ImGui::End();
@@ -197,15 +209,16 @@ namespace mv
         for (const auto &waterfall : powerWaterfalls) {
             waterfall.reload();
         }
-
-        azimuthWaterfallMask.reload();
-        powerWaterfallMask.reload();
     }
 
     auto Waterfall::setPixel(
-        const std::size_t x, const std::size_t y, const gl::float16 azimuth,
-        const gl::float16 power) const -> void
+        std::size_t x, std::size_t y, const gl::float16 azimuth, const gl::float16 power) const
+        -> void
     {
+        x = static_cast<std::size_t>(std::round(static_cast<double>(x) / frequencyScale));
+        y = static_cast<std::size_t>(
+            std::round((static_cast<double>(y) - timeStartOffset) / timeScale));
+
         std::next(azimuthWaterfalls.begin(), x / maxTextureSize)
             ->setPixelValue(x % maxTextureSize, y, azimuth);
 
@@ -218,8 +231,10 @@ namespace mv
         rectangleInstances.models.clear();
         rectangleInstances.models.reserve(detections.size());
 
-        const auto frequency_scale = 2.0F / static_cast<float>(frequencyScale)
-                                     / static_cast<float>(powerWaterfalls.size() * maxTextureSize);
+        const auto frequency_scale =
+            2.0F
+            / (static_cast<float>(frequencyScale)
+               * static_cast<float>(powerWaterfalls.size() * maxTextureSize));
 
         for (const auto &detection : detections) {
             auto trans = glm::mat4(1.0F);
@@ -228,7 +243,7 @@ namespace mv
                 trans,
                 {
                     static_cast<float>(detection.x) * frequency_scale + waterfallStart.x,
-                    static_cast<float>(detection.y)
+                    static_cast<float>(static_cast<double>(detection.y) - timeStartOffset)
                             / static_cast<float>(waterfallHeight * timeScale) * imageHeightScale
                         + waterfallStart.y,
                     0.0001F,
@@ -327,8 +342,7 @@ namespace mv
             GL_TRIANGLE_FAN, 0, rectangle.vertices.size(), rectangleInstances.models.size());
     }
 
-    auto Waterfall::drawPowerDetections(
-        const glm::mat4 &projection, const float offset_width_scale) const -> void
+    auto Waterfall::drawPowerDetections(const glm::mat4 &projection, const float) const -> void
     {
         shaderLinearWithModel->use();
         shaderLinearWithModel->setMat4("projection", projection);
