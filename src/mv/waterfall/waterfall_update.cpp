@@ -119,17 +119,17 @@ namespace mv
         timePosition = (camera_vec.y - waterfallStart.y) * timeScale / imageHeightScale
                        * static_cast<double>(waterfallHeight);
 
-        const std::time_t time = static_cast<int64_t>(timePosition + timeStartOffset / 1000.0);
+        const auto time = static_cast<int64_t>(static_cast<double>(timePosition) + timeStartOffset);
 
         fmt::format_to_n(
             timeFormattingBuffer.data(),
             timeFormattingBuffer.size(),
             "{:%Y-%m-%d %H:%M:%S}.{:03}",
-            fmt::localtime(time),
+            fmt::localtime(time / 1000),
             time % 1000);
 
         ImGui::Text(
-            "x-axis: %.0f\ny-axis: %.0f %s",
+            "x-axis: %.0f\ny-axis: %.0f ms = %s",
             frequencyPosition,
             timePosition + timeStartOffset,
             timeFormattingBuffer.data());
