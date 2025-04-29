@@ -280,6 +280,8 @@ namespace mv
             / (static_cast<float>(frequencyScale)
                * static_cast<float>(powerWaterfalls.size() * maxTextureSize));
 
+        float index = 0.0F;
+
         for (const auto &detection : detections) {
             auto trans = glm::mat4(1.0F);
 
@@ -290,7 +292,7 @@ namespace mv
                     static_cast<float>(static_cast<double>(detection.y) - timeStartOffset)
                             / static_cast<float>(waterfallHeight * timeScale) * imageHeightScale
                         + waterfallStart.y,
-                    0.0001F,
+                    0.00001F + index,
                 });
 
             trans = glm::scale(
@@ -311,6 +313,7 @@ namespace mv
                     0.0F,
                 },
                 trans);
+            index += 0.00001F;
         }
 
         rectangleInstances.loadData();
