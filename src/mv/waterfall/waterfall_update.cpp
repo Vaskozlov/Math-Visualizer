@@ -270,6 +270,26 @@ namespace mv
             ->setPixelValue(x % maxTextureSize, y, power);
     }
 
+    auto Waterfall::setPixelAzimuth(std::size_t x, std::size_t y, const gl::float16 azimuth) const -> void
+    {
+        x = static_cast<std::size_t>(std::round(static_cast<double>(x) / frequencyScale));
+        y = static_cast<std::size_t>(
+            std::round((static_cast<double>(y) - timeStartOffset) / timeScale));
+
+        std::next(azimuthWaterfalls.begin(), static_cast<std::ptrdiff_t>(x / maxTextureSize))
+            ->setPixelValue(x % maxTextureSize, y, azimuth);
+    }
+
+    auto Waterfall::setPixelPower(std::size_t x, std::size_t y, const gl::float16 power) const -> void
+    {
+        x = static_cast<std::size_t>(std::round(static_cast<double>(x) / frequencyScale));
+        y = static_cast<std::size_t>(
+            std::round((static_cast<double>(y) - timeStartOffset) / timeScale));
+
+        std::next(powerWaterfalls.begin(), static_cast<std::ptrdiff_t>(x / maxTextureSize))
+            ->setPixelValue(x % maxTextureSize, y, power);
+    }
+
     auto Waterfall::drawDetections() -> void
     {
         rectangleInstances.models.clear();

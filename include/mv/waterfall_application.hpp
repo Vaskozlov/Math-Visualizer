@@ -173,6 +173,10 @@ namespace mv
         auto setPixel(std::size_t x, std::size_t y, gl::float16 azimuth, gl::float16 power) const
             -> void;
 
+        auto setPixelAzimuth(std::size_t x, std::size_t y, gl::float16 azimuth) const -> void;
+
+        auto setPixelPower(std::size_t x, std::size_t y, gl::float16 power) const -> void;
+
         [[nodiscard]] auto getAzimuthWaterfalls() const
             -> const std::list<gl::Waterfall<gl::float16>> &
         {
