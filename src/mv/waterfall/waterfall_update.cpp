@@ -122,17 +122,40 @@ namespace mv
         const auto time = static_cast<int64_t>(static_cast<double>(timePosition) + timeStartOffset);
 
         fmt::format_to_n(
-            timeFormattingBuffer.data(),
-            timeFormattingBuffer.size(),
+            timeFormattingBuffer1.data(),
+            timeFormattingBuffer1.size(),
             "{:%Y-%m-%d %H:%M:%S}.{:03}",
             fmt::localtime(time / 1000),
             time % 1000);
 
+        const glm::vec2 scenePoint = getPointOn2DScene();
+
+        mouseWordX = scenePoint.x;
+        mouseWordY = scenePoint.y;
+
+        const auto mouseFrequency = (scenePoint.x - waterfallStart.x) / frequency_scale / 1e3F;
+        const auto mouseTime = static_cast<int64_t>(
+            (scenePoint.y - waterfallStart.y) * timeScale / imageHeightScale
+                * static_cast<double>(waterfallHeight)
+            + timeStartOffset);
+
+        fmt::format_to_n(
+            timeFormattingBuffer2.data(),
+            timeFormattingBuffer2.size(),
+            "{:%Y-%m-%d %H:%M:%S}.{:03}",
+            fmt::localtime(mouseTime / 1000),
+            mouseTime % 1000);
+
         ImGui::Text(
-            "x-axis: %.0f\ny-axis: %.0f ms = %s",
+            "x-axis: %.0f\n"
+            "y-axis: %.0f ms = %s\n"
+            "mouse frequency: %.0f, time: %ld = %s",
             frequencyPosition,
             timePosition + timeStartOffset,
-            timeFormattingBuffer.data());
+            timeFormattingBuffer1.data(),
+            mouseFrequency,
+            mouseTime,
+            timeFormattingBuffer2.data());
 
         ImGui::SliderFloat("Font scale", &fontScale, 0.2, 1.5);
 
@@ -204,8 +227,7 @@ namespace mv
         ImGui::SameLine();
         ImGui::Checkbox("Power detections", &showDetectionPower);
 
-        const auto projection =
-            getCameraProjection(imageWidthScale, imageHeightScale) * getCameraView();
+        const auto projection = getResultedViewMatrix();
 
         if (showAzimuthPoints) {
             drawAzimuthWaterfalls(projection, offset_width_scale);
@@ -270,7 +292,8 @@ namespace mv
             ->setPixelValue(x % maxTextureSize, y, power);
     }
 
-    auto Waterfall::setPixelAzimuth(std::size_t x, std::size_t y, const gl::float16 azimuth) const -> void
+    auto Waterfall::setPixelAzimuth(std::size_t x, std::size_t y, const gl::float16 azimuth) const
+        -> void
     {
         x = static_cast<std::size_t>(std::round(static_cast<double>(x) / frequencyScale));
         y = static_cast<std::size_t>(
@@ -280,7 +303,8 @@ namespace mv
             ->setPixelValue(x % maxTextureSize, y, azimuth);
     }
 
-    auto Waterfall::setPixelPower(std::size_t x, std::size_t y, const gl::float16 power) const -> void
+    auto Waterfall::setPixelPower(std::size_t x, std::size_t y, const gl::float16 power) const
+        -> void
     {
         x = static_cast<std::size_t>(std::round(static_cast<double>(x) / frequencyScale));
         y = static_cast<std::size_t>(

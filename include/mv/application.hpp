@@ -41,7 +41,7 @@ namespace mv
 
         virtual ~Application();
 
-        [[nodiscard]] auto getCameraProjection() const -> glm::mat4
+        [[nodiscard]] virtual auto getCameraProjection() const -> glm::mat4
         {
             return glm::perspective(
                 glm::radians(camera.getZoom()), windowWidth / windowHeight, zNear, zFar);

@@ -37,7 +37,8 @@ namespace mv
     {
     private:
         std::array<char, 128> imguiWindowBufferTitle{};
-        std::array<char, 128> timeFormattingBuffer{};
+        std::array<char, 64> timeFormattingBuffer1{};
+        std::array<char, 64> timeFormattingBuffer2{};
 
     protected:
         std::vector<std::function<void()>> commandsPipe;
@@ -75,6 +76,12 @@ namespace mv
 
         float frequencyPosition = 0.0F;
         float timePosition = 0.0;
+
+        float mouseWordX = 0.0F;
+        float mouseWordY = 0.0F;
+
+        float mouseX = 0.0F;
+        float mouseY = 0.0F;
 
         std::size_t maxTextureSize;
         std::mutex updateMutex;
@@ -145,6 +152,8 @@ namespace mv
 
         auto processInput() -> void override;
 
+        auto onMouseMovement(double x_pos_in, double y_pos_in) -> void override;
+
         auto onMouseRelativeMovement(double delta_x, double delta_y) -> void override;
 
         auto changeWidthScale(float scale_difference) -> void;
@@ -152,6 +161,8 @@ namespace mv
         auto changeHeightScale(float scale_difference) -> void;
 
         auto onScroll(double x_offset, double y_offset) -> void override;
+
+        auto getCameraProjection() const -> glm::mat4 override;
 
         auto resizeImages(
             std::size_t width, std::size_t height, gl::float16 default_azimuth,
@@ -221,6 +232,8 @@ namespace mv
 
         auto drawPowerDetections(const glm::mat4 &projection, float offset_width_scale) const
             -> void;
+
+        glm::vec2 getPointOn2DScene() const;
     };
 } // namespace mv
 

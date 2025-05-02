@@ -30,6 +30,16 @@ namespace mv
         }
     }
 
+    auto Waterfall::onMouseMovement(const double x_pos_in, const double y_pos_in) -> void
+    {
+        if (isInFocus) {
+            mouseX = static_cast<float>(x_pos_in);
+            mouseY = static_cast<float>(y_pos_in);
+        }
+
+        Application2D::onMouseMovement(x_pos_in, y_pos_in);
+    }
+
     auto Waterfall::onMouseRelativeMovement(const double delta_x, const double delta_y) -> void
     {
         const auto scale = camera.getZoom() / 200.0F;
@@ -71,5 +81,24 @@ namespace mv
             changeHeightScale(
                 static_cast<float>(x_offset + y_offset) * scale * maxHeightScale / maxWidthScale);
         }
+    }
+
+    auto Waterfall::getCameraProjection() const -> glm::mat4
+    {
+        return Application::getCameraProjection(imageWidthScale, imageHeightScale);
+    }
+
+    glm::vec2 Waterfall::getPointOn2DScene() const
+    {
+        const float x = (2.0F * static_cast<float>(mouseX)) / windowWidth - 1.0f;
+        const float y = 1.0F - (2.0F * static_cast<float>(mouseY)) / windowHeight;
+
+        const glm::vec4 screen_position{x, y, 0.0F, 1.0F};
+
+        const auto inv_view_projection = glm::inverse(getResultedViewMatrix());
+        auto worldPos = inv_view_projection * screen_position;
+        worldPos /= worldPos.w;
+
+        return glm::vec2(worldPos);
     }
 } // namespace mv
