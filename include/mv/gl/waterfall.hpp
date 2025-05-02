@@ -99,6 +99,7 @@ namespace mv::gl
             {
                 if (new_width == texture.getWidth()) {
                     pixels.resize(new_width * new_height, color);
+                    texture.resize(pixels.data(), new_width, new_height);
                     return;
                 }
 
