@@ -60,6 +60,10 @@ namespace mv
         const gl::float16 default_azimuth,
         const gl::float16 default_power) -> void
     {
+        if (width == waterfallWidth && height <= waterfallHeight) {
+            return;
+        }
+
         waterfallWidth = width;
         waterfallHeight = height;
 
