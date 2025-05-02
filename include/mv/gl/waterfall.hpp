@@ -34,25 +34,21 @@ namespace mv::gl
         class WaterfallBase
         {
         protected:
-            std::unique_ptr<T[]> pixels{}; // NOLINT
+            std::vector<T> pixels;
             Texture texture;
 
         public:
             WaterfallBase(const int width, const int height, const T color)
-              : pixels(
-                    std::make_unique_for_overwrite<T[]>(
-                        static_cast<std::size_t>(width * height))) // NOLINT
+              : pixels(static_cast<std::size_t>(width * height), color)
               , texture{
-                    pixels.get(),
+                    pixels.data(),
                     width,
                     height,
                     TextureWrapMode::CLAMP_TO_BORDER,
                     Mode,
                     TextureScaleFormat::NEAREST,
                 }
-            {
-                std::fill(pixels.get(), pixels.get() + width * height, color);
-            }
+            {}
 
             [[nodiscard]] auto getWidth() const -> std::size_t
             {
@@ -74,8 +70,7 @@ namespace mv::gl
                 return texture.getTextureId();
             }
 
-            auto setPixelValue(const std::size_t x, const std::size_t y, const T &value) const
-                -> void
+            auto setPixelValue(const std::size_t x, const std::size_t y, const T &value) -> void
             {
                 if (x > texture.getWidth() || y > texture.getHeight()) {
                     return;
@@ -102,10 +97,12 @@ namespace mv::gl
             auto resize(const std::size_t new_width, const std::size_t new_height, const T color)
                 -> void
             {
-                std::unique_ptr<T[]> new_pixels = std::make_unique_for_overwrite<T[]>(
-                    static_cast<std::size_t>(new_width * new_height)); // NOLINT
+                if (new_width == texture.getWidth()) {
+                    pixels.resize(new_width * new_height, color);
+                    return;
+                }
 
-                std::fill(new_pixels.get(), new_pixels.get() + new_width * new_height, color);
+                std::vector<T> new_pixels(new_width * new_height, color);
 
                 for (std::size_t y = 0; y < std::min(texture.getHeight(), new_height); ++y) {
                     for (std::size_t x = 0; x < std::min(texture.getWidth(), new_width); ++x) {
@@ -114,10 +111,10 @@ namespace mv::gl
                 }
 
                 pixels = std::move(new_pixels);
-                texture.resize(pixels.get(), new_width, new_height);
+                texture.resize(pixels.data(), new_width, new_height);
             }
 
-            auto fill(T color) const -> void
+            auto fill(T color) -> void
             {
                 for (std::size_t i = 0; i < texture.getWidth() * texture.getHeight(); ++i) {
                     pixels[i] = color;
@@ -126,7 +123,7 @@ namespace mv::gl
                 reload();
             }
 
-            auto fillRect(const Rect &rect, T color) const -> void
+            auto fillRect(const Rect &rect, T color) -> void
             {
                 const auto start_x = std::clamp<std::size_t>(rect.x, 0, getWidth());
                 const auto start_y = std::clamp<std::size_t>(rect.y, 0, getHeight());
@@ -140,8 +137,8 @@ namespace mv::gl
                 }
             }
 
-            auto drawRectangleBorder(
-                const Rect &rect, T color, const std::uint16_t line_thickness) const -> void
+            auto drawRectangleBorder(const Rect &rect, T color, const std::uint16_t line_thickness)
+                -> void
             {
                 const auto line_left_offset = static_cast<isl::ssize_t>(
                     std::floor(static_cast<float>(line_thickness) / 2.0f));

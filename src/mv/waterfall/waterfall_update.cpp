@@ -249,16 +249,16 @@ namespace mv
         ImGui::End();
     }
 
-    auto Waterfall::fill(const float value) const -> void
+    auto Waterfall::fill(const float value) -> void
     {
-        for (const auto &waterfall : azimuthWaterfalls) {
+        for (auto &waterfall : azimuthWaterfalls) {
             waterfall.fill(static_cast<gl::float16>(value));
 
             glBindTexture(GL_TEXTURE_2D, waterfall.getTextureId());
             glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, value);
         }
 
-        for (const auto &waterfall : powerWaterfalls) {
+        for (auto &waterfall : powerWaterfalls) {
             waterfall.fill(static_cast<gl::float16>(value));
 
             glBindTexture(GL_TEXTURE_2D, waterfall.getTextureId());
@@ -278,8 +278,7 @@ namespace mv
     }
 
     auto Waterfall::setPixel(
-        std::size_t x, std::size_t y, const gl::float16 azimuth, const gl::float16 power) const
-        -> void
+        std::size_t x, std::size_t y, const gl::float16 azimuth, const gl::float16 power) -> void
     {
         x = static_cast<std::size_t>(std::round(static_cast<double>(x) / frequencyScale));
         y = static_cast<std::size_t>(
@@ -292,8 +291,7 @@ namespace mv
             ->setPixelValue(x % maxTextureSize, y, power);
     }
 
-    auto Waterfall::setPixelAzimuth(std::size_t x, std::size_t y, const gl::float16 azimuth) const
-        -> void
+    auto Waterfall::setPixelAzimuth(std::size_t x, std::size_t y, const gl::float16 azimuth) -> void
     {
         x = static_cast<std::size_t>(std::round(static_cast<double>(x) / frequencyScale));
         y = static_cast<std::size_t>(
@@ -303,8 +301,7 @@ namespace mv
             ->setPixelValue(x % maxTextureSize, y, azimuth);
     }
 
-    auto Waterfall::setPixelPower(std::size_t x, std::size_t y, const gl::float16 power) const
-        -> void
+    auto Waterfall::setPixelPower(std::size_t x, std::size_t y, const gl::float16 power) -> void
     {
         x = static_cast<std::size_t>(std::round(static_cast<double>(x) / frequencyScale));
         y = static_cast<std::size_t>(

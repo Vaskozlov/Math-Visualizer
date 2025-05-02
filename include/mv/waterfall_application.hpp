@@ -177,16 +177,15 @@ namespace mv
             detections.emplace_back(detection);
         }
 
-        auto fill(float value) const -> void;
+        auto fill(float value) -> void;
 
         auto reloadImages() const -> void;
 
-        auto setPixel(std::size_t x, std::size_t y, gl::float16 azimuth, gl::float16 power) const
-            -> void;
+        auto setPixel(std::size_t x, std::size_t y, gl::float16 azimuth, gl::float16 power) -> void;
 
-        auto setPixelAzimuth(std::size_t x, std::size_t y, gl::float16 azimuth) const -> void;
+        auto setPixelAzimuth(std::size_t x, std::size_t y, gl::float16 azimuth) -> void;
 
-        auto setPixelPower(std::size_t x, std::size_t y, gl::float16 power) const -> void;
+        auto setPixelPower(std::size_t x, std::size_t y, gl::float16 power) -> void;
 
         [[nodiscard]] auto getAzimuthWaterfalls() const
             -> const std::list<gl::Waterfall<gl::float16>> &
