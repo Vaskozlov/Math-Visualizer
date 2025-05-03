@@ -3,6 +3,7 @@
 
 #include <ccl/text/text_iterator.hpp>
 #include <glm/glm.hpp>
+#include <isl/float16.hpp>
 #include <isl/range.hpp>
 #include <mv/color.hpp>
 #include <mv/gl/texture.hpp>
@@ -10,24 +11,6 @@
 
 namespace mv::gl
 {
-    struct float16
-    {
-    private:
-        glm::detail::hdata data = glm::detail::toFloat16(0.0F);
-
-    public:
-        float16() = default;
-
-        explicit float16(const float value)
-          : data{glm::detail::toFloat16(value)}
-        {}
-
-        explicit operator float() const
-        {
-            return glm::detail::toFloat32(data);
-        }
-    };
-
     namespace detail
     {
         template <typename T, TextureMode Mode>
@@ -238,7 +221,7 @@ namespace mv::gl
     };
 
     template <>
-    class Waterfall<float16> : public detail::WaterfallBase<float16, TextureMode::F16>
+    class Waterfall<isl::float16> : public detail::WaterfallBase<isl::float16, TextureMode::F16>
     {
     public:
         using WaterfallBase::WaterfallBase;

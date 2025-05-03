@@ -41,8 +41,8 @@ namespace mv
     }
 
     auto Waterfall::resizeToFit(
-        const double max_frequency, const std::size_t max_time, const gl::float16 default_azimuth,
-        const gl::float16 default_power) -> void
+        const double max_frequency, const std::size_t max_time, const isl::float16 default_azimuth,
+        const isl::float16 default_power) -> void
     {
         resizeImages(
             static_cast<std::size_t>(
@@ -57,8 +57,8 @@ namespace mv
     auto Waterfall::resizeImages(
         const std::size_t width,
         const std::size_t height,
-        const gl::float16 default_azimuth,
-        const gl::float16 default_power) -> void
+        const isl::float16 default_azimuth,
+        const isl::float16 default_power) -> void
     {
         if (width == waterfallWidth && height <= waterfallHeight) {
             return;
@@ -256,14 +256,14 @@ namespace mv
     auto Waterfall::fill(const float value) -> void
     {
         for (auto &waterfall : azimuthWaterfalls) {
-            waterfall.fill(static_cast<gl::float16>(value));
+            waterfall.fill(static_cast<isl::float16>(value));
 
             glBindTexture(GL_TEXTURE_2D, waterfall.getTextureId());
             glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, value);
         }
 
         for (auto &waterfall : powerWaterfalls) {
-            waterfall.fill(static_cast<gl::float16>(value));
+            waterfall.fill(static_cast<isl::float16>(value));
 
             glBindTexture(GL_TEXTURE_2D, waterfall.getTextureId());
             glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, value);
@@ -282,7 +282,7 @@ namespace mv
     }
 
     auto Waterfall::setPixel(
-        std::size_t x, std::size_t y, const gl::float16 azimuth, const gl::float16 power) -> void
+        std::size_t x, std::size_t y, const isl::float16 azimuth, const isl::float16 power) -> void
     {
         x = static_cast<std::size_t>(std::round(static_cast<double>(x) / frequencyScale));
         y = static_cast<std::size_t>(
@@ -295,7 +295,8 @@ namespace mv
             ->setPixelValue(x % maxTextureSize, y, power);
     }
 
-    auto Waterfall::setPixelAzimuth(std::size_t x, std::size_t y, const gl::float16 azimuth) -> void
+    auto Waterfall::setPixelAzimuth(std::size_t x, std::size_t y, const isl::float16 azimuth)
+        -> void
     {
         x = static_cast<std::size_t>(std::round(static_cast<double>(x) / frequencyScale));
         y = static_cast<std::size_t>(
@@ -305,7 +306,7 @@ namespace mv
             ->setPixelValue(x % maxTextureSize, y, azimuth);
     }
 
-    auto Waterfall::setPixelPower(std::size_t x, std::size_t y, const gl::float16 power) -> void
+    auto Waterfall::setPixelPower(std::size_t x, std::size_t y, const isl::float16 power) -> void
     {
         x = static_cast<std::size_t>(std::round(static_cast<double>(x) / frequencyScale));
         y = static_cast<std::size_t>(

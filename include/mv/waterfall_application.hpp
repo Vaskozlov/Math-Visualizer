@@ -49,8 +49,8 @@ namespace mv
         Shader *shaderHsvWithModel = gl::getHsvShaderWithModel();
         Shader *shaderLinearWithModel = gl::getLinearShaderWithModel();
 
-        std::list<gl::Waterfall<gl::float16>> powerWaterfalls;
-        std::list<gl::Waterfall<gl::float16>> azimuthWaterfalls;
+        std::list<gl::Waterfall<isl::float16>> powerWaterfalls;
+        std::list<gl::Waterfall<isl::float16>> azimuthWaterfalls;
 
         gl::InstancesHolder<gl::InstanceParameters> rectangleInstances;
         gl::shape::Rectangle rectangle{0.0F, 0.0F, 1.0F, 1.0F};
@@ -165,12 +165,12 @@ namespace mv
         auto getCameraProjection() const -> glm::mat4 override;
 
         auto resizeImages(
-            std::size_t width, std::size_t height, gl::float16 default_azimuth,
-            gl::float16 default_power) -> void;
+            std::size_t width, std::size_t height, isl::float16 default_azimuth,
+            isl::float16 default_power) -> void;
 
         auto resizeToFit(
-            double max_frequency, std::size_t max_time, gl::float16 default_azimuth,
-            gl::float16 default_power) -> void;
+            double max_frequency, std::size_t max_time, isl::float16 default_azimuth,
+            isl::float16 default_power) -> void;
 
         auto addRect(const RectWithAzimuthAndPower &detection) -> void
         {
@@ -181,20 +181,21 @@ namespace mv
 
         auto reloadImages() const -> void;
 
-        auto setPixel(std::size_t x, std::size_t y, gl::float16 azimuth, gl::float16 power) -> void;
+        auto setPixel(std::size_t x, std::size_t y, isl::float16 azimuth, isl::float16 power)
+            -> void;
 
-        auto setPixelAzimuth(std::size_t x, std::size_t y, gl::float16 azimuth) -> void;
+        auto setPixelAzimuth(std::size_t x, std::size_t y, isl::float16 azimuth) -> void;
 
-        auto setPixelPower(std::size_t x, std::size_t y, gl::float16 power) -> void;
+        auto setPixelPower(std::size_t x, std::size_t y, isl::float16 power) -> void;
 
         [[nodiscard]] auto getAzimuthWaterfalls() const
-            -> const std::list<gl::Waterfall<gl::float16>> &
+            -> const std::list<gl::Waterfall<isl::float16>> &
         {
             return azimuthWaterfalls;
         }
 
         [[nodiscard]] auto getPowerWaterfalls() const
-            -> const std::list<gl::Waterfall<gl::float16>> &
+            -> const std::list<gl::Waterfall<isl::float16>> &
         {
             return powerWaterfalls;
         }

@@ -80,6 +80,10 @@ add_executable(
         programs/waterfall_application.cpp
 )
 
+if (CMAKE_CXX_COMPILER_ID MATCHES ".*Clang|GNU")
+    target_compile_options(waterfall PRIVATE -march=native)
+endif ()
+
 isl_set_target_flags(
         waterfall
         ${MV_STRICT_COMPILATION}
