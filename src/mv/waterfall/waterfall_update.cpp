@@ -259,35 +259,48 @@ namespace mv
         ImGui::End();
     }
 
-    auto Waterfall::fill(const float value) -> void
+    auto Waterfall::doFill(const float value) -> isl::Task<>
     {
+        const auto v = static_cast<isl::float16>(value);
+
         for (auto &waterfall : azimuthWaterfalls) {
-            waterfall.fill(static_cast<isl::float16>(value));
+            waterfall.fill(v);
 
             glBindTexture(GL_TEXTURE_2D, waterfall.getTextureId());
             glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, value);
         }
 
         for (auto &waterfall : powerWaterfalls) {
-            waterfall.fill(static_cast<isl::float16>(value));
+            waterfall.fill(v);
 
             glBindTexture(GL_TEXTURE_2D, waterfall.getTextureId());
             glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, value);
         }
+
+        co_return;
+    }
+
+    auto Waterfall::fill(const float value) -> isl::AsyncTask<void>
+    {
+        return submit(doFill(value));
+    }
+
+    auto Waterfall::doReloadImages() const -> isl::Task<>
+    {
+        for (const auto &waterfall : azimuthWaterfalls) {
+            waterfall.reload();
+        }
+
+        for (const auto &waterfall : powerWaterfalls) {
+            waterfall.reload();
+        }
+
+        co_return;
     }
 
     auto Waterfall::reloadImages() -> isl::AsyncTask<void>
     {
-        return submit([this]() -> isl::Task<> {
-            for (const auto &waterfall : azimuthWaterfalls) {
-                waterfall.reload();
-            }
-
-            for (const auto &waterfall : powerWaterfalls) {
-                waterfall.reload();
-            }
-            co_return;
-        }());
+        return submit(doReloadImages());
     }
 
     auto Waterfall::setPixel(
@@ -323,6 +336,18 @@ namespace mv
 
         std::next(powerWaterfalls.begin(), static_cast<std::ptrdiff_t>(x / maxTextureSize))
             ->setPixelValue(x % maxTextureSize, y, power);
+    }
+
+    auto Waterfall::doClear() -> isl::Task<>
+    {
+        azimuthWaterfalls.clear();
+        powerWaterfalls.clear();
+        detections.clear();
+        waterfallWidth = 0;
+        waterfallHeight = 0;
+        timeStartOffset = 0.0;
+        frequencyStartOffset = 0.0;
+        co_return;
     }
 
     auto Waterfall::drawDetections() -> void

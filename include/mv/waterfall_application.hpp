@@ -125,10 +125,6 @@ namespace mv
 
         ~Waterfall() override;
 
-        auto updateAzimuthUniform() const -> void;
-
-        auto updatePowerUniform() const -> void;
-
         auto clearDetections() -> void
         {
             detections.clear();
@@ -160,15 +156,9 @@ namespace mv
             double max_frequency, std::size_t max_time, isl::float16 default_azimuth,
             isl::float16 default_power) -> isl::AsyncTask<void>;
 
-        auto clear() -> void
+        auto clear() -> isl::AsyncTask<void>
         {
-            azimuthWaterfalls.clear();
-            powerWaterfalls.clear();
-            detections.clear();
-            waterfallWidth = 0;
-            waterfallHeight = 0;
-            timeStartOffset = 0.0;
-            frequencyStartOffset = 0.0;
+            return submit(doClear());
         }
 
         auto addRect(const RectWithAzimuthAndPower &detection) -> void
@@ -176,7 +166,7 @@ namespace mv
             detections.emplace_back(detection);
         }
 
-        auto fill(float value) -> void;
+        auto fill(float value) -> isl::AsyncTask<void>;
 
         auto reloadImages() -> isl::AsyncTask<void>;
 
@@ -211,9 +201,19 @@ namespace mv
             return true;
         }
 
+    private:
+        auto doFill(float value) -> isl::Task<>;
+
+        auto updateAzimuthUniform() const -> void;
+
+        auto updatePowerUniform() const -> void;
+
+        auto doClear() -> isl::Task<>;
+
         auto drawDetections() -> void;
 
-    private:
+        auto doReloadImages() const -> isl::Task<>;
+
         auto doResizeImages(
             std::size_t width, std::size_t height, isl::float16 default_azimuth,
             isl::float16 default_power) -> isl::Task<>;
