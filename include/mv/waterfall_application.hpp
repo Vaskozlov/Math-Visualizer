@@ -162,7 +162,7 @@ namespace mv
 
         auto onScroll(double x_offset, double y_offset) -> void override;
 
-        auto getCameraProjection() const -> glm::mat4 override;
+        [[nodiscard]] auto getCameraProjection() const -> glm::mat4 override;
 
         auto resizeImages(
             std::size_t width, std::size_t height, isl::float16 default_azimuth,
@@ -171,6 +171,16 @@ namespace mv
         auto resizeToFit(
             double max_frequency, std::size_t max_time, isl::float16 default_azimuth,
             isl::float16 default_power) -> void;
+
+        auto clear() -> void
+        {
+            powerWaterfalls.clear();
+            detections.clear();
+            waterfallWidth = 0;
+            waterfallHeight = 0;
+            timeStartOffset = 0.0;
+            frequencyStartOffset = 0.0;
+        }
 
         auto addRect(const RectWithAzimuthAndPower &detection) -> void
         {
