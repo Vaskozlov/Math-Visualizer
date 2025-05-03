@@ -67,6 +67,9 @@ namespace mv
 
     auto Application::update() -> void
     {
+        while (pool.executeOneTask()) {
+        }
+
         std::scoped_lock lock{onMainThreadExecutionQueueMutex};
 
         while (!onMainThreadExecutionQueue.empty()) {
@@ -120,6 +123,11 @@ namespace mv
         }
 
         camera.processMouseScroll(static_cast<float>(y_offset));
+    }
+
+    auto Application::submit(isl::Task<> task) -> isl::AsyncTask<void>
+    {
+        return pool.async(std::move(task));
     }
 
     auto Application::submit(const std::function<void()> &func) -> void

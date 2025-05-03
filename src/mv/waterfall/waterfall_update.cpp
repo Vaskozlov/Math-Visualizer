@@ -42,9 +42,9 @@ namespace mv
 
     auto Waterfall::resizeToFit(
         const double max_frequency, const std::size_t max_time, const isl::float16 default_azimuth,
-        const isl::float16 default_power) -> void
+        const isl::float16 default_power) -> isl::AsyncTask<void>
     {
-        resizeImages(
+        return resizeImages(
             static_cast<std::size_t>(
                 std::ceil((max_frequency - frequencyStartOffset) / frequencyScale)),
             static_cast<std::size_t>(
@@ -58,10 +58,17 @@ namespace mv
         const std::size_t width,
         const std::size_t height,
         const isl::float16 default_azimuth,
-        const isl::float16 default_power) -> void
+        const isl::float16 default_power) -> isl::AsyncTask<void>
+    {
+        return submit(doResizeImages(width, height, default_azimuth, default_power));
+    }
+
+    auto Waterfall::doResizeImages(
+        const std::size_t width, const std::size_t height, const isl::float16 default_azimuth,
+        const isl::float16 default_power) -> isl::Task<>
     {
         if (width == waterfallWidth && height <= waterfallHeight) {
-            return;
+            co_return;
         }
 
         waterfallWidth = width;
@@ -92,13 +99,12 @@ namespace mv
         }
 
         drawDetections();
+        co_return;
     }
 
     auto Waterfall::update() -> void
     {
         Application2D::update();
-
-        pollTask();
 
         fmt::format_to_n(
             imguiWindowBufferTitle.data(),
@@ -270,15 +276,18 @@ namespace mv
         }
     }
 
-    auto Waterfall::reloadImages() const -> void
+    auto Waterfall::reloadImages() -> isl::AsyncTask<void>
     {
-        for (const auto &waterfall : azimuthWaterfalls) {
-            waterfall.reload();
-        }
+        return submit([this]() -> isl::Task<> {
+            for (const auto &waterfall : azimuthWaterfalls) {
+                waterfall.reload();
+            }
 
-        for (const auto &waterfall : powerWaterfalls) {
-            waterfall.reload();
-        }
+            for (const auto &waterfall : powerWaterfalls) {
+                waterfall.reload();
+            }
+            co_return;
+        }());
     }
 
     auto Waterfall::setPixel(

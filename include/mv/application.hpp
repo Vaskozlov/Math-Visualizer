@@ -7,6 +7,8 @@
 #include <functional>
 #include <imgui.h>
 #include <isl/isl.hpp>
+#include <isl/thread/async_task.hpp>
+#include <isl/thread/pool.hpp>
 #include <mutex>
 #include <mv/camera.hpp>
 
@@ -15,6 +17,7 @@ namespace mv
     class Application
     {
     protected:
+        isl::thread::Pool pool{0, false};
         Camera camera;
         std::string title;
         glm::vec4 clearColor{0.0F, 0.0F, 0.0F, 1.0F};
@@ -79,6 +82,8 @@ namespace mv
             clearColor = clear_color;
             glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
         }
+
+        auto submit(isl::Task<> task) -> isl::AsyncTask<void>;
 
         auto submit(const std::function<void()> &func) -> void;
 

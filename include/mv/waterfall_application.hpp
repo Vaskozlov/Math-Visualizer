@@ -41,8 +41,6 @@ namespace mv
         std::array<char, 64> timeFormattingBuffer2{};
 
     protected:
-        std::vector<std::function<void()>> commandsPipe;
-
         Shader *waterfallShaderHsvF32 = getWaterfallShaderHsvF32();
         Shader *waterfallShaderLinearF32 = getWaterfallShaderLinearF32();
         Shader *colorShader = gl::getShaderWithPositioning();
@@ -138,16 +136,6 @@ namespace mv
 
         auto init() -> void override;
 
-        auto pollTask() -> void
-        {
-            const std::scoped_lock lock{updateMutex};
-
-            while (!commandsPipe.empty()) {
-                commandsPipe.back()();
-                commandsPipe.pop_back();
-            }
-        }
-
         auto update() -> void override;
 
         auto processInput() -> void override;
@@ -166,14 +154,15 @@ namespace mv
 
         auto resizeImages(
             std::size_t width, std::size_t height, isl::float16 default_azimuth,
-            isl::float16 default_power) -> void;
+            isl::float16 default_power) -> isl::AsyncTask<void>;
 
         auto resizeToFit(
             double max_frequency, std::size_t max_time, isl::float16 default_azimuth,
-            isl::float16 default_power) -> void;
+            isl::float16 default_power) -> isl::AsyncTask<void>;
 
         auto clear() -> void
         {
+            azimuthWaterfalls.clear();
             powerWaterfalls.clear();
             detections.clear();
             waterfallWidth = 0;
@@ -189,7 +178,7 @@ namespace mv
 
         auto fill(float value) -> void;
 
-        auto reloadImages() const -> void;
+        auto reloadImages() -> isl::AsyncTask<void>;
 
         auto setPixel(std::size_t x, std::size_t y, isl::float16 azimuth, isl::float16 power)
             -> void;
@@ -210,12 +199,6 @@ namespace mv
             return powerWaterfalls;
         }
 
-        auto pushCommand(std::function<void()> command) -> void
-        {
-            const std::scoped_lock lock{updateMutex};
-            commandsPipe.emplace_back(std::move(command));
-        }
-
         auto waitForFlag() -> bool
         {
             continueFlag.wait(false);
@@ -231,6 +214,10 @@ namespace mv
         auto drawDetections() -> void;
 
     private:
+        auto doResizeImages(
+            std::size_t width, std::size_t height, isl::float16 default_azimuth,
+            isl::float16 default_power) -> isl::Task<>;
+
         auto drawAzimuthWaterfalls(const glm::mat4 &projection, float offset_width_scale) const
             -> void;
 
@@ -243,7 +230,7 @@ namespace mv
         auto drawPowerDetections(const glm::mat4 &projection, float offset_width_scale) const
             -> void;
 
-        glm::vec2 getPointOn2DScene() const;
+        [[nodiscard]] auto getPointOn2DScene() const -> glm::vec2;
     };
 } // namespace mv
 

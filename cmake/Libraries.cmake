@@ -33,5 +33,5 @@ CPMAddPackage(
 CPMAddPackage(
         NAME ccl
         GITHUB_REPOSITORY Vaskozlov/ccl-project
-        GIT_TAG 639e26105e84e7c6788ad1800eb93a05b79adbff
+        GIT_TAG 1d5ddd26f9149549797180e2dfa13510a3138b39
 )
