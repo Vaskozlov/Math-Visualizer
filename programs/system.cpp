@@ -30,8 +30,8 @@ private:
 
     std::array<char, windowTitleBufferSize> imguiWindowBuffer{};
 
-    mv::Shader &colorShader = mv::gl::getColorShader();
-    mv::Shader &shaderWithPositioning = mv::gl::getShaderWithPositioning();
+    mv::Shader &colorShader = *mv::gl::getColorShader();
+    mv::Shader &shaderWithPositioning = *mv::gl::getShaderWithPositioning();
 
     mv::gl::shape::Axes2D plot{12, 0.009F};
 
@@ -93,8 +93,8 @@ public:
 
         auto iterations_difference = glm::vec2{std::numeric_limits<float>::infinity()};
 
-        while ((iterations_difference.x > epsilon || iterations_difference.y > epsilon) &&
-               it < maxIterations) {
+        while ((iterations_difference.x > epsilon || iterations_difference.y > epsilon)
+               && it < maxIterations) {
             auto a = upperEquation->derivationX(x, y);
             auto b = upperEquation->derivationY(x, y);
 
@@ -142,7 +142,8 @@ public:
             for (std::size_t j = 0; j != functionY.size(); ++j) {
                 if (std::abs(upperEquation->compute(functionX[i], functionY[j])) < plotEpsilon) {
                     addSphere(
-                        new_spheres, mv::Color::ORANGE,
+                        new_spheres,
+                        mv::Color::ORANGE,
                         {
                             functionX[i],
                             functionY[j],
@@ -153,7 +154,8 @@ public:
 
                 if (std::abs(lowerEquation->compute(functionX[i], functionY[j])) < plotEpsilon) {
                     addSphere(
-                        new_spheres, mv::Color::OLIVE,
+                        new_spheres,
+                        mv::Color::OLIVE,
                         {
                             functionX[i],
                             functionY[j],
@@ -211,8 +213,10 @@ public:
         Application2D::update();
 
         fmt::format_to_n(
-            imguiWindowBuffer.data(), imguiWindowBuffer.size(),
-            "Настройки. FPS: {:#.4}###SettingWindowTitle", ImGui::GetIO().Framerate);
+            imguiWindowBuffer.data(),
+            imguiWindowBuffer.size(),
+            "Настройки. FPS: {:#.4}###SettingWindowTitle",
+            ImGui::GetIO().Framerate);
 
         ImGui::Begin(imguiWindowBuffer.data());
         ImGui::PushFont(font);
@@ -222,7 +226,12 @@ public:
             "Computed in %zu iterations, x = %f, y = %f\n"
             "Start point: (%f, %f)\n"
             "Iterations difference: (%e, %e)\n",
-            iterations, answerX, answerY, startX, startY, iterationsDifference.x,
+            iterations,
+            answerX,
+            answerY,
+            startX,
+            startY,
+            iterationsDifference.x,
             iterationsDifference.y);
 
         ImGui::InputText("Upper equation", &upperInput);
@@ -337,7 +346,7 @@ public:
 
             glm::vec3 rayDirection = screenToWorldRay(mouseX, mouseY, width, height);
             glm::vec2 scenePoint = getPointOn2DScene(
-                camera.getPosition(), rayDirection, 0.0f);// Get 2D position on z = 0
+                camera.getPosition(), rayDirection, 0.0f); // Get 2D position on z = 0
 
             startX = scenePoint.x;
             startY = scenePoint.y;

@@ -408,31 +408,31 @@ public:
             functionGraph.loadData();
         }
 
-        colorShader.use();
-        colorShader.setMat4("projection", getResultedViewMatrix());
+        colorShader->use();
+        colorShader->setMat4("projection", getResultedViewMatrix());
 
-        colorShader.setMat4(
+        colorShader->setMat4(
             "model", glm::translate(glm::mat4(1.0F), glm::vec3{0.0F, 0.0F, -0.02F}));
-        colorShader.setVec4("elementColor", mv::Color::BLACK);
+        colorShader->setVec4("elementColor", mv::Color::BLACK);
 
         plot.draw();
 
-        colorShader.setVec4("elementColor", mv::Color::FOREST);
-        prism.drawAt(colorShader, {leftBorder, 0.0F, 0.0F});
+        colorShader->setVec4("elementColor", mv::Color::FOREST);
+        prism.drawAt(*colorShader, {leftBorder, 0.0F, 0.0F});
 
-        colorShader.setVec4("elementColor", mv::Color::NAVY);
-        prism.drawAt(colorShader, {rightBorder, 0.0F, 0.0F});
+        colorShader->setVec4("elementColor", mv::Color::NAVY);
+        prism.drawAt(*colorShader, {rightBorder, 0.0F, 0.0F});
 
-        colorShader.setMat4("model", glm::mat4(1.0F));
-        colorShader.setVec4("elementColor", mv::Color::DARK_ORANGE);
+        colorShader->setMat4("model", glm::mat4(1.0F));
+        colorShader->setVec4("elementColor", mv::Color::DARK_ORANGE);
         functionGraph.draw();
 
-        colorShader.setVec4("elementColor", mv::Color::PINK);
-        colorShader.setMat4("model", glm::scale(glm::mat4(1.0F), glm::vec3{sphereRadius}));
+        colorShader->setVec4("elementColor", mv::Color::PINK);
+        colorShader->setMat4("model", glm::scale(glm::mat4(1.0F), glm::vec3{sphereRadius}));
         secantSphere.draw();
 
-        shaderWithPositioning.use();
-        shaderWithPositioning.setMat4("projection", getResultedViewMatrix());
+        shaderWithPositioning->use();
+        shaderWithPositioning->setMat4("projection", getResultedViewMatrix());
 
         chordSphere.vao.bind();
 
