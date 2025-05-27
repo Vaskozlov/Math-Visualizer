@@ -25,7 +25,7 @@ isl_set_target_flags(
 target_link_libraries(
         math-visualizer
         PUBLIC
-        fmt::fmt
+        fmt::fmt-header-only
         glfw
         GLEW::GLEW
         glm::glm

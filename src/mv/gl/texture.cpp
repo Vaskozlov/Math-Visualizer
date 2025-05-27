@@ -50,7 +50,7 @@ namespace mv::gl
         int channels = 0;
         stbi_set_flip_vertically_on_load(1);
 
-        auto *data_ptr = stbi_load(path.c_str(), &width, &height, &channels, 0);
+        auto *data_ptr = stbi_load(path.string().c_str(), &width, &height, &channels, 0);
         data = data_ptr;
         textureMode = channelsToTextureMode(channels);
 

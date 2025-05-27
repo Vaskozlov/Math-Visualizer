@@ -84,7 +84,7 @@ namespace mv
         std::size_t maxTextureSize;
         std::mutex updateMutex;
 
-        std::atomic_flag continueFlag{false};
+        std::atomic_flag continueFlag = ATOMIC_FLAG_INIT;
 
         std::size_t waterfallWidth{};
         std::size_t waterfallHeight{};
