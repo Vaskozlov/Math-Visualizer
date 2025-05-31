@@ -201,14 +201,15 @@ namespace mv
             return true;
         }
 
+    protected:
+        auto doClear() -> isl::Task<>;
+
     private:
         auto doFill(float value) -> isl::Task<>;
 
         auto updateAzimuthUniform() const -> void;
 
         auto updatePowerUniform() const -> void;
-
-        auto doClear() -> isl::Task<>;
 
         auto drawDetections() -> void;
 
