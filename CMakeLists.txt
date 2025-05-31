@@ -25,7 +25,7 @@ install(TARGETS math-visualizer math-visualizer-resources glm glm-header-only
         INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
-install(DIRECTORY include/mv include/mvl
+install(DIRECTORY include/
         DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
         FILES_MATCHING PATTERN "*.hpp")
 
