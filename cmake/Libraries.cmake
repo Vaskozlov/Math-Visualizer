@@ -12,7 +12,7 @@ CPMFindPackage(
         GIT_TAG 577fd3be883accf8629423ed77fcca8a24bccee2
 )
 
-CPMFindPackage(
+CPMAddPackage(
         NAME glm
         GITHUB_REPOSITORY g-truc/glm
         GIT_TAG 2d4c4b4dd31fde06cfffad7915c2b3006402322f
