@@ -124,7 +124,7 @@ public:
         camera.movementSpeed = 0.5F;
 
         ImGui::StyleColorsDark();
-        font = loadFont<"resources/fonts/JetBrainsMono-Medium.ttf">(30.0F);
+        font = this->loadFont(30.0F);
 
         updateShaderUniform();
     }

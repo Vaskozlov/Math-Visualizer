@@ -33,21 +33,18 @@ namespace mv::gl
         MIRRORED_REPEAT,
     };
 
-    inline TextureMode channelsToTextureMode(const std::uint8_t channels)
+    struct GlTextureFormat
     {
-        switch (channels) {
-        case 1:
-            return TextureMode::R;
-        case 2:
-            return TextureMode::RG;
-        case 3:
-            return TextureMode::RGB;
-        case 4:
-            return TextureMode::RGBA;
-        default:
-            isl::unreachable();
-        }
-    }
+        GLenum format;
+        GLenum internalFormat;
+        GLenum type;
+    };
+
+    [[nodiscard]] TextureMode channelsToTextureMode(std::uint8_t channels);
+
+    [[nodiscard]] auto getGlWrapModeValue(TextureWrapMode wrap_mode) -> GLint;
+
+    [[nodiscard]] auto getGlTextureFormat(TextureMode texture_mode) -> GlTextureFormat;
 
     class Texture
     {
@@ -76,6 +73,7 @@ namespace mv::gl
         ~Texture();
 
         auto resize(const void *buffer, const std::size_t new_width, const std::size_t new_height)
+            -> void
         {
             data = buffer;
             width = static_cast<int>(new_width);
@@ -103,9 +101,9 @@ namespace mv::gl
             return textureMode;
         }
 
-        auto bind(const int texture_number = GL_TEXTURE0) const -> void
+        auto bind(const int texture_number = 0) const -> void
         {
-            glActiveTexture(texture_number);
+            glActiveTexture(GL_TEXTURE0 + texture_number);
             glBindTexture(GL_TEXTURE_2D, textureId);
         }
 

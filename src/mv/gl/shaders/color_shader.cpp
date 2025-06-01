@@ -12,4 +12,17 @@ namespace mv::gl
 
         return &colorShader;
     }
+
+    auto getTexture3DLinearShader() -> Shader *
+    {
+        static Shader shader{
+            {b::embed<"resources/shaders/tex3d/linear_with_fixed_level.vert">().str()},
+            {
+             b::embed<"resources/shaders/tex3d/linear_with_fixed_level.frag">().str(),
+             b::embed<"resources/shaders/waterfall/linear/linear_rgb.glsl">().str(),
+             },
+        };
+
+        return std::addressof(shader);
+    }
 } // namespace mv::gl

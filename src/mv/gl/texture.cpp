@@ -8,6 +8,104 @@
 
 namespace mv::gl
 {
+    auto channelsToTextureMode(const std::uint8_t channels) -> TextureMode
+    {
+        switch (channels) {
+        case 1:
+            return TextureMode::R;
+        case 2:
+            return TextureMode::RG;
+        case 3:
+            return TextureMode::RGB;
+        case 4:
+            return TextureMode::RGBA;
+        default:
+            isl::unreachable();
+        }
+    }
+
+    auto getGlWrapModeValue(const TextureWrapMode wrap_mode) -> GLint
+    {
+        switch (wrap_mode) {
+        default:
+        case TextureWrapMode::CLAMP_TO_BORDER:
+            return GL_CLAMP_TO_BORDER;
+
+        case TextureWrapMode::CLAMP_TO_EDGE:
+            return GL_CLAMP_TO_EDGE;
+
+        case TextureWrapMode::REPEAT:
+            return GL_REPEAT;
+
+        case TextureWrapMode::MIRRORED_REPEAT:
+            return GL_MIRRORED_REPEAT;
+        }
+    }
+
+    auto getGlTextureFormat(const TextureMode texture_mode) -> GlTextureFormat
+    {
+        switch (texture_mode) {
+        case TextureMode::R:
+            return {
+                .format = GL_RED,
+                .internalFormat = GL_RED,
+                .type = GL_UNSIGNED_BYTE,
+            };
+
+        case TextureMode::RG:
+            return {
+                .format = GL_RG,
+                .internalFormat = GL_RG,
+                .type = GL_UNSIGNED_BYTE,
+            };
+
+        case TextureMode::RGB:
+            return {
+                .format = GL_RGB,
+                .internalFormat = GL_RGB,
+                .type = GL_UNSIGNED_BYTE,
+            };
+
+        case TextureMode::RGBA:
+            return {
+                .format = GL_RGBA,
+                .internalFormat = GL_RGBA,
+                .type = GL_UNSIGNED_BYTE,
+            };
+
+        case TextureMode::I32:
+            return {
+                .format = GL_RED_INTEGER,
+                .internalFormat = GL_R32I,
+                .type = GL_INT,
+            };
+
+        case TextureMode::U32:
+            return {
+                .format = GL_RED_INTEGER,
+                .internalFormat = GL_R32UI,
+                .type = GL_UNSIGNED_INT,
+            };
+
+        case TextureMode::F32:
+            return {
+                .format = GL_RED,
+                .internalFormat = GL_R32F,
+                .type = GL_FLOAT,
+            };
+
+        case TextureMode::F16:
+            return {
+                .format = GL_RED,
+                .internalFormat = GL_R16F,
+                .type = GL_HALF_FLOAT,
+            };
+
+        default:
+            isl::unreachable();
+        }
+    }
+
     Texture::Texture(
         const void *buffer, const int width, const int height, const TextureWrapMode wrap_mode,
         const TextureMode texture_mode, const TextureScaleFormat scale_format)
@@ -73,82 +171,8 @@ namespace mv::gl
 
     auto Texture::updateTexture() const -> void
     {
-        GLenum format;
-        GLint internal_format;
-        GLenum type;
-        GLint wrap_mode;
-
-        switch (wrapMode) {
-        default:
-        case TextureWrapMode::CLAMP_TO_BORDER:
-            wrap_mode = GL_CLAMP_TO_BORDER;
-            break;
-
-        case TextureWrapMode::CLAMP_TO_EDGE:
-            wrap_mode = GL_CLAMP_TO_EDGE;
-            break;
-
-        case TextureWrapMode::REPEAT:
-            wrap_mode = GL_REPEAT;
-            break;
-
-        case TextureWrapMode::MIRRORED_REPEAT:
-            wrap_mode = GL_MIRRORED_REPEAT;
-            break;
-        }
-
-        switch (textureMode) {
-        case TextureMode::R:
-            format = GL_RED;
-            internal_format = GL_RED;
-            type = GL_UNSIGNED_BYTE;
-            break;
-
-        case TextureMode::RG:
-            format = GL_RG;
-            internal_format = GL_RG;
-            type = GL_UNSIGNED_BYTE;
-            break;
-
-        case TextureMode::RGB:
-            format = GL_RGB;
-            internal_format = GL_RGB;
-            type = GL_UNSIGNED_BYTE;
-            break;
-
-        case TextureMode::RGBA:
-            format = GL_RGBA;
-            internal_format = GL_RGBA;
-            type = GL_UNSIGNED_BYTE;
-            break;
-
-        case TextureMode::I32:
-            format = GL_RED_INTEGER;
-            internal_format = GL_R32I;
-            type = GL_INT;
-            break;
-
-        case TextureMode::U32:
-            format = GL_RED_INTEGER;
-            internal_format = GL_R32UI;
-            type = GL_UNSIGNED_INT;
-            break;
-
-        case TextureMode::F32:
-            format = GL_RED;
-            internal_format = GL_R32F;
-            type = GL_FLOAT;
-            break;
-
-        case TextureMode::F16:
-            format = GL_RED;
-            internal_format = GL_R16F;
-            type = GL_HALF_FLOAT;
-            break;
-
-        default:
-            isl::unreachable();
-        }
+        const auto wrap_mode = getGlWrapModeValue(wrapMode);
+        const auto [format, internal_format, type] = getGlTextureFormat(textureMode);
 
         glBindTexture(GL_TEXTURE_2D, textureId);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap_mode);

@@ -67,7 +67,7 @@ namespace mv::gl
                 texture.updateTexture();
             }
 
-            auto bind(const int texture_number = GL_TEXTURE0) const -> void
+            auto bind(const int texture_number = 0) const -> void
             {
                 texture.bind(texture_number);
             }
