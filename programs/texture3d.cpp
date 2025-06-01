@@ -52,6 +52,7 @@ private:
 
     std::array<bool, 3> frozenAxes{false, false, true};
     glm::vec3 frozenAxesPosition{0.0F, 0.0F, 0.0F};
+    glm::vec2 valueRange{0.0F, 1.1F};
 
     mv::gl::shape::Axes2D plot{12, 0.009F};
 
@@ -100,6 +101,7 @@ public:
         // plot.vao.bind(0, 3, GL_FLOAT, sizeof(glm::vec3), 0);
 
         updateShaderFixedLevelMask();
+        updateValueRange();
     }
 
     auto update() -> void override
@@ -121,6 +123,14 @@ public:
         }
 
         ImGui::SliderFloat("Font scale", &fontScale, 0.1F, 1.5F, "%.3f");
+
+        if (ImGui::SliderFloat("Min value", &valueRange.x, 0.0F, valueRange.y)) {
+            updateValueRange();
+        }
+
+        if (ImGui::SliderFloat("Max value", &valueRange.y, valueRange.x, 1.1F)) {
+            updateValueRange();
+        }
 
         if (ImGui::Checkbox("x-level", &frozenAxes[0])) {
             if (frozenAxes[0]) {
@@ -185,6 +195,12 @@ public:
         } else {
             ImGui::SliderFloat("z-value", &frozenAxesPosition.z, 0.0F, 1.0F, "%.3f");
         }
+    }
+
+    auto updateValueRange() const -> void
+    {
+        linearFixedLevelShader->use();
+        linearFixedLevelShader->setVec2("valueRange", valueRange);
     }
 
     auto updateShaderFixedLevelMask() const -> void

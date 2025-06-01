@@ -3,6 +3,7 @@
 in vec2 TexCoord;
 uniform sampler3D texture1;
 uniform vec3 fixedLevel;
+uniform vec2 valueRange;
 uniform float fixedLevelValue;
 
 out vec4 FragColor;
@@ -21,7 +22,12 @@ void main()
         textureCoord = vec3(TexCoord, fixedLevelValue);
     }
 
-    float texColor = texture(texture1, textureCoord).r;
-    FragColor = vec4(floatToColor(texColor, 0.0, 1.0), 1.0);
+    float value = texture(texture1, textureCoord).r;
+
+    if (valueRange.x > value || valueRange.y < value) {
+        discard;
+    }
+
+    FragColor = vec4(floatToColor(value, valueRange.x, valueRange.y), 1.0);
 }
 
