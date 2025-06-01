@@ -39,3 +39,9 @@ b_embed_proxy_target(
 )
 
 mv_embed_resources("resources" math-visualizer-resources)
+
+target_include_directories(
+        math-visualizer
+        PUBLIC
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>"
+)
