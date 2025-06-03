@@ -84,7 +84,7 @@ namespace mvl
         auto [nodes, algorithm] = parser.parse(tokenizer);
         assert(nodes.size() < 2);
 
-        nodes.front()->print("", false, to_str);
+        // nodes.front()->print("", false, to_str);
 
         const auto cvt_table = ast::MathNode::buildConversionTable(MathConstructor);
         auto *row_root = nodes.front().get();
