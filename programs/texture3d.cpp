@@ -15,8 +15,6 @@
 #include <mv/color.hpp>
 #include <mv/gl/axes_2d.hpp>
 #include <mv/gl/instances_holder.hpp>
-#include <mv/gl/shaders/color_shader.hpp>
-#include <mv/gl/shaders/shader_with_positioning.hpp>
 #include <mv/gl/shape/plot_2d.hpp>
 #include <mv/gl/shape/sphere.hpp>
 #include <mv/gl/vertices_container.hpp>
@@ -33,8 +31,8 @@ private:
     constexpr static glm::vec3 defaultCameraPosition{0.0F, 0.0F, 10.0F};
     std::array<char, windowTitleBufferSize> imguiWindowBuffer{};
     std::vector<float> data;
-    mv::Shader *colorShader = mv::gl::getColorShader();
-    mv::Shader *linearFixedLevelShader = mv::gl::getTexture3DLinearShader();
+    mv::Shader colorShader = getColorShader();
+    mv::Shader linearFixedLevelShader = getTexture3DLinearShader();
     mv::gl::shape::Rectangle rectangle{0.0F, 0.0F, 1.0F, 1.0F};
     mv::gl::Texture3D texture{
         nullptr,
@@ -161,26 +159,26 @@ public:
         ImGui::PopFont();
         ImGui::End();
 
-        // colorShader->use();
-        // colorShader->setMat4("projection", getResultedViewMatrix());
-        // colorShader->setMat4(
+        // colorShader.use();
+        // colorShader.setMat4("projection", getResultedViewMatrix());
+        // colorShader.setMat4(
         //     "model", glm::translate(glm::mat4(1.0F), glm::vec3{0.0F, 0.0F, -0.02F}));
-        // colorShader->setVec4("elementColor", mv::Color::BLACK);
+        // colorShader.setVec4("elementColor", mv::Color::BLACK);
 
         // plot.draw();
 
-        linearFixedLevelShader->use();
+        linearFixedLevelShader.use();
 
         if (frozenAxes[0]) {
-            linearFixedLevelShader->setFloat("fixedLevelValue", frozenAxesPosition.x);
+            linearFixedLevelShader.setFloat("fixedLevelValue", frozenAxesPosition.x);
         } else if (frozenAxes[1]) {
-            linearFixedLevelShader->setFloat("fixedLevelValue", frozenAxesPosition.y);
+            linearFixedLevelShader.setFloat("fixedLevelValue", frozenAxesPosition.y);
         } else {
-            linearFixedLevelShader->setFloat("fixedLevelValue", frozenAxesPosition.z);
+            linearFixedLevelShader.setFloat("fixedLevelValue", frozenAxesPosition.z);
         }
 
-        linearFixedLevelShader->setMat4("projection", getResultedViewMatrix());
-        linearFixedLevelShader->setMat4("model", glm::scale(glm::mat4(1.0F), glm::vec3{5.0F}));
+        linearFixedLevelShader.setMat4("projection", getResultedViewMatrix());
+        linearFixedLevelShader.setMat4("model", glm::scale(glm::mat4(1.0F), glm::vec3{5.0F}));
 
         texture.bind();
         rectangle.draw();
@@ -199,13 +197,13 @@ public:
 
     auto updateValueRange() const -> void
     {
-        linearFixedLevelShader->use();
-        linearFixedLevelShader->setVec2("valueRange", valueRange);
+        linearFixedLevelShader.use();
+        linearFixedLevelShader.setVec2("valueRange", valueRange);
     }
 
     auto updateShaderFixedLevelMask() const -> void
     {
-        linearFixedLevelShader->use();
+        linearFixedLevelShader.use();
         auto vec = glm::vec3(0);
 
         if (frozenAxes[0]) {
@@ -216,7 +214,7 @@ public:
             vec.z = std::numeric_limits<float>::quiet_NaN();
         }
 
-        linearFixedLevelShader->setVec3("fixedLevel", vec);
+        linearFixedLevelShader.setVec3("fixedLevel", vec);
     }
 
     auto onMouseClick(int button, int action, int mods) -> void override
@@ -271,9 +269,9 @@ public:
     }
 };
 
-auto main() -> int
+auto main(int, const char *argv[]) -> int
 {
-    Texture3D application{1000, 800, "Texture 3d", 2};
+    Texture3D application{argv[0], 1000, 800, "Texture 3d", 2};
     application.run();
 
     return 0;

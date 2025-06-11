@@ -4,16 +4,16 @@ namespace mv
 {
     auto Waterfall::updateAzimuthUniform() const -> void
     {
-        waterfallShaderHsvF32->use();
-        waterfallShaderHsvF32->setVec2(
+        waterfallShaderHsvF32.use();
+        waterfallShaderHsvF32.setVec2(
             "minMaxValue",
             glm::vec2{
                 azimuthMiddle - azimuthSide,
                 azimuthMiddle + azimuthSide,
             });
 
-        shaderHsvWithModel->use();
-        shaderHsvWithModel->setVec2(
+        shaderHsvWithModel.use();
+        shaderHsvWithModel.setVec2(
             "minMaxValue",
             glm::vec2{
                 azimuthMiddle - azimuthSide,
@@ -23,16 +23,16 @@ namespace mv
 
     auto Waterfall::updatePowerUniform() const -> void
     {
-        waterfallShaderLinearF32->use();
-        waterfallShaderLinearF32->setVec2(
+        waterfallShaderLinearF32.use();
+        waterfallShaderLinearF32.setVec2(
             "minMaxValue",
             glm::vec2{
                 powerLow,
                 powerHigh,
             });
 
-        shaderLinearWithModel->use();
-        shaderLinearWithModel->setVec2(
+        shaderLinearWithModel.use();
+        shaderLinearWithModel.setVec2(
             "minMaxValue",
             glm::vec2{
                 powerLow,
@@ -402,8 +402,8 @@ namespace mv
     auto Waterfall::drawAzimuthWaterfalls(
         const glm::mat4 &projection, const float offset_width_scale) const -> void
     {
-        waterfallShaderHsvF32->use();
-        waterfallShaderHsvF32->setMat4("projection", projection);
+        waterfallShaderHsvF32.use();
+        waterfallShaderHsvF32.setMat4("projection", projection);
 
         float index = 0.0F;
 
@@ -423,7 +423,7 @@ namespace mv
                 trans, {index * offset_width_scale + waterfallStart.x, waterfallStart.y, 0.0F});
             trans = glm::scale(trans, {real_width_scale, real_height_scale, 1.0F});
 
-            waterfallShaderHsvF32->setMat4("model", trans);
+            waterfallShaderHsvF32.setMat4("model", trans);
             azimuthMapSize.draw();
             index += 1.0F;
         }
@@ -432,8 +432,8 @@ namespace mv
     auto Waterfall::drawPowerWaterfalls(
         const glm::mat4 &projection, const float offset_width_scale) const -> void
     {
-        waterfallShaderLinearF32->use();
-        waterfallShaderLinearF32->setMat4("projection", projection);
+        waterfallShaderLinearF32.use();
+        waterfallShaderLinearF32.setMat4("projection", projection);
 
         float index = 0.0F;
 
@@ -453,7 +453,7 @@ namespace mv
                 trans, {index * offset_width_scale + waterfallStart.x, waterfallStart.y, 0.0F});
             trans = glm::scale(trans, {real_width_scale, real_height_scale, 1.0F});
 
-            waterfallShaderLinearF32->setMat4("model", trans);
+            waterfallShaderLinearF32.setMat4("model", trans);
             azimuthMapSize.draw();
             index += 1.0F;
         }
@@ -461,8 +461,8 @@ namespace mv
 
     auto Waterfall::drawAzimuthDetections(const glm::mat4 &projection, const float) const -> void
     {
-        shaderHsvWithModel->use();
-        shaderHsvWithModel->setMat4("projection", projection);
+        shaderHsvWithModel.use();
+        shaderHsvWithModel.setMat4("projection", projection);
 
         rectangle.vao.bind();
 
@@ -472,8 +472,8 @@ namespace mv
 
     auto Waterfall::drawPowerDetections(const glm::mat4 &projection, const float) const -> void
     {
-        shaderLinearWithModel->use();
-        shaderLinearWithModel->setMat4("projection", projection);
+        shaderLinearWithModel.use();
+        shaderLinearWithModel.setMat4("projection", projection);
 
         rectangle.vao.bind();
 

@@ -16,8 +16,6 @@
 #include <mv/color.hpp>
 #include <mv/gl/axes_2d.hpp>
 #include <mv/gl/instances_holder.hpp>
-#include <mv/gl/shaders/color_shader.hpp>
-#include <mv/gl/shaders/shader_with_positioning.hpp>
 #include <mv/gl/shape/plot_2d.hpp>
 #include <mv/gl/shape/sphere.hpp>
 #include <mv/gl/vertices_container.hpp>
@@ -38,8 +36,8 @@ private:
 
     std::array<char, windowTitleBufferSize> imguiWindowBuffer{};
 
-    mv::Shader &colorShader = *mv::gl::getColorShader();
-    mv::Shader &shaderWithPositioning = *mv::gl::getShaderWithPositioning();
+    mv::Shader colorShader = getColorShader();
+    mv::Shader shaderWithPositioning = getShaderWithPositioning();
 
     mv::gl::shape::Axes3D plot{12};
 
@@ -429,9 +427,9 @@ public:
     }
 };
 
-auto main() -> int
+auto main(int, const char *argv[]) -> int
 {
-    SplineInterpolation3D application{1000, 800, "System of equations", 2};
+    SplineInterpolation3D application{argv[0], 1000, 800, "System of equations", 2};
     application.run();
     return 0;
 }

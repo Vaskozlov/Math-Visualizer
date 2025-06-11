@@ -1,9 +1,7 @@
-#include "mv/application.hpp"
-
-#include <battery/embed.hpp>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
+#include <mv/application.hpp>
 #include <mv/gl/gl_init.hpp>
 #include <mv/glfw/callbacks.hpp>
 #include <mv/glfw/glfw_init.hpp>
@@ -13,11 +11,7 @@ namespace mv
 {
     auto Application::loadFont(const float font_size) const -> ImFont *
     {
-        void *font_data = const_cast<char *>(
-            b::embed<"resources/fonts/JetBrainsMono-Medium.ttf">().data()); // NOLINT
-
-        const int font_data_size =
-            static_cast<int>(b::embed<"resources/fonts/JetBrainsMono-Medium.ttf">().size());
+        auto [font_data_size, font_data] = getResourceAsRaw("fonts/JetBrainsMono-Medium.ttf");
 
         ImFontConfig config;
         config.FontDataOwnedByAtlas = false;
@@ -31,10 +25,12 @@ namespace mv
     }
 
     Application::Application(
-        const int width, const int height, std::string window_title, const int multisampling_level)
+        std::filesystem::path programs_path, const int width, const int height,
+        std::string window_title, const int multisampling_level)
       : title{std::move(window_title)}
       , windowWidth{static_cast<float>(width)}
       , windowHeight{static_cast<float>(height)}
+      , programsPath(std::move(programs_path))
     {
         glfw::init(3, 3);
 

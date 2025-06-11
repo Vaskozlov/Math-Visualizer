@@ -62,7 +62,9 @@
         "MV_INCLUDE_BENCHMARK": "ON",
         "MV_UNITY_BUILD": "ON",
         "CPM_SOURCE_CACHE": "~/.cache/cpm",
-        "CMAKE_BUILD_TYPE": "Release"
+        "CMAKE_BUILD_TYPE": "Release",
+        "MV_STATIC_LIBRARY": "ON",
+        "CCL_STATIC_LIBRARY": "ON"
       }
     },
     {

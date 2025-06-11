@@ -8,8 +8,6 @@
 #include <list>
 #include <mv/application_2d.hpp>
 #include <mv/gl/instances_holder.hpp>
-#include <mv/gl/shaders/color_shader.hpp>
-#include <mv/gl/shaders/shader_with_positioning.hpp>
 #include <mv/gl/shape/rectangle.hpp>
 #include <mv/gl/shape/sphere.hpp>
 #include <mv/gl/texture.hpp>
@@ -41,11 +39,11 @@ namespace mv
         std::array<char, 64> timeFormattingBuffer2{};
 
     protected:
-        Shader *waterfallShaderHsvF32 = getWaterfallShaderHsvF32();
-        Shader *waterfallShaderLinearF32 = getWaterfallShaderLinearF32();
-        Shader *colorShader = gl::getShaderWithPositioning();
-        Shader *shaderHsvWithModel = gl::getHsvShaderWithModel();
-        Shader *shaderLinearWithModel = gl::getLinearShaderWithModel();
+        Shader waterfallShaderHsvF32 = getWaterfallShaderHsvF32();
+        Shader waterfallShaderLinearF32 = getWaterfallShaderLinearF32();
+        Shader colorShader = getShaderWithPositioning();
+        Shader shaderHsvWithModel = getHsvShaderWithModel();
+        Shader shaderLinearWithModel = getLinearShaderWithModel();
 
         std::list<gl::Waterfall<isl::float16>> powerWaterfalls;
         std::list<gl::Waterfall<isl::float16>> azimuthWaterfalls;
@@ -98,8 +96,8 @@ namespace mv
         bool showDetectionAzimuth{true};
         bool showDetectionPower{};
 
-        static auto getWaterfallShaderHsvF32() -> Shader *;
-        static auto getWaterfallShaderLinearF32() -> Shader *;
+        auto getWaterfallShaderHsvF32() const -> Shader;
+        auto getWaterfallShaderLinearF32() const -> Shader;
 
     public:
         static constexpr float minWidthScale = 0.9F;

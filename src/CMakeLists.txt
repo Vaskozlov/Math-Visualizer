@@ -33,13 +33,6 @@ target_link_libraries(
         astlang2
 )
 
-b_embed_proxy_target(
-        math-visualizer
-        math-visualizer-resources
-)
-
-mv_embed_resources("resources" math-visualizer-resources)
-
 target_include_directories(
         math-visualizer
         PUBLIC

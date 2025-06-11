@@ -24,14 +24,10 @@ CPMAddPackage(
         GIT_TAG 73f3cbb237e84d483afafc743f1f14ec53e12314
 )
 
-CPMAddPackage(
-        NAME battery-embed
-        GITHUB_REPOSITORY batterycenter/embed
-        GIT_TAG 465081903d97ff1ed05e1fd5d0b3c8032a4a26a6
-)
 
 CPMAddPackage(
         NAME ccl
         GITHUB_REPOSITORY Vaskozlov/ccl-project
         GIT_TAG 044fae8c996e5803e7c6a4f2ae7d3ee22d3525d1
+        OPTIONS "CCL_STATIC_LIBRARY ON" "ISL_STATIC_LIBRARY ON"
 )

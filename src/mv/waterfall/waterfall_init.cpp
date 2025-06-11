@@ -1,36 +1,34 @@
-#include <battery/embed.hpp>
+#include "mv/shader.hpp"
+
+#include <memory>
 #include <mv/waterfall_application.hpp>
 
 namespace mv
 {
-    auto Waterfall::getWaterfallShaderHsvF32() -> Shader *
+    auto Waterfall::getWaterfallShaderHsvF32() const -> Shader
     {
-        static Shader waterfallShaderHsvF32{
+        return Shader{
             {
-             b::embed<"resources/shaders/waterfall/vertex_with_limits_f32.vert">().str(),
+             getResourceAsString("shaders/waterfall/vertex_with_limits_f32.vert"),
              },
             {
-             b::embed<"resources/shaders/waterfall/hsv/f32_rgba.frag">().str(),
-             b::embed<"resources/shaders/waterfall/hsv/hsv2rgb.glsl">().str(),
+             getResourceAsString("shaders/waterfall/hsv/f32_rgba.frag"),
+             getResourceAsString("shaders/waterfall/hsv/hsv2rgb.glsl"),
              },
         };
-
-        return &waterfallShaderHsvF32;
     }
 
-    auto Waterfall::getWaterfallShaderLinearF32() -> Shader *
+    auto Waterfall::getWaterfallShaderLinearF32() const -> Shader
     {
-        static Shader waterfallShaderLinearF32{
+        return Shader{
             {
-             b::embed<"resources/shaders/waterfall/vertex_with_limits_f32.vert">().str(),
+             getResourceAsString("shaders/waterfall/vertex_with_limits_f32.vert"),
              },
             {
-             b::embed<"resources/shaders/waterfall/linear/f32_rgba.frag">().str(),
-             b::embed<"resources/shaders/waterfall/linear/linear_rgb.glsl">().str(),
+             getResourceAsString("shaders/waterfall/linear/f32_rgba.frag"),
+             getResourceAsString("shaders/waterfall/linear/linear_rgb.glsl"),
              },
         };
-
-        return &waterfallShaderLinearF32;
     }
 
     Waterfall::~Waterfall()

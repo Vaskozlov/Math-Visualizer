@@ -11,13 +11,12 @@ include_directories(stb)
 
 include(cmake/ProjectOptions.cmake)
 include(cmake/Libraries.cmake)
-include(cmake/Embed.cmake)
 include(src/CMakeLists.txt)
 include(programs/CMakeLists.txt)
 
 target_compile_definitions(math-visualizer PUBLIC STBI_NO_SIMD=1)
 
-install(TARGETS math-visualizer math-visualizer-resources glm glm-header-only
+install(TARGETS math-visualizer glm glm-header-only spline astlang2
         EXPORT mvTargets
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -35,7 +34,7 @@ install(EXPORT mvTargets
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/mv
 )
 
-set_property(TARGET math-visualizer  PROPERTY VERSION ${version})
+set_property(TARGET math-visualizer PROPERTY VERSION ${version})
 
 write_basic_package_version_file(
         "${CMAKE_CURRENT_BINARY_DIR}/mvConfigVersion.cmake"
@@ -58,3 +57,12 @@ export(EXPORT mvTargets
         FILE "${CMAKE_CURRENT_BINARY_DIR}/cmake/mvTargets.cmake"
         NAMESPACE mv::
 )
+
+set(CPACK_PACKAGE_NAME "mv-spline")
+set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "My application description")
+set(CPACK_PACKAGE_VENDOR "My Company")
+
+include(cmake/AppImage.cmake)
+
+include(CPack)

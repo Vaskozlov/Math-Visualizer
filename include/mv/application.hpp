@@ -6,11 +6,13 @@
 #include <deque>
 #include <functional>
 #include <imgui.h>
+#include <isl/io.hpp>
 #include <isl/isl.hpp>
 #include <isl/thread/async_task.hpp>
 #include <isl/thread/pool.hpp>
 #include <mutex>
 #include <mv/camera.hpp>
+#include <mv/shader.hpp>
 
 namespace mv
 {
@@ -39,10 +41,43 @@ namespace mv
         std::deque<std::function<void()>> onMainThreadExecutionQueue;
         std::mutex onMainThreadExecutionQueueMutex;
 
+        std::filesystem::path programsPath;
+
     public:
-        Application(int width, int height, std::string window_title, int multisampling_level = 4);
+        auto getColorShader() const ->  Shader;
+
+        auto getTexture3DLinearShader() const -> Shader;
+
+        auto getShaderWithPositioning() const -> Shader;
+
+        auto getHsvShaderWithModel() const -> Shader;
+
+        auto getLinearShaderWithModel() const -> Shader;
+
+        Application(
+            std::filesystem::path programs_path, int width, int height, std::string window_title,
+            int multisampling_level = 4);
 
         virtual ~Application();
+
+        auto getResourceAsString(const std::string_view name) const -> std::string
+        {
+            const auto resources_path = programsPath / "share" / "resources";
+
+            return isl::io::read(resources_path / name);
+        }
+
+        auto getResourceAsRaw(const std::string_view name) const -> std::pair<std::size_t, void *>
+        {
+            const auto resources_path = programsPath / "share" / "resources";
+
+            auto result = isl::io::read(resources_path / name);
+
+            auto buffer = std::make_unique_for_overwrite<char[]>(result.size());
+            std::copy_n(result.data(), result.size(), buffer.get());
+
+            return std::make_pair(result.size(), static_cast<void *>(buffer.release()));
+        }
 
         [[nodiscard]] virtual auto getCameraProjection() const -> glm::mat4
         {

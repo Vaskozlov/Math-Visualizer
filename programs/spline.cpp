@@ -1,4 +1,5 @@
 #include <ccl/runtime.hpp>
+#include <cstdlib>
 #include <future>
 #include <imgui.h>
 #include <imgui_stdlib.h>
@@ -11,8 +12,6 @@
 #include <mv/color.hpp>
 #include <mv/gl/axes_2d.hpp>
 #include <mv/gl/instances_holder.hpp>
-#include <mv/gl/shaders/color_shader.hpp>
-#include <mv/gl/shaders/shader_with_positioning.hpp>
 #include <mv/gl/shape/plot_2d.hpp>
 #include <mv/gl/shape/sphere.hpp>
 #include <mv/gl/vertices_container.hpp>
@@ -33,8 +32,8 @@ private:
 
     std::array<char, windowTitleBufferSize> imguiWindowBuffer{};
 
-    mv::Shader &colorShader = *mv::gl::getColorShader();
-    mv::Shader &shaderWithPositioning = *mv::gl::getShaderWithPositioning();
+    mv::Shader colorShader = getColorShader();
+    mv::Shader shaderWithPositioning = getShaderWithPositioning();
 
     mv::gl::shape::Axes2D plot{12, 0.009F};
 
@@ -344,9 +343,14 @@ static auto countSplineValue(
 std::vector<float> dataX{0.0F, 1.0F, 2.0F, 3.0F, 4.0F, 5.0F};
 std::vector<float> dataY{0.0F, 1.5F, 0.3F, 2.8F, 1.1F, 3.0F};
 
-auto main() -> int
+auto main(int, const char *argv[]) -> int
 {
-    SplineInterpolation application{1000, 800, "System of equations", 2};
+    SplineInterpolation application{
+        std::filesystem::path(std::getenv("APPDIR")) / "usr" / "local",
+        1000,
+        800,
+        "System of equations",
+        2};
     application.run();
 
     // auto spline_coefficients = isl::interpolation::createCubicSpline<float>(dataX, dataY);

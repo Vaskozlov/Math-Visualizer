@@ -1,45 +1,38 @@
-#include <battery/embed.hpp>
-#include <mv/gl/shaders/shader_with_positioning.hpp>
+#include <mv/application.hpp>
 
-namespace mv::gl
+namespace mv
 {
-    auto getShaderWithPositioning() -> Shader *
+    auto Application::getShaderWithPositioning() const -> Shader
     {
-        static Shader shaderWithPositioning{
-            {b::embed<"resources/shaders/static_instance.vert">().str()},
-            {b::embed<"resources/shaders/fragment.frag">().str()},
+        return Shader{
+            {getResourceAsString("shaders/static_instance.vert")},
+            {getResourceAsString("shaders/fragment.frag")},
         };
-
-        return &shaderWithPositioning;
     }
 
-    auto getHsvShaderWithModel() -> Shader *
+    auto Application::getHsvShaderWithModel() const -> Shader
     {
-        static Shader shader{
+        return Shader{
             {
-             b::embed<"resources/shaders/waterfall/static.vert">().str(),
+             getResourceAsString("shaders/waterfall/static.vert"),
              },
             {
-             b::embed<"resources/shaders/waterfall/hsv/hsv_static.frag">().str(),
-             b::embed<"resources/shaders/waterfall/hsv/hsv2rgb.glsl">().str(),
+             getResourceAsString("shaders/waterfall/hsv/hsv_static.frag"),
+             getResourceAsString("shaders/waterfall/hsv/hsv2rgb.glsl"),
              },
         };
-
-        return &shader;
     }
 
-    auto getLinearShaderWithModel() -> Shader *
+    auto Application::getLinearShaderWithModel() const -> Shader
     {
-        static Shader shader{
+        return Shader{
             {
-             b::embed<"resources/shaders/waterfall/static.vert">().str(),
+             getResourceAsString("shaders/waterfall/static.vert"),
              },
             {
-             b::embed<"resources/shaders/waterfall/linear/linear_static.frag">().str(),
-             b::embed<"resources/shaders/waterfall/linear/linear_rgb.glsl">().str(),
+             getResourceAsString("shaders/waterfall/linear/linear_static.frag"),
+             getResourceAsString("shaders/waterfall/linear/linear_rgb.glsl"),
              },
         };
-
-        return &shader;
     }
-} // namespace mv::gl
+} // namespace mv

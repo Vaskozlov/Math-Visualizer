@@ -1,28 +1,25 @@
-#include <battery/embed.hpp>
-#include <mv/gl/shaders/color_shader.hpp>
+#include <mv/application.hpp>
 
-namespace mv::gl
+namespace mv
 {
-    auto getColorShader() -> Shader *
+    auto Application::getColorShader() const -> Shader
     {
-        static Shader colorShader{
-            {b::embed<"resources/shaders/colored_shader.vert">().str()},
-            {b::embed<"resources/shaders/fragment.frag">().str()},
+        return Shader{
+            {getResourceAsString("shaders/colored_shader.vert")},
+            {getResourceAsString("shaders/fragment.frag")},
         };
-
-        return &colorShader;
     }
 
-    auto getTexture3DLinearShader() -> Shader *
+    auto Application::getTexture3DLinearShader() const -> Shader
     {
-        static Shader shader{
-            {b::embed<"resources/shaders/tex3d/linear_with_fixed_level.vert">().str()},
+        return Shader{
             {
-             b::embed<"resources/shaders/tex3d/linear_with_fixed_level.frag">().str(),
-             b::embed<"resources/shaders/waterfall/linear/linear_rgb.glsl">().str(),
+             getResourceAsString("shaders/tex3d/linear_with_fixed_level.vert"),
+             },
+            {
+             getResourceAsString("shaders/tex3d/linear_with_fixed_level.frag"),
+             getResourceAsString("shaders/waterfall/linear/linear_rgb.glsl"),
              },
         };
-
-        return std::addressof(shader);
     }
-} // namespace mv::gl
+} // namespace mv
