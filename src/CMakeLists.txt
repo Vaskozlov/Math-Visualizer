@@ -27,9 +27,9 @@ target_link_libraries(
         PUBLIC
         fmt::fmt-header-only
         glfw
-        GLEW::GLEW
+        libglew_static
         glm::glm
-        imgui::imgui
+        imgui
         astlang2
 )
 

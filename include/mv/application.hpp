@@ -44,7 +44,7 @@ namespace mv
         std::filesystem::path programsPath;
 
     public:
-        auto getColorShader() const ->  Shader;
+        auto getColorShader() const -> Shader;
 
         auto getTexture3DLinearShader() const -> Shader;
 
@@ -62,14 +62,14 @@ namespace mv
 
         auto getResourceAsString(const std::string_view name) const -> std::string
         {
-            const auto resources_path = programsPath / "share" / "resources";
+            const auto resources_path = programsPath;
 
             return isl::io::read(resources_path / name);
         }
 
         auto getResourceAsRaw(const std::string_view name) const -> std::pair<std::size_t, void *>
         {
-            const auto resources_path = programsPath / "share" / "resources";
+            const auto resources_path = programsPath;
 
             auto result = isl::io::read(resources_path / name);
 
@@ -85,8 +85,8 @@ namespace mv
                 glm::radians(camera.getZoom()), windowWidth / windowHeight, zNear, zFar);
         }
 
-        [[nodiscard]] auto getCameraProjection(const float zoomX, const float zoomY) const
-            -> glm::mat4
+        [[nodiscard]] auto
+            getCameraProjection(const float zoomX, const float zoomY) const -> glm::mat4
         {
             return glm::ortho(
                 -1.0F / zoomX, 1.0F / zoomX, -1.0F / zoomY, 1.0F / zoomY, zNear, zFar);

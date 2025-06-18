@@ -11,15 +11,12 @@ namespace mv
 {
     auto Application::loadFont(const float font_size) const -> ImFont *
     {
-        auto [font_data_size, font_data] = getResourceAsRaw("fonts/JetBrainsMono-Medium.ttf");
-
         ImFontConfig config;
-        config.FontDataOwnedByAtlas = false;
+        config.FontDataOwnedByAtlas = true;
+        config.SizePixels = font_size * 2;
 
-        return imguiIO->Fonts->AddFontFromMemoryTTF(
-            font_data,
-            font_data_size,
-            font_size,
+        return imguiIO->Fonts->AddFontFromFileTTF(
+            (programsPath / "fonts" / "JetBrainsMono-Medium.ttf").string().c_str(), font_size,
             &config,
             imguiIO->Fonts->GetGlyphRangesCyrillic());
     }

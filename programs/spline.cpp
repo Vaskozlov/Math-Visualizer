@@ -343,14 +343,14 @@ static auto countSplineValue(
 std::vector<float> dataX{0.0F, 1.0F, 2.0F, 3.0F, 4.0F, 5.0F};
 std::vector<float> dataY{0.0F, 1.5F, 0.3F, 2.8F, 1.1F, 3.0F};
 
-auto main(int, const char *argv[]) -> int
+auto main(int argc, const char *argv[]) -> int
 {
-    SplineInterpolation application{
-        std::filesystem::path(std::getenv("APPDIR")) / "usr" / "local",
-        1000,
-        800,
-        "System of equations",
-        2};
+    if (argc != 2) {
+        fmt::println("Prorgrams argument must be resource folder");
+        return 1;
+    }
+
+    SplineInterpolation application{argv[1], 1000, 800, "System of equations", 2};
     application.run();
 
     // auto spline_coefficients = isl::interpolation::createCubicSpline<float>(dataX, dataY);

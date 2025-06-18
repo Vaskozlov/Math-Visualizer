@@ -1,15 +1,53 @@
 include(cmake/CPM.cmake)
 
 find_package(Threads REQUIRED)
-find_package(glfw3 CONFIG REQUIRED)
-find_package(GLEW REQUIRED)
 find_package(OpenGL REQUIRED)
-find_package(imgui CONFIG REQUIRED)
 
-CPMFindPackage(
+CPMAddPackage(
         NAME fmt
         GITHUB_REPOSITORY fmtlib/fmt
-        GIT_TAG 577fd3be883accf8629423ed77fcca8a24bccee2
+        GIT_TAG 11.2.0
+)
+
+CPMAddPackage(
+        NAME glfw
+        GITHUB_REPOSITORY glfw/glfw
+        GIT_TAG 3.3
+        OPTIONS "BUILD_SHARED_LIBS OFF" "GLFW_LIBRARY_TYPE STATIC"
+)
+
+CPMAddPackage(
+        NAME glew
+        GITHUB_REPOSITORY Perlmint/glew-cmake
+        GIT_TAG glew-cmake-2.2.0
+        OPTIONS "-Dglew-cmake_BUILD_STATIC=ON"
+)
+
+CPMAddPackage(
+        NAME imgui
+        GITHUB_REPOSITORY ocornut/imgui
+        GIT_TAG v1.91.9
+)
+
+add_library(
+        imgui
+        STATIC
+        ${imgui_SOURCE_DIR}/imgui.cpp
+        ${imgui_SOURCE_DIR}/imgui_draw.cpp
+        ${imgui_SOURCE_DIR}/imgui_tables.cpp
+        ${imgui_SOURCE_DIR}/imgui_widgets.cpp
+        ${imgui_SOURCE_DIR}/backends/imgui_impl_glfw.cpp
+        ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp
+        ${imgui_SOURCE_DIR}/misc/cpp/imgui_stdlib.cpp
+)
+
+target_include_directories(
+    imgui 
+    PUBLIC
+    ${imgui_SOURCE_DIR}
+    ${imgui_SOURCE_DIR}/backends
+    ${imgui_SOURCE_DIR}/misc/cpp
+    ${glfw_SOURCE_DIR}/include
 )
 
 CPMAddPackage(
@@ -21,9 +59,8 @@ CPMAddPackage(
 CPMAddPackage(
         NAME unordered_dense
         GITHUB_REPOSITORY martinus/unordered_dense
-        GIT_TAG 73f3cbb237e84d483afafc743f1f14ec53e12314
+        GIT_TAG v4.5.0
 )
-
 
 CPMAddPackage(
         NAME ccl

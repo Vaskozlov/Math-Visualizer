@@ -16,7 +16,7 @@ include(programs/CMakeLists.txt)
 
 target_compile_definitions(math-visualizer PUBLIC STBI_NO_SIMD=1)
 
-install(TARGETS math-visualizer glm glm-header-only spline astlang2
+install(TARGETS math-visualizer glm glm-header-only spline astlang2 glfw imgui libglew_static
         EXPORT mvTargets
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
