@@ -7,14 +7,14 @@ namespace mv::gl
         const GLsizei offset) -> void
     {
         glVertexAttribPointer(
-            array_attribute,
+            static_cast<GLuint>(array_attribute),
             size,
             type,
             GL_FALSE,
             stride,
             reinterpret_cast<const void *>(offset)); // NOLINT
 
-        glEnableVertexAttribArray(array_attribute);
+        glEnableVertexAttribArray(static_cast<GLuint>(array_attribute));
     }
 
     VAO::VAO()
@@ -61,7 +61,8 @@ namespace mv::gl
                 sizeof(InstanceParameters),
                 static_cast<GLsizei>(sizeof(glm::vec4)) * i); // NOLINT
 
-            glVertexAttribDivisor(array_attribute + i, divisor);
+            glVertexAttribDivisor(
+                static_cast<GLuint>(array_attribute + i), static_cast<GLuint>(divisor));
         }
 
         unbind();

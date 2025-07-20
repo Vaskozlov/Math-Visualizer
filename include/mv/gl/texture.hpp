@@ -36,7 +36,7 @@ namespace mv::gl
     struct GlTextureFormat
     {
         GLenum format;
-        GLenum internalFormat;
+        GLint internalFormat;
         GLenum type;
     };
 
@@ -61,14 +61,6 @@ namespace mv::gl
         Texture(
             const void *buffer, int width, int height, TextureWrapMode wrap_mode,
             TextureMode texture_mode, TextureScaleFormat scale_format = TextureScaleFormat::LINEAR);
-
-        Texture(
-            const unsigned char *buffer, int buffer_length, TextureWrapMode wrap_mode,
-            TextureScaleFormat scale_format = TextureScaleFormat::LINEAR);
-
-        explicit Texture(
-            const std::filesystem::path &path, TextureWrapMode wrap_mode,
-            TextureScaleFormat scale_format = TextureScaleFormat::LINEAR);
 
         ~Texture();
 
@@ -103,7 +95,7 @@ namespace mv::gl
 
         auto bind(const int texture_number = 0) const -> void
         {
-            glActiveTexture(GL_TEXTURE0 + texture_number);
+            glActiveTexture(static_cast<GLenum>(GL_TEXTURE0 + texture_number));
             glBindTexture(GL_TEXTURE_2D, textureId);
         }
 

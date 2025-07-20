@@ -26,7 +26,7 @@ CPMAddPackage(
 CPMAddPackage(
         NAME imgui
         GITHUB_REPOSITORY ocornut/imgui
-        GIT_TAG v1.91.9
+        GIT_TAG v1.91.9-docking
 )
 
 add_library(

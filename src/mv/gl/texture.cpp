@@ -1,9 +1,6 @@
 #include <isl/isl.hpp>
 #include <mv/gl/texture.hpp>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-
 #include <iostream>
 
 namespace mv::gl
@@ -107,57 +104,18 @@ namespace mv::gl
     }
 
     Texture::Texture(
-        const void *buffer, const int width, const int height, const TextureWrapMode wrap_mode,
+        const void *buffer, const int w, const int h, const TextureWrapMode wrap_mode,
         const TextureMode texture_mode, const TextureScaleFormat scale_format)
       : data(buffer)
-      , width(width)
-      , height(height)
+      , width(w)
+      , height(h)
       , textureMode(texture_mode)
       , scaleFormat(scale_format)
       , wrapMode(wrap_mode)
     {
         finishTextureConstruction();
     }
-
-    Texture::Texture(
-        const unsigned char *buffer, const int buffer_length, const TextureWrapMode wrap_mode,
-        const TextureScaleFormat scale_format)
-      : scaleFormat(scale_format)
-      , wrapMode(wrap_mode)
-    {
-        int channels = 0;
-        stbi_set_flip_vertically_on_load(1);
-
-        auto *data_ptr =
-            stbi_load_from_memory(buffer, buffer_length, &width, &height, &channels, 0);
-        data = data_ptr;
-        textureMode = channelsToTextureMode(channels);
-
-        finishTextureConstruction();
-
-        stbi_image_free(data_ptr);
-        data = nullptr;
-    }
-
-    Texture::Texture(
-        const std::filesystem::path &path, const TextureWrapMode wrap_mode,
-        const TextureScaleFormat scale_format)
-      : scaleFormat(scale_format)
-      , wrapMode(wrap_mode)
-    {
-        int channels = 0;
-        stbi_set_flip_vertically_on_load(1);
-
-        auto *data_ptr = stbi_load(path.string().c_str(), &width, &height, &channels, 0);
-        data = data_ptr;
-        textureMode = channelsToTextureMode(channels);
-
-        finishTextureConstruction();
-
-        stbi_image_free(data_ptr);
-        data = nullptr;
-    }
-
+   
     Texture::~Texture()
     {
         glDeleteTextures(1, &textureId);

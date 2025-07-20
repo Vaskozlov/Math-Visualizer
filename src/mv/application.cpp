@@ -16,7 +16,8 @@ namespace mv
         config.SizePixels = font_size * 2;
 
         return imguiIO->Fonts->AddFontFromFileTTF(
-            (programsPath / "fonts" / "JetBrainsMono-Medium.ttf").string().c_str(), font_size,
+            (programsPath / "fonts" / "JetBrainsMono-Medium.ttf").string().c_str(),
+            font_size,
             &config,
             imguiIO->Fonts->GetGlyphRangesCyrillic());
     }
@@ -53,6 +54,7 @@ namespace mv
 
         imguiIO->ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
         imguiIO->ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+        imguiIO->ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
         ImGui_ImplGlfw_InitForOpenGL(window, true);
         ImGui_ImplOpenGL3_Init("#version 330 core");
@@ -69,6 +71,8 @@ namespace mv
             onMainThreadExecutionQueue.front()();
             onMainThreadExecutionQueue.pop_front();
         }
+
+        drawGUI();
     }
 
     auto Application::onResize(const int width, const int height) -> void

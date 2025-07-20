@@ -28,7 +28,7 @@ namespace mv::gl
         -> void
     {
         bind();
-        glBufferData(GL_ARRAY_BUFFER, data_size, data, mode);
+        glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizeiptr>(data_size), data, mode);
         unbind();
     }
 } // namespace mv::gl

@@ -1,10 +1,7 @@
-#include "mv/gl/texture3d.hpp"
-
-#include "mv/gl/shape/rectangle.hpp"
-
 #include <ccl/runtime.hpp>
 #include <future>
 #include <imgui.h>
+#include <imgui_internal.h>
 #include <imgui_stdlib.h>
 #include <isl/linalg/lagrange.hpp>
 #include <isl/linalg/linspace.hpp>
@@ -16,8 +13,11 @@
 #include <mv/gl/axes_2d.hpp>
 #include <mv/gl/instances_holder.hpp>
 #include <mv/gl/shape/plot_2d.hpp>
+#include <mv/gl/shape/rectangle.hpp>
 #include <mv/gl/shape/sphere.hpp>
+#include <mv/gl/texture3d.hpp>
 #include <mv/gl/vertices_container.hpp>
+#include <mv/imgui_window.hpp>
 #include <mv/shader.hpp>
 #include <mvl/mvl.hpp>
 #include <valarray>
@@ -26,10 +26,8 @@
 class Texture3D final : public mv::Application2D
 {
 private:
-    constexpr static auto windowTitleBufferSize = 128;
-
     constexpr static glm::vec3 defaultCameraPosition{0.0F, 0.0F, 10.0F};
-    std::array<char, windowTitleBufferSize> imguiWindowBuffer{};
+
     std::vector<float> data;
     mv::Shader colorShader = getColorShader();
     mv::Shader linearFixedLevelShader = getTexture3DLinearShader();
@@ -46,13 +44,14 @@ private:
 
     ImFont *font{};
     double pressTime = 0.0;
-    float fontScale = 0.5F;
+    float fontScale = 1.0F;
 
     std::array<bool, 3> frozenAxes{false, false, true};
     glm::vec3 frozenAxesPosition{0.0F, 0.0F, 0.0F};
     glm::vec2 valueRange{0.0F, 1.1F};
 
     mv::gl::shape::Axes2D plot{12, 0.009F};
+    bool needToInitializeGui = true;
 
 public:
     using Application2D::Application2D;
@@ -65,7 +64,8 @@ public:
         camera.setPosition(defaultCameraPosition);
 
         ImGui::StyleColorsLight();
-        font = loadFont(30.0F);
+        fontScale = ImGui::GetIO().FontGlobalScale;
+        font = loadFont();
 
         setClearColor(mv::Color::LIGHT_GRAY);
 
@@ -102,62 +102,73 @@ public:
         updateValueRange();
     }
 
+    auto drawGUI() -> void override
+    {
+        mv::Application2D::drawGUI();
+
+        if (needToInitializeGui) {
+            needToInitializeGui = false;
+            auto dock_space_id = ImGui::GetID("Dock space");
+
+            ImGui::DockBuilderSetNodeSize(dock_space_id, ImVec2{300, 300});
+            ImGui::DockBuilderDockWindow("Second", dock_space_id);
+            ImGui::DockBuilderDockWindow("Настройки", dock_space_id);
+
+            ImGui::DockBuilderFinish(dock_space_id);
+        }
+
+        {
+            mv::ImGuiWindow imgui_window{"Second", fontScale, font};
+        }
+
+        {
+            mv::ImGuiWindow imgui_window{"Настройки", fontScale, font};
+
+            if (ImGui::Button("Center camera")) {
+                camera.setPosition(defaultCameraPosition);
+            }
+
+            ImGui::SliderFloat("Font scale", &fontScale, 0.3F, 2.0F, "%.3f");
+
+            if (ImGui::SliderFloat("Min value", &valueRange.x, 0.0F, valueRange.y)) {
+                updateValueRange();
+            }
+
+            if (ImGui::SliderFloat("Max value", &valueRange.y, valueRange.x, 1.1F)) {
+                updateValueRange();
+            }
+
+            if (ImGui::Checkbox("x-level", &frozenAxes[0])) {
+                if (frozenAxes[0]) {
+                    frozenAxes[1] = frozenAxes[2] = false;
+                }
+
+                updateShaderFixedLevelMask();
+            }
+
+            if (ImGui::Checkbox("y-level", &frozenAxes[1])) {
+                if (frozenAxes[1]) {
+                    frozenAxes[0] = frozenAxes[2] = false;
+                }
+
+                updateShaderFixedLevelMask();
+            }
+
+            if (ImGui::Checkbox("z-level", &frozenAxes[2])) {
+                if (frozenAxes[2]) {
+                    frozenAxes[0] = frozenAxes[1] = false;
+                }
+
+                updateShaderFixedLevelMask();
+            }
+
+            showFixedAxisSlider();
+        }
+    }
+
     auto update() -> void override
     {
         Application2D::update();
-
-        fmt::format_to_n(
-            imguiWindowBuffer.data(),
-            imguiWindowBuffer.size(),
-            "Настройки. FPS: {:#.4}###SettingWindowTitle",
-            ImGui::GetIO().Framerate);
-
-        ImGui::Begin(imguiWindowBuffer.data());
-        ImGui::PushFont(font);
-        ImGui::SetWindowFontScale(fontScale);
-
-        if (ImGui::Button("Center camera")) {
-            camera.setPosition(defaultCameraPosition);
-        }
-
-        ImGui::SliderFloat("Font scale", &fontScale, 0.1F, 1.5F, "%.3f");
-
-        if (ImGui::SliderFloat("Min value", &valueRange.x, 0.0F, valueRange.y)) {
-            updateValueRange();
-        }
-
-        if (ImGui::SliderFloat("Max value", &valueRange.y, valueRange.x, 1.1F)) {
-            updateValueRange();
-        }
-
-        if (ImGui::Checkbox("x-level", &frozenAxes[0])) {
-            if (frozenAxes[0]) {
-                frozenAxes[1] = frozenAxes[2] = false;
-            }
-
-            updateShaderFixedLevelMask();
-        }
-
-        if (ImGui::Checkbox("y-level", &frozenAxes[1])) {
-            if (frozenAxes[1]) {
-                frozenAxes[0] = frozenAxes[2] = false;
-            }
-
-            updateShaderFixedLevelMask();
-        }
-
-        if (ImGui::Checkbox("z-level", &frozenAxes[2])) {
-            if (frozenAxes[2]) {
-                frozenAxes[0] = frozenAxes[1] = false;
-            }
-
-            updateShaderFixedLevelMask();
-        }
-
-        showFixedAxisSlider();
-
-        ImGui::PopFont();
-        ImGui::End();
 
         // colorShader.use();
         // colorShader.setMat4("projection", getResultedViewMatrix());
@@ -217,17 +228,6 @@ public:
         linearFixedLevelShader.setVec3("fixedLevel", vec);
     }
 
-    auto onMouseClick(int button, int action, int mods) -> void override
-    {
-        if (button == GLFW_MOUSE_BUTTON_RIGHT) {
-            double mouseX, mouseY;
-            glfwGetCursorPos(window, &mouseX, &mouseY);
-
-            int width, height;
-            glfwGetWindowSize(window, &width, &height);
-        }
-    }
-
     auto processInput() -> void override
     {
         constexpr static auto key_press_delay = 0.2;
@@ -271,7 +271,7 @@ public:
 
 auto main(int, const char *argv[]) -> int
 {
-    Texture3D application{argv[0], 1000, 800, "Texture 3d", 2};
+    Texture3D application{argv[1], 1000, 800, "Texture 3d", 2};
     application.run();
 
     return 0;

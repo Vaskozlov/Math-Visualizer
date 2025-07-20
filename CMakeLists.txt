@@ -7,14 +7,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include(CMakePackageConfigHelpers)
 
 include_directories(include)
-include_directories(stb)
 
 include(cmake/ProjectOptions.cmake)
 include(cmake/Libraries.cmake)
 include(src/CMakeLists.txt)
 include(programs/CMakeLists.txt)
-
-target_compile_definitions(math-visualizer PUBLIC STBI_NO_SIMD=1)
 
 install(TARGETS math-visualizer glm glm-header-only spline astlang2 glfw imgui libglew_static
         EXPORT mvTargets

@@ -27,12 +27,12 @@ namespace mv
         ImGuiIO *imguiIO{};
         double lastMouseX = 0.0;
         double lastMouseY = 0.0;
-        float deltaTime = 0.0f;
-        float lastFrameTime = 0.0f;
+        float deltaTime = 0.0F;
+        float lastFrameTime = 0.0F;
         float windowWidth;
         float windowHeight;
-        float zNear = 0.1f;
-        float zFar = 50.0f;
+        float zNear = 0.1F;
+        float zFar = 50.0F;
         bool firstMouse = true;
         bool isInFocus = true;
         bool isMouseShowed = false;
@@ -127,6 +127,9 @@ namespace mv
         auto submit(const std::function<void(const Application &)> &func) -> void;
 
         auto run() -> void;
+
+        virtual auto drawGUI() -> void
+        {}
 
         virtual auto init() -> void
         {}
