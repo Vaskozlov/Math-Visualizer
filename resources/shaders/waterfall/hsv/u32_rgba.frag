@@ -1,5 +1,3 @@
-#version 330 core
-
 in vec2 TexCoord;
 in uvec2 valueLimits;
 uniform usampler2D texture1;

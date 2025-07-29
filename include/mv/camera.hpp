@@ -1,7 +1,7 @@
 #ifndef MV_CAMERA_HPP
 #define MV_CAMERA_HPP
 
-#include <GL/glew.h>
+#include <mv/gl/gl_init.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <isl/isl.hpp>

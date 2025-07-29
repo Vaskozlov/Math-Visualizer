@@ -1,7 +1,6 @@
 #include <isl/isl.hpp>
+#include <mv/gl/gl_init.hpp>
 #include <mv/gl/texture.hpp>
-
-#include <iostream>
 
 namespace mv::gl
 {
@@ -26,7 +25,9 @@ namespace mv::gl
         switch (wrap_mode) {
         default:
         case TextureWrapMode::CLAMP_TO_BORDER:
+#ifndef __EMSCRIPTEN__
             return GL_CLAMP_TO_BORDER;
+#endif
 
         case TextureWrapMode::CLAMP_TO_EDGE:
             return GL_CLAMP_TO_EDGE;
@@ -115,7 +116,7 @@ namespace mv::gl
     {
         finishTextureConstruction();
     }
-   
+
     Texture::~Texture()
     {
         glDeleteTextures(1, &textureId);

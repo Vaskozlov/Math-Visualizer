@@ -1,8 +1,12 @@
 #ifndef MV_APPLICATION_HPP
 #define MV_APPLICATION_HPP
 
-#include <GL/glew.h>
+#include <mv/gl/gl_init.hpp>
+
+//
+
 #include <GLFW/glfw3.h>
+#include <cstdlib>
 #include <deque>
 #include <functional>
 #include <imgui.h>
@@ -16,9 +20,13 @@
 
 namespace mv
 {
+    [[nodiscard]] auto findOutResourcesPath(const int argc, const char *argv[]) -> std::string;
+
     class Application
     {
     protected:
+        friend auto invokeLoop() -> void;
+
         isl::thread::Pool pool{0, false};
         Camera camera;
         std::string title;
@@ -41,18 +49,18 @@ namespace mv
         std::deque<std::function<void()>> onMainThreadExecutionQueue;
         std::mutex onMainThreadExecutionQueueMutex;
 
-        std::filesystem::path programsPath;
+        std::filesystem::path resourcesPath;
 
     public:
-        auto getColorShader() const -> Shader;
+        [[nodiscard]] auto getColorShader() const -> Shader;
 
-        auto getTexture3DLinearShader() const -> Shader;
+        [[nodiscard]] auto getTexture3DLinearShader() const -> Shader;
 
-        auto getShaderWithPositioning() const -> Shader;
+        [[nodiscard]] auto getShaderWithPositioning() const -> Shader;
 
-        auto getHsvShaderWithModel() const -> Shader;
+        [[nodiscard]] auto getHsvShaderWithModel() const -> Shader;
 
-        auto getLinearShaderWithModel() const -> Shader;
+        [[nodiscard]] auto getLinearShaderWithModel() const -> Shader;
 
         Application(
             std::filesystem::path programs_path, int width, int height, std::string window_title,
@@ -60,20 +68,17 @@ namespace mv
 
         virtual ~Application();
 
-        auto getResourceAsString(const std::string_view name) const -> std::string
+        [[nodiscard]] auto getResourceAsString(const std::string_view name) const -> std::string
         {
-            const auto resources_path = programsPath;
-
-            return isl::io::read(resources_path / name);
+            return isl::io::read(resourcesPath / name);
         }
 
-        auto getResourceAsRaw(const std::string_view name) const -> std::pair<std::size_t, void *>
+        [[nodiscard]] auto getResourceAsRaw(const std::string_view name) const
+            -> std::pair<std::size_t, void *>
         {
-            const auto resources_path = programsPath;
-
-            auto result = isl::io::read(resources_path / name);
-
+            auto result = isl::io::read(resourcesPath / name);
             auto buffer = std::make_unique_for_overwrite<char[]>(result.size());
+
             std::copy_n(result.data(), result.size(), buffer.get());
 
             return std::make_pair(result.size(), static_cast<void *>(buffer.release()));
@@ -85,8 +90,8 @@ namespace mv
                 glm::radians(camera.getZoom()), windowWidth / windowHeight, zNear, zFar);
         }
 
-        [[nodiscard]] auto
-            getCameraProjection(const float zoomX, const float zoomY) const -> glm::mat4
+        [[nodiscard]] auto getCameraProjection(const float zoomX, const float zoomY) const
+            -> glm::mat4
         {
             return glm::ortho(
                 -1.0F / zoomX, 1.0F / zoomX, -1.0F / zoomY, 1.0F / zoomY, zNear, zFar);
@@ -151,6 +156,9 @@ namespace mv
         virtual auto onMouseClick(int button, int action, int mods) -> void;
 
         [[nodiscard]] auto loadFont(float font_size = 45.0F) const -> ImFont *;
+
+    private:
+        auto loop() -> void;
     };
 } // namespace mv
 

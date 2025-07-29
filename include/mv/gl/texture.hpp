@@ -1,7 +1,7 @@
 #ifndef MV_TEXTURE_HPP
 #define MV_TEXTURE_HPP
 
-#include <GL/glew.h>
+#include <mv/gl/gl_init.hpp>
 #include <filesystem>
 #include <isl/isl.hpp>
 

@@ -1,5 +1,3 @@
-#version 330 core
-
 in vec2 TexCoord;
 uniform sampler3D texture1;
 uniform vec3 fixedLevel;

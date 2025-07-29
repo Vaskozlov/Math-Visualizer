@@ -345,16 +345,15 @@ std::vector<float> dataY{0.0F, 1.5F, 0.3F, 2.8F, 1.1F, 3.0F};
 
 auto main(int argc, const char *argv[]) -> int
 {
-    if (argc != 2) {
-        fmt::println("Prorgrams argument must be resource folder");
-        return 1;
+    auto resources = mv::findOutResourcesPath(argc, argv);
+
+    if (resources.empty()) {
+        fmt::println("Unable to find out resources path");
+        return EXIT_FAILURE;
     }
 
-    SplineInterpolation application{argv[1], 1000, 800, "System of equations", 2};
+    SplineInterpolation application{resources, 1000, 800, "System of equations", 2};
     application.run();
-
-    // auto spline_coefficients = isl::interpolation::createCubicSpline<float>(dataX, dataY);
-    // fmt::println("{}", countSplineValue(dataX, spline_coefficients, 4.5F));
 
     return 0;
 }

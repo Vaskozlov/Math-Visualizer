@@ -1,5 +1,3 @@
-#version 330 core
-
 vec3 hsv2rgb(vec3 hsvColor)
 {
     vec3 hsv = hsvColor;
@@ -62,15 +60,15 @@ vec3 hsv2rgb(vec3 hsvColor)
 }
 
 vec3 hsvIntToRgb(int value, int min_value, int max_value) {
-    float v = clamp(value, min_value, max_value);
-    float hue = 360.0F * (v - min_value) / (max_value - min_value);
+    float v = float(clamp(value, min_value, max_value));
+    float hue = 360.0F * (v - float(min_value)) / float(max_value - min_value);
 
     return hsv2rgb(vec3(hue, 1.0F, 1.0F));
 }
 
 vec3 hsvUintToRgb(uint value, uint min_value, uint max_value) {
-    float v = clamp(value, min_value, max_value);
-    float hue = 360.0F * (v - min_value) / (max_value - min_value);
+    float v = float(clamp(value, min_value, max_value));
+    float hue = 360.0F * (v - float(min_value)) / float(max_value - min_value);
 
     return hsv2rgb(vec3(hue, 1.0F, 1.0F));
 }

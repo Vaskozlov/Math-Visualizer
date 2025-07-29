@@ -1,5 +1,3 @@
-#version 330 core
-
 in vec2 TexCoord;
 in vec2 valueLimits;
 in vec4 imageMaxSize;

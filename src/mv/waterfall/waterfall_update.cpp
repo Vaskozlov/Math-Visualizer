@@ -267,14 +267,12 @@ namespace mv
             waterfall.fill(v);
 
             glBindTexture(GL_TEXTURE_2D, waterfall.getTextureId());
-            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, value);
         }
 
         for (auto &waterfall : powerWaterfalls) {
             waterfall.fill(v);
 
             glBindTexture(GL_TEXTURE_2D, waterfall.getTextureId());
-            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, value);
         }
 
         co_return;

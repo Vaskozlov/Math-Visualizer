@@ -1,4 +1,7 @@
-#include <GL/glew.h>
+#include <mv/gl/gl_init.hpp>
+
+//
+
 #include <GLFW/glfw3.h>
 #include <mutex>
 #include <mv/glfw/glfw_init.hpp>

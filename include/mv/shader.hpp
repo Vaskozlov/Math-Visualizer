@@ -1,8 +1,7 @@
 #ifndef MV_SHADER_HPP
 #define MV_SHADER_HPP
 
-#include <GL/glew.h>
-#include <glm/fwd.hpp>
+#include <mv/gl/gl_init.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <vector>

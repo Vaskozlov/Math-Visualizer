@@ -1,5 +1,3 @@
-#version 330 core
-
 in vec2 pointCoordinate;
 in float iterationsCount;
 out vec4 FragColor;

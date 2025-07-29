@@ -1,7 +1,10 @@
 #ifndef MV_GLFW_CALLBACKS_HPP
 #define MV_GLFW_CALLBACKS_HPP
 
-#include <GL/glew.h>
+#include <mv/gl/gl_init.hpp>
+
+//
+
 #include <GLFW/glfw3.h>
 
 namespace mv::glfw

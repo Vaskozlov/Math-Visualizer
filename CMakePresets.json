@@ -17,7 +17,8 @@
         "MV_ADDRESS_SANITIZER": "ON",
         "MV_UNITY_BUILD": "ON",
         "CPM_SOURCE_CACHE": "~/.cache/cpm",
-        "CMAKE_BUILD_TYPE": "Debug"
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_POLICY_VERSION_MINIMUM": "3.5"
       }
     },
     {
@@ -31,7 +32,8 @@
         "MV_ADDRESS_SANITIZER": "OFF",
         "MV_UNITY_BUILD": "ON",
         "CPM_SOURCE_CACHE": "~/.cache/cpm",
-        "CMAKE_BUILD_TYPE": "Release"
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_POLICY_VERSION_MINIMUM": "3.5"
       }
     },
     {
@@ -47,24 +49,6 @@
         "MV_PRECOMPILED_HEADERS": "OFF",
         "CPM_SOURCE_CACHE": "~/.cache/cpm",
         "CMAKE_BUILD_TYPE": "Debug"
-      }
-    },
-    {
-      "name": "Unix-cache-release",
-      "displayName": "Unix cache release with CPM cache directory",
-      "description": "Sets build and install directories",
-      "binaryDir": "${sourceDir}/build/${presetName}",
-      "generator": "Ninja",
-      "cacheVariables": {
-        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
-        "MV_ADDRESS_SANITIZER": "OFF",
-        "MV_INCLUDE_TESTS": "OFF",
-        "MV_INCLUDE_BENCHMARK": "ON",
-        "MV_UNITY_BUILD": "ON",
-        "CPM_SOURCE_CACHE": "~/.cache/cpm",
-        "CMAKE_BUILD_TYPE": "Release",
-        "MV_STATIC_LIBRARY": "ON",
-        "CCL_STATIC_LIBRARY": "ON"
       }
     },
     {
@@ -105,6 +89,35 @@
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
         "MV_ADDRESS_SANITIZER": "OFF",
         "MV_UNITY_BUILD": "ON",
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "wasm-debug",
+      "displayName": "Emscripten WebAssembly debug",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/wasm-debug",
+      "toolchainFile": "${sourceDir}/emscripten/emscripten.toolchain.cmake",
+      "cacheVariables": {
+        "CPM_SOURCE_CACHE": "~/.cache/cpm"
+      },
+      "environment": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "MV_UNITY_BUILD": "OFF",
+        "CCL_UNITY_BUILD": "OFF",
+        "ISL_UNITY_BUILD": "OFF"
+      }
+    },
+     {
+      "name": "wasm-release",
+      "displayName": "Emscripten WebAssembl release",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/wasm-release",
+      "toolchainFile": "${sourceDir}/emscripten/emscripten.toolchain.cmake",
+      "cacheVariables": {
+        "CPM_SOURCE_CACHE": "~/.cache/cpm"
+      },
+      "environment": {
         "CMAKE_BUILD_TYPE": "Release"
       }
     }

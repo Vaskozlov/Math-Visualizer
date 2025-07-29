@@ -1,9 +1,9 @@
 #ifndef MV_GL_VAO_HPP
 #define MV_GL_VAO_HPP
 
-#include <GL/glew.h>
 #include <mv/gl/instance_parameters.hpp>
 #include <utility>
+#include <mv/gl/gl_init.hpp>
 
 namespace mv::gl
 {

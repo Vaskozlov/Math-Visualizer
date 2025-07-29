@@ -1,13 +1,22 @@
-#include "mv/shader.hpp"
-
 #include <array>
 #include <fmt/format.h>
 #include <fstream>
 #include <iostream>
+#include <mv/shader.hpp>
 #include <sstream>
 
 namespace mv
 {
+    static auto shaderHeader() -> std::string
+    {
+#ifdef __EMSCRIPTEN__
+        return "#version 300 es\n"
+               "precision highp float;\n";
+#else
+        return "#version 330 core\n";
+#endif
+    }
+
     static auto compileShader(const char *shader_code, const GLenum shader_type) -> GLuint
     {
         int success = 0;
@@ -55,15 +64,23 @@ namespace mv
     {
         std::vector<GLuint> shaders;
 
+        auto full_shader_code = shaderHeader();
+
         for (const auto &vertex_code_str : vertex_shaders) {
-            const char *vertex_shader_code = vertex_code_str.c_str();
-            shaders.emplace_back(compileShader(vertex_shader_code, GL_VERTEX_SHADER));
+            full_shader_code += vertex_code_str;
+            full_shader_code.push_back('\n');
         }
 
+        shaders.emplace_back(compileShader(full_shader_code.c_str(), GL_VERTEX_SHADER));
+
+        full_shader_code = shaderHeader();
+
         for (const auto &fragment_code_str : fragment_shaders) {
-            const char *fragment_shader_code = fragment_code_str.c_str();
-            shaders.emplace_back(compileShader(fragment_shader_code, GL_FRAGMENT_SHADER));
+            full_shader_code += fragment_code_str;
+            full_shader_code.push_back('\n');
         }
+
+        shaders.emplace_back(compileShader(full_shader_code.c_str(), GL_FRAGMENT_SHADER));
 
         program = createProgram(shaders);
 

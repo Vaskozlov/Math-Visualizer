@@ -1,7 +1,7 @@
 file(
         GLOB_RECURSE
         MV_OBJECTS
-        "src/*.cpp"
+        "src/mv/*.cpp"
 )
 
 add_library(
@@ -26,12 +26,43 @@ target_link_libraries(
         math-visualizer
         PUBLIC
         fmt::fmt-header-only
-        glfw
-        libglew_static
         glm::glm
         imgui
-        astlang2
+        ccl
+        Threads::Threads
 )
+
+if(EMSCRIPTEN)
+        add_compile_options(-matomics)
+
+        target_compile_options(math-visualizer INTERFACE -sUSE_GLFW=3)
+        target_compile_options(math-visualizer INTERFACE -sUSE_WEBGL2=1)
+        target_compile_options(math-visualizer INTERFACE -sFULL_ES3=1)
+        target_compile_options(math-visualizer INTERFACE -sWASM=1)
+        target_compile_options(math-visualizer INTERFACE -sALLOW_MEMORY_GROWTH=1)
+        target_compile_options(math-visualizer INTERFACE -sUSE_PTHREADS=1)
+
+        target_link_options(math-visualizer INTERFACE -sUSE_GLFW=3)
+        target_link_options(math-visualizer INTERFACE -sFULL_ES3=1)
+        target_link_options(math-visualizer INTERFACE -sWASM=1)
+        target_link_options(math-visualizer INTERFACE -sASSERTIONS=1)
+        target_link_options(math-visualizer INTERFACE -sALLOW_MEMORY_GROWTH=1)
+        target_link_options(math-visualizer INTERFACE -sUSE_PTHREADS=1)
+
+        target_compile_options(
+                math-visualizer
+                INTERFACE
+                -matomics
+        )
+else()
+        target_link_libraries(
+                math-visualizer
+                PUBLIC
+                glfw
+                libglew_static
+        )
+
+endif()
 
 target_include_directories(
         math-visualizer

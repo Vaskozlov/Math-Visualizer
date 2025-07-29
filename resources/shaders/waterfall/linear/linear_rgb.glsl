@@ -1,5 +1,3 @@
-#version 330 core
-
 vec3 ratioToColor(float ratio) {
     vec3 start_color = vec3(0, 1, 0);
     vec3 end_color = vec3(1, 0, 0);

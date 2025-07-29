@@ -1,5 +1,3 @@
-#version 330 core
-
 in vec2 pointCoordinate;
 in vec2 setC;
 in float iterationsCount;

@@ -1,5 +1,3 @@
-#version 330
-
 vec2 cx_sqr(vec2 value)
 {
     return vec2(value.x * value.x - value.y * value.y, 2.0 * value.x * value.y);

@@ -1,7 +1,7 @@
 #ifndef MV_GL_VBO_HPP
 #define MV_GL_VBO_HPP
 
-#include <GL/glew.h>
+#include <mv/gl/gl_init.hpp>
 #include <utility>
 
 namespace mv::gl

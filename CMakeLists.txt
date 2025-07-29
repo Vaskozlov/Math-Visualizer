@@ -13,7 +13,20 @@ include(cmake/Libraries.cmake)
 include(src/CMakeLists.txt)
 include(programs/CMakeLists.txt)
 
-install(TARGETS math-visualizer glm glm-header-only spline astlang2 glfw imgui libglew_static
+set(MV_INSTALLED_TARGETS math-visualizer glm glm-header-only spline imgui)
+
+if(NOT EMSCRIPTEN)
+        list(APPEND MV_INSTALLED_TARGETS glfw libglew_static)
+else()
+        file(
+                COPY
+                ${CMAKE_SOURCE_DIR}/emscripten/.headers
+                DESTINATION
+                ${CMAKE_BINARY_DIR}
+        )
+endif()
+
+install(TARGETS ${MV_INSTALLED_TARGETS}
         EXPORT mvTargets
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
