@@ -1,3 +1,4 @@
+#include <imgui.h>
 #include <mv/waterfall_application.hpp>
 
 namespace mv
@@ -156,16 +157,20 @@ namespace mv
             fmt::localtime(mouseTime / 1000),
             mouseTime % 1000);
 
-        ImGui::Text(
-            "x-axis: %.0f\n"
-            "y-axis: %.0f ms = %s\n"
-            "mouse frequency: %.0f, time: %ld = %s",
-            frequencyPosition,
-            timePosition + timeStartOffset,
-            timeFormattingBuffer1.data(),
-            mouseFrequency,
-            mouseTime,
-            timeFormattingBuffer2.data());
+        {
+            auto text = fmt::format(
+                "x-axis: {:.0f}\n"
+                "y-axis: {:.0f} ms = {}\n"
+                "mouse frequency: {:.0f}, time: {} = {}",
+                frequencyPosition,
+                timePosition + timeStartOffset,
+                timeFormattingBuffer1.data(),
+                mouseFrequency,
+                mouseTime,
+                timeFormattingBuffer2.data());
+
+            ImGui::TextUnformatted(text.c_str());
+        }
 
         ImGui::SliderFloat("Font scale", &fontScale, 0.2, 1.5);
 
