@@ -330,8 +330,10 @@ public:
         Application2D::onScroll(x_offset * scale, y_offset * scale);
     }
 
-    auto onDrop(const std::vector<std::filesystem::path> &) -> void override
-    {}
+    auto onDrop(const std::vector<std::filesystem::path> &path) -> void override
+    {
+        fmt::println("{}", path);
+    }
 };
 
 auto main(int argc, const char *argv[]) -> int
