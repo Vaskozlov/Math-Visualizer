@@ -35,8 +35,6 @@ namespace mv
     {
     private:
         std::array<char, 128> imguiWindowBufferTitle{};
-        std::array<char, 64> timeFormattingBuffer1{};
-        std::array<char, 64> timeFormattingBuffer2{};
 
     protected:
         Shader waterfallShaderHsvF32 = getWaterfallShaderHsvF32();
@@ -112,9 +110,9 @@ namespace mv
         static constexpr float minPower = -20.0F;
         static constexpr float maxPower = 100.0F;
 
-        double frequencyScale = 1.0F;
+        double frequencyScale = 1.0;
         double frequencyStartOffset = 0.0;
-        double timeScale = 1.0F;
+        double timeScale = 1.0;
         double timeStartOffset = 0.0;
 
         static constexpr RGBA<uint8_t> white{255, 255, 255, 255};

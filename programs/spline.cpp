@@ -113,7 +113,7 @@ public:
             addSphere(iterationsSpheres.models, mv::Color::GREEN, {dataX[i], dataY[i], 0.01F});
         }
 
-        for (isl::ssize_t i = 0; i < 100; ++i, x += step) {
+        for (std::size_t i = 0; i < 100; ++i, x += step) {
             const auto it = std::lower_bound(dataX.begin(), dataX.end(), x);
             const auto index = static_cast<std::size_t>(std::clamp<std::ptrdiff_t>(
                 std::distance(dataX.begin(), it) - 1, 0, spline_coefficients.size() - 1));
@@ -171,8 +171,8 @@ public:
 
         setClearColor(mv::Color::LIGHT_GRAY);
 
-        dataX.resize(dataCount);
-        dataY.resize(dataCount);
+        dataX.resize(static_cast<std::size_t>(dataCount));
+        dataY.resize(static_cast<std::size_t>(dataCount));
     }
 
     auto update() -> void override
@@ -194,9 +194,9 @@ public:
             for (std::size_t row = 0; row < 2; ++row) {
                 ImGui::TableNextRow();
                 ImGui::TableNextColumn();
-                ImGui::Text(row == 0 ? "x" : "y");
+                ImGui::TextUnformatted(row == 0 ? "x" : "y");
 
-                for (std::size_t col = 0; col < dataCount; ++col) {
+                for (std::size_t col = 0; col < static_cast<std::size_t>(dataCount); ++col) {
                     ImGui::TableNextColumn();
                     auto label = fmt::format("###cell_input_{}_{}", row, col);
                     ImGui::InputFloat(label.c_str(), row == 0 ? &dataX[col] : &dataY[col]);
@@ -210,8 +210,8 @@ public:
                 dataCount = 3;
             }
 
-            dataX.resize(dataCount);
-            dataY.resize(dataCount);
+            dataX.resize(static_cast<std::size_t>(dataCount));
+            dataY.resize(static_cast<std::size_t>(dataCount));
         }
 
         if (ImGui::Button("Draw")) {
@@ -226,7 +226,7 @@ public:
             resultValueL = isl::interpolation::lagrange<float>(dataX, dataY, inputValue);
         }
 
-        ImGui::Text("Result %f %f", resultVaue, resultValueL);
+        imguiText("result {} {}", resultVaue, resultValueL);
 
         colorShader.use();
         colorShader.setMat4("projection", getResultedViewMatrix());
@@ -256,12 +256,18 @@ public:
         sphere.vao.bind();
 
         glDrawArraysInstanced(
-            GL_TRIANGLE_STRIP, 0, sphere.vertices.size(), iterationsSpheres.models.size());
+            GL_TRIANGLE_STRIP,
+            0,
+            static_cast<GLsizei>(sphere.vertices.size()),
+            static_cast<GLsizei>(iterationsSpheres.models.size()));
 
         plotSphere.vao.bind();
 
         glDrawArraysInstanced(
-            GL_TRIANGLE_STRIP, 0, sphere.vertices.size(), plotSpheres.models.size());
+            GL_TRIANGLE_STRIP,
+            0,
+            static_cast<GLsizei>(sphere.vertices.size()),
+            static_cast<GLsizei>(plotSpheres.models.size()));
 
         if (ImGui::Button("Center camera")) {
             camera.setPosition(defaultCameraPosition);
@@ -273,7 +279,7 @@ public:
         ImGui::End();
     }
 
-    auto onMouseClick(int button, int action, int mods) -> void override
+    auto onMouseClick(int button, int /*action*/, int /*mods*/) -> void override
     {
         if (button == GLFW_MOUSE_BUTTON_RIGHT) {
             double mouseX, mouseY;
@@ -323,25 +329,10 @@ public:
         const auto scale = static_cast<double>(camera.getZoom()) / 180.0;
         Application2D::onScroll(x_offset * scale, y_offset * scale);
     }
+
+    auto onDrop(const std::vector<std::filesystem::path> &) -> void override
+    {}
 };
-
-static auto countSplineValue(
-    const std::span<const float> x,
-    const std::vector<isl::interpolation::CubicSplineCoefficients<float>> &spline_coefficients,
-    const float value)
-{
-    const auto it = std::ranges::lower_bound(x, value);
-    const auto index = static_cast<std::size_t>(std::clamp<std::ptrdiff_t>(
-        std::distance(x.begin(), it) - 1, 0, spline_coefficients.size() - 1));
-
-    const auto &coefficient = spline_coefficients[index];
-    const auto h = value - x[index];
-
-    return coefficient.a + coefficient.b * h + coefficient.c * h * h + coefficient.d * h * h * h;
-}
-
-std::vector<float> dataX{0.0F, 1.0F, 2.0F, 3.0F, 4.0F, 5.0F};
-std::vector<float> dataY{0.0F, 1.5F, 0.3F, 2.8F, 1.1F, 3.0F};
 
 auto main(int argc, const char *argv[]) -> int
 {

@@ -274,7 +274,7 @@ public:
             for (std::size_t row = 0; row < 2; ++row) {
                 ImGui::TableNextRow();
                 ImGui::TableNextColumn();
-                ImGui::Text(row == 0 ? "x" : "y");
+                ImGui::TextUnformatted(row == 0 ? "x" : "y");
 
                 auto l = row == 0 ? dataCountX : dataCountY;
 
@@ -289,7 +289,8 @@ public:
             for (std::size_t i = 0; i < dataCountY; ++i) {
                 ImGui::TableNextRow();
                 ImGui::TableNextColumn();
-                ImGui::Text("y = %.2f", dataY[i]);
+
+                imguiText("y = {:.2f}", dataY[i]);
 
                 for (std::size_t j = 0; j < dataCountX; ++j) {
                     ImGui::TableNextColumn();

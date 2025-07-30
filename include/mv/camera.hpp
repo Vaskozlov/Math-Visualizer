@@ -1,10 +1,14 @@
 #ifndef MV_CAMERA_HPP
 #define MV_CAMERA_HPP
 
-#include <mv/gl/gl_init.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <isl/isl.hpp>
+#include <mv/gl/gl_init.hpp>
+
+//
+
+#include <GLFW/glfw3.h>
 
 namespace mv
 {
@@ -65,7 +69,8 @@ namespace mv
         [[nodiscard]] auto getViewMatrix() const -> glm::mat4
         {
             return glm::rotate(
-                glm::lookAt(position, position + front, up), rotationAngle,
+                glm::lookAt(position, position + front, up),
+                rotationAngle,
                 glm::vec3(0.0F, 1.0F, 0.0F));
         }
 
@@ -178,17 +183,16 @@ namespace mv
     private:
         auto updateCameraVectors() -> void
         {
-            front = glm::normalize(
-                glm::vec3{
-                    cos(glm::radians(yaw)) * cos(glm::radians(pitch)),
-                    sin(glm::radians(pitch)),
-                    sin(glm::radians(yaw)) * cos(glm::radians(pitch)),
-                });
+            front = glm::normalize(glm::vec3{
+                cos(glm::radians(yaw)) * cos(glm::radians(pitch)),
+                sin(glm::radians(pitch)),
+                sin(glm::radians(yaw)) * cos(glm::radians(pitch)),
+            });
 
             right = glm::normalize(glm::cross(front, worldUp));
             up = glm::normalize(glm::cross(right, front));
         }
     };
-}// namespace mv
+} // namespace mv
 
 #endif /* MV_CAMERA_HPP */

@@ -33,21 +33,8 @@ target_link_libraries(
 )
 
 if(EMSCRIPTEN)
-        add_compile_options(-matomics)
-
-        target_compile_options(math-visualizer INTERFACE -sUSE_GLFW=3)
-        target_compile_options(math-visualizer INTERFACE -sUSE_WEBGL2=1)
-        target_compile_options(math-visualizer INTERFACE -sFULL_ES3=1)
-        target_compile_options(math-visualizer INTERFACE -sWASM=1)
-        target_compile_options(math-visualizer INTERFACE -sALLOW_MEMORY_GROWTH=1)
-        target_compile_options(math-visualizer INTERFACE -sUSE_PTHREADS=1)
-
         target_link_options(math-visualizer INTERFACE -sUSE_GLFW=3)
-        target_link_options(math-visualizer INTERFACE -sFULL_ES3=1)
-        target_link_options(math-visualizer INTERFACE -sWASM=1)
         target_link_options(math-visualizer INTERFACE -sASSERTIONS=1)
-        target_link_options(math-visualizer INTERFACE -sALLOW_MEMORY_GROWTH=1)
-        target_link_options(math-visualizer INTERFACE -sUSE_PTHREADS=1)
 
         target_compile_options(
                 math-visualizer

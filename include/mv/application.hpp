@@ -1,11 +1,6 @@
 #ifndef MV_APPLICATION_HPP
 #define MV_APPLICATION_HPP
 
-#include <mv/gl/gl_init.hpp>
-
-//
-
-#include <GLFW/glfw3.h>
 #include <cstdlib>
 #include <deque>
 #include <functional>
@@ -16,7 +11,12 @@
 #include <isl/thread/pool.hpp>
 #include <mutex>
 #include <mv/camera.hpp>
+#include <mv/gl/gl_init.hpp>
 #include <mv/shader.hpp>
+
+//
+
+#include <GLFW/glfw3.h>
 
 namespace mv
 {
@@ -117,6 +117,14 @@ namespace mv
             return clearColor;
         }
 
+        template <typename... Args>
+        static auto imguiText(fmt::format_string<Args...> fmt, Args &&...args) -> void
+        {
+            const auto formnatted = fmt::format(fmt, std::forward<Args>(args)...);
+
+            ImGui::TextUnformatted(formnatted.c_str(), formnatted.c_str() + formnatted.size());
+        }
+
         auto setClearColor(const glm::vec4 &clear_color) -> void
         {
             clearColor = clear_color;
@@ -154,6 +162,8 @@ namespace mv
         virtual auto onLeaveOrEnter(bool entered) -> void;
 
         virtual auto onMouseClick(int button, int action, int mods) -> void;
+
+        virtual auto onDrop(const std::vector<std::filesystem::path> &paths) -> void;
 
         [[nodiscard]] auto loadFont(float font_size = 45.0F) const -> ImFont *;
 

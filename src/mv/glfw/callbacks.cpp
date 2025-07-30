@@ -1,5 +1,10 @@
 #include <mv/application.hpp>
 #include <mv/glfw/callbacks.hpp>
+#include <filesystem>
+
+//
+
+#include <GLFW/glfw3.h>
 
 namespace mv::glfw
 {
@@ -34,6 +39,21 @@ namespace mv::glfw
         app->onMouseClick(button, action, mods);
     }
 
+     auto dropCallback(GLFWwindow *window, const int count, const char **paths)
+        -> void
+    {
+        auto *app = static_cast<Application *>(glfwGetWindowUserPointer(window));
+
+        std::vector<std::filesystem::path> fs_paths;
+        fs_paths.reserve(static_cast<std::size_t>(count));
+
+        for (int i = 0; i < count; ++i) {
+            fs_paths.push_back(paths[static_cast<std::size_t>(i)]);
+        }
+
+        app->onDrop(fs_paths);
+    }
+
     auto setupCallbacksForApplication(Application *application) -> void
     {
         GLFWwindow *window = application->getWindow();
@@ -44,5 +64,6 @@ namespace mv::glfw
         glfwSetCursorPosCallback(window, mouseCallback);
         glfwSetScrollCallback(window, scrollCallback);
         glfwSetCursorEnterCallback(window, cursorEnterLeaveCallback);
+        glfwSetDropCallback(window, dropCallback);
     }
 } // namespace mv::glfw

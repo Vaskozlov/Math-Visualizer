@@ -1,4 +1,3 @@
-#include <isl/isl.hpp>
 #include <mv/gl/gl_init.hpp>
 #include <mv/gl/texture.hpp>
 

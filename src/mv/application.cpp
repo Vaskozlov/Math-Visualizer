@@ -51,6 +51,108 @@ extern "C" void resize_canvas_to_page()
 EM_JS(void, setup_resize_handler, (), {
     window.addEventListener("resize", function() { _resize_canvas_to_page(); });
 });
+
+EMSCRIPTEN_KEEPALIVE
+extern "C" void on_file_dropped(const char *filename)
+{
+    // Example: just print filename and size
+    printf("Received file: %s \n", filename);
+
+    for (auto entry: std::filesystem::recursive_directory_iterator(filename)) {
+        fmt::println("{}", entry.path());
+    }
+}
+
+EM_JS(void, setup_drag_and_copy, (), {
+    const canvas = document.getElementById('canvas');
+
+    if (!canvas) {
+        console.error('Canvas element not found');
+        return;
+    }
+
+    canvas.addEventListener("dragover", (e) => {
+        e.preventDefault();
+    });
+
+   canvas.addEventListener("drop", function (e) {
+    e.preventDefault();
+
+    const items = e.dataTransfer.items;
+    const files = e.dataTransfer.files;
+
+    // Helper: Create nested directories
+    function ensureDirectory(path) {
+        const parts = path.split('/');
+        let current = "";
+        for (const part of parts) {
+            if (!part) continue;
+            current += '/' + part;
+            if (!FS.analyzePath(current).exists) {
+                FS.mkdir(current);
+            }
+        }
+    }
+
+    function traverseFileTree(item, path = "") {
+        return new Promise((resolve) => {
+            if (item.isFile) {
+                item.file((file) => {
+                    file.fullPath = path + file.name;
+                    resolve([file]);
+                });
+            } else if (item.isDirectory) {
+                const dirReader = item.createReader();
+                dirReader.readEntries(async (entries) => {
+                    const results = await Promise.all(
+                        entries.map((entry) => traverseFileTree(entry, path + item.name + "/"))
+                    );
+                    resolve(results.flat());
+                });
+            } else {
+                resolve([]);
+            }
+        });
+    }
+
+    (async () => {
+        const collectedFiles = [];
+
+        for (let i = 0; i < items.length; i++) {
+            const entry = items[i].webkitGetAsEntry?.();
+            if (entry) {
+                const files = await traverseFileTree(entry);
+                collectedFiles.push(...files);
+            }
+        }
+
+        for (const file of collectedFiles) {
+            const arrayBuffer = await file.arrayBuffer();
+            const data = new Uint8Array(arrayBuffer);
+            const path = "/drop/" + file.fullPath;
+
+            // Ensure directory exists
+            const dirPath = path.split("/").slice(0, -1).join("/");
+            ensureDirectory(dirPath);
+
+            // Write to virtual FS
+            FS.writeFile(path, data);
+        }
+
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const path = "/drop/" + file.name;
+
+            const len = lengthBytesUTF8(path) + 1;
+            const pathPtr = _malloc(len);
+
+            stringToUTF8(path, pathPtr, len);
+            Module.ccall("on_file_dropped", null, ["number"], [pathPtr]);
+            _free(pathPtr);
+        }
+    })();
+});
+});
 #endif
 
 namespace mv
@@ -279,6 +381,7 @@ namespace mv
 #ifdef __EMSCRIPTEN__
         resize_canvas_to_page();
         setup_resize_handler();
+        setup_drag_and_copy();
 
         emscripten_set_main_loop_timing(EM_TIMING_SETTIMEOUT, 60);
         emscripten_set_main_loop(invokeLoop, 0, 1);
@@ -303,6 +406,9 @@ namespace mv
     }
 
     auto Application::onMouseClick(int, int, int) -> void
+    {}
+
+    auto Application::onDrop(const std::vector<std::filesystem::path> &) -> void
     {}
 
     Application::~Application()

@@ -132,13 +132,6 @@ namespace mv
 
         const auto time = static_cast<int64_t>(static_cast<double>(timePosition) + timeStartOffset);
 
-        fmt::format_to_n(
-            timeFormattingBuffer1.data(),
-            timeFormattingBuffer1.size(),
-            "{:%Y-%m-%d %H:%M:%S}.{:03}",
-            fmt::localtime(time / 1000),
-            time % 1000);
-
         const glm::vec2 scenePoint = getPointOn2DScene();
 
         mouseWordX = scenePoint.x;
@@ -150,29 +143,20 @@ namespace mv
                 * static_cast<double>(waterfallHeight)
             + timeStartOffset);
 
-        fmt::format_to_n(
-            timeFormattingBuffer2.data(),
-            timeFormattingBuffer2.size(),
-            "{:%Y-%m-%d %H:%M:%S}.{:03}",
+        imguiText(
+            "x-axis: {:.0f}\n"
+            "y-axis: {:.0f} ms = {:%Y-%m-%d %H:%M:%S}.{:03}\n"
+            "mouse frequency: {:.0f}, time: {} = {:%Y-%m-%d %H:%M:%S}.{:03}",
+            frequencyPosition,
+            timePosition + timeStartOffset,
+            fmt::localtime(time / 1000),
+            time % 1000,
+            mouseFrequency,
+            mouseTime,
             fmt::localtime(mouseTime / 1000),
             mouseTime % 1000);
 
-        {
-            auto text = fmt::format(
-                "x-axis: {:.0f}\n"
-                "y-axis: {:.0f} ms = {}\n"
-                "mouse frequency: {:.0f}, time: {} = {}",
-                frequencyPosition,
-                timePosition + timeStartOffset,
-                timeFormattingBuffer1.data(),
-                mouseFrequency,
-                mouseTime,
-                timeFormattingBuffer2.data());
-
-            ImGui::TextUnformatted(text.c_str());
-        }
-
-        ImGui::SliderFloat("Font scale", &fontScale, 0.2, 1.5);
+        ImGui::SliderFloat("Font scale", &fontScale, 0.2F, 1.5F);
 
         if (ImGui::SliderFloat("Middle", &azimuthMiddle, azimuthMin, azimuthMax)) {
             updateAzimuthUniform();
@@ -204,14 +188,19 @@ namespace mv
                 "Frequency position",
                 &frequencyPosition,
                 0.0F,
-                waterfallWidth * frequencyScale / 1e3F,
+                static_cast<float>(waterfallWidth * frequencyScale / 1e3F),
                 "%.0f")) {
-            camera_vec.x = frequencyPosition * frequency_scale * 1e3F + waterfallStart.x;
+            camera_vec.x =
+                static_cast<float>(frequencyPosition * frequency_scale) * 1e3F + waterfallStart.x;
             camera.setPosition(camera_vec);
         }
 
         if (ImGui::SliderFloat(
-                "Timeline", &timePosition, 0.0F, timeScale * waterfallHeight, "%.0f")) {
+                "Timeline",
+                &timePosition,
+                0.0F,
+                static_cast<float>(timeScale * static_cast<double>(waterfallHeight)),
+                "%.0f")) {
             camera_vec.y = timePosition
                                / static_cast<float>(
                                    timeScale / static_cast<double>(imageHeightScale)
@@ -470,7 +459,10 @@ namespace mv
         rectangle.vao.bind();
 
         glDrawArraysInstanced(
-            GL_TRIANGLE_FAN, 0, rectangle.vertices.size(), rectangleInstances.models.size());
+            GL_TRIANGLE_FAN,
+            0,
+            static_cast<GLsizei>(rectangle.vertices.size()),
+            static_cast<GLsizei>(rectangleInstances.models.size()));
     }
 
     auto Waterfall::drawPowerDetections(const glm::mat4 &projection, const float) const -> void
@@ -481,6 +473,9 @@ namespace mv
         rectangle.vao.bind();
 
         glDrawArraysInstanced(
-            GL_TRIANGLE_FAN, 0, rectangle.vertices.size(), rectangleInstances.models.size());
+            GL_TRIANGLE_FAN,
+            0,
+            static_cast<GLsizei>(rectangle.vertices.size()),
+            static_cast<GLsizei>(rectangleInstances.models.size()));
     }
 } // namespace mv
