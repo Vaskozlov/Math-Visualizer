@@ -1,12 +1,8 @@
-#include <mv/gl/gl_init.hpp>
-
-//
-
-#include <GLFW/glfw3.h>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 #include <mv/application.hpp>
+#include <mv/gl/gl_init.hpp>
 #include <mv/glfw/callbacks.hpp>
 #include <mv/glfw/glfw_init.hpp>
 #include <thread>
@@ -14,8 +10,9 @@
 #ifdef __EMSCRIPTEN__
 #    include <emscripten/emscripten.h>
 #    include <emscripten/html5.h>
-
 #endif
+
+#include <GLFW/glfw3.h>
 
 mv::Application *application;
 
@@ -23,15 +20,7 @@ mv::Application *application;
 EMSCRIPTEN_KEEPALIVE
 void setupCanvas()
 {
-    // Get canvas element using modern Emscripten API
-    EM_ASM({
-        // canvas is automatically created and available as Module.canvas
-        Module.canvas = Module.canvas || document.getElementById('canvas');
-
-        // Ensure proper touch event handling
-        // Module.canvas.addEventListener(
-        //     'touchmove', function(e) { e.preventDefault(); }, {passive : false});
-    });
+    EM_ASM({ Module.canvas = Module.canvas || document.getElementById('canvas'); });
 }
 
 EMSCRIPTEN_KEEPALIVE
@@ -41,8 +30,8 @@ extern "C" void resize_canvas_to_page()
     int width = EM_ASM_INT({ return window.innerWidth; });
     int height = EM_ASM_INT({ return window.innerHeight; });
 
-    int buffer_width = std::round(width * dpr);
-    int buffer_height = std::round(height * dpr);
+    int buffer_width = static_cast<int>(std::round(width * dpr));
+    int buffer_height = static_cast<int>(std::round(height * dpr));
 
     emscripten_set_canvas_element_size("#canvas", buffer_width, buffer_height);
     application->onResize(buffer_width, buffer_height);
@@ -61,6 +50,8 @@ namespace mv
 #ifdef __EMSCRIPTEN__
         return "/resources";
 #else
+
+        // NOLINTNEXTLINE
         const auto *env_app_dir = std::getenv("APPDIR");
 
         if (env_app_dir != nullptr) {
@@ -112,6 +103,7 @@ namespace mv
 
         glfwWindowHint(GLFW_SAMPLES, multisampling_level);
 
+        // NOLINTNEXTLINE
         window = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
 
         if (window == nullptr) {
@@ -145,13 +137,6 @@ namespace mv
     auto Application::update() -> void
     {
         while (pool.executeOneTask()) {
-        }
-
-        std::scoped_lock lock{onMainThreadExecutionQueueMutex};
-
-        while (!onMainThreadExecutionQueue.empty()) {
-            onMainThreadExecutionQueue.front()();
-            onMainThreadExecutionQueue.pop_front();
         }
 
         drawGUI();
@@ -214,23 +199,6 @@ namespace mv
         return pool.async(std::move(task));
     }
 
-    auto Application::submit(const std::function<void()> &func) -> void
-    {
-        const std::scoped_lock lock{onMainThreadExecutionQueueMutex};
-        onMainThreadExecutionQueue.push_back(func);
-        glfwPostEmptyEvent();
-    }
-
-    auto Application::submit(const std::function<void(Application &)> &func) -> void
-    {
-        submit([func, this]() { func(*this); });
-    }
-
-    auto Application::submit(const std::function<void(const Application &)> &func) -> void
-    {
-        submit([func, this]() { func(*this); });
-    }
-
     auto Application::loop() -> void
     {
         using namespace std::chrono_literals;
@@ -280,8 +248,7 @@ namespace mv
         resize_canvas_to_page();
         setup_resize_handler();
 
-        emscripten_set_main_loop_timing(EM_TIMING_SETTIMEOUT, 60);
-        emscripten_set_main_loop(invokeLoop, 0, 1);
+        emscripten_set_main_loop(invokeLoop, 60, 1);
 #else
         while (glfwWindowShouldClose(window) == GLFW_FALSE) {
             loop();
@@ -291,9 +258,19 @@ namespace mv
 
     auto Application::processInput() -> void
     {
+#ifdef __EMSCRIPTEN__
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
             glfwSetWindowShouldClose(window, GLFW_TRUE);
         }
+
+        const auto left_shift_pressed = glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS;
+        const auto key_f_pressed = glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS;
+
+        if (left_shift_pressed && key_f_pressed) {
+            emscripten_request_fullscreen("#canvas", EM_FALSE);
+            resize_canvas_to_page();
+        }
+#endif
     }
 
     auto Application::onLeaveOrEnter(const bool entered) -> void

@@ -15,9 +15,15 @@ static std::normal_distribution<float> power_distribution(-10.0F, 10.0F);
 static std::uniform_real_distribution<float> azimuth_distribution1(70.0F, 110.0F);
 static std::uniform_real_distribution<float> azimuth_distribution2(180.0F, 210.0F);
 
-std::pair<float, float> generateNoise()
+static auto generateNoise() -> std::pair<float, float>
 {
     return {azimuth_distribution1(engine), power_distribution(engine)};
+}
+
+auto testTask() -> isl::Task<>
+{
+    co_await currentApp->fill(std::numeric_limits<float>::quiet_NaN());
+    co_return;
 }
 
 static auto worker() -> isl::Task<>
@@ -25,8 +31,6 @@ static auto worker() -> isl::Task<>
     auto nan = isl::fp32ToFp16(std::numeric_limits<float>::quiet_NaN());
 
     co_await currentApp->resizeImages(width, 100 / ScaleY, nan, nan);
-
-    co_await currentApp->fill(std::numeric_limits<float>::quiet_NaN());
     co_await currentApp->fill(std::numeric_limits<float>::quiet_NaN());
 
     for (std::size_t y = 0; y < 100 / ScaleY; ++y) {

@@ -133,12 +133,6 @@ namespace mv
 
         auto submit(isl::Task<> task) -> isl::AsyncTask<void>;
 
-        auto submit(const std::function<void()> &func) -> void;
-
-        auto submit(const std::function<void(Application &)> &func) -> void;
-
-        auto submit(const std::function<void(const Application &)> &func) -> void;
-
         auto run() -> void;
 
         virtual auto drawGUI() -> void

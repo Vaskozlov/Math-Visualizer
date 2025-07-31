@@ -68,6 +68,6 @@ CPMAddPackage(
 CPMAddPackage(
         NAME ccl
         GITHUB_REPOSITORY Vaskozlov/ccl-project
-        GIT_TAG b2792b597af2a3261c07e233867e157bdbb3c787
+        GIT_TAG 6842f54a6a13ad9f0cc98e32a81d67dd293192b7
         OPTIONS "CCL_STATIC_LIBRARY ON" "ISL_STATIC_LIBRARY ON"
 )

@@ -148,12 +148,12 @@ namespace mv
             "y-axis: {:.0f} ms = {:%Y-%m-%d %H:%M:%S}.{:03}\n"
             "mouse frequency: {:.0f}, time: {} = {:%Y-%m-%d %H:%M:%S}.{:03}",
             frequencyPosition,
-            timePosition + timeStartOffset,
-            fmt::localtime(time / 1000),
+            static_cast<double>(timePosition) + timeStartOffset,
+            fmt::gmtime(time / 1000),
             time % 1000,
             mouseFrequency,
             mouseTime,
-            fmt::localtime(mouseTime / 1000),
+            fmt::gmtime(mouseTime / 1000),
             mouseTime % 1000);
 
         ImGui::SliderFloat("Font scale", &fontScale, 0.2F, 1.5F);
