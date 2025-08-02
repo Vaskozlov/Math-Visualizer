@@ -24,6 +24,13 @@ else()
                 DESTINATION
                 ${CMAKE_BINARY_DIR}
         )
+
+        file(
+                COPY
+                ${CMAKE_SOURCE_DIR}/emscripten/enable-threads.js
+                DESTINATION
+                ${CMAKE_BINARY_DIR}
+        )
 endif()
 
 install(TARGETS ${MV_INSTALLED_TARGETS}
