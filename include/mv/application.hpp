@@ -55,6 +55,8 @@ namespace mv
     public:
         [[nodiscard]] auto getColorShader() const -> Shader;
 
+        [[nodiscard]] auto getTextureRGBAShader() const -> Shader;
+
         [[nodiscard]] auto getTexture3DLinearShader() const -> Shader;
 
         [[nodiscard]] auto getShaderWithPositioning() const -> Shader;
