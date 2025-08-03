@@ -2,6 +2,14 @@
 
 namespace mv
 {
+    auto Application::getTextureRGBAShader() const -> Shader
+    {
+        return Shader{
+            {getResourceAsString("shaders/texture.vert")},
+            {getResourceAsString("shaders/texture.frag")},
+        };
+    }
+
     auto Application::getColorShader() const -> Shader
     {
         return Shader{

@@ -8,13 +8,12 @@
 #include <thread>
 
 #ifdef __EMSCRIPTEN__
+#    include <GLFW/emscripten_glfw3.h>
 #    include <emscripten/emscripten.h>
 #    include <emscripten/html5.h>
 #endif
 
 #include <GLFW/glfw3.h>
-
-mv::Application *application;
 
 #ifdef __EMSCRIPTEN__
 EMSCRIPTEN_KEEPALIVE
@@ -22,28 +21,12 @@ void setupCanvas()
 {
     EM_ASM({ Module.canvas = Module.canvas || document.getElementById('canvas'); });
 }
-
-EMSCRIPTEN_KEEPALIVE
-extern "C" void resize_canvas_to_page()
-{
-    double dpr = emscripten_get_device_pixel_ratio();
-    int width = EM_ASM_INT({ return window.innerWidth; });
-    int height = EM_ASM_INT({ return window.innerHeight; });
-
-    int buffer_width = static_cast<int>(std::round(width * dpr));
-    int buffer_height = static_cast<int>(std::round(height * dpr));
-
-    emscripten_set_canvas_element_size("#canvas", buffer_width, buffer_height);
-    application->onResize(buffer_width, buffer_height);
-}
-
-EM_JS(void, setup_resize_handler, (), {
-    window.addEventListener("resize", function() { _resize_canvas_to_page(); });
-});
 #endif
 
 namespace mv
 {
+    static mv::Application *application{};
+
     auto findOutResourcesPath([[maybe_unused]] const int argc, [[maybe_unused]] const char *argv[])
         -> std::string
     {
@@ -128,6 +111,7 @@ namespace mv
         ImGui_ImplGlfw_InitForOpenGL(window, true);
 
 #ifdef __EMSCRIPTEN__
+        glfwSetWindowAspectRatio(window, GLFW_DONT_CARE, GLFW_DONT_CARE);
         ImGui_ImplOpenGL3_Init("#version 300 es");
 #else
         ImGui_ImplOpenGL3_Init("#version 330 core");
@@ -147,10 +131,6 @@ namespace mv
         windowWidth = static_cast<float>(width);
         windowHeight = static_cast<float>(height);
 
-#if __EMSCRIPTEN__
-        glfwSetWindowSize(window, width, height);
-#endif
-
         glViewport(0, 0, width, height);
     }
 
@@ -165,6 +145,15 @@ namespace mv
             lastMouseY = y_pos_in;
             firstMouse = false;
         }
+
+#if __EMSCRIPTEN__
+
+        if (!isMouseShowed) {
+            onMouseRelativeMovement(x_pos_in, -y_pos_in);
+            return;
+        }
+
+#endif
 
         const double x_offset = x_pos_in - lastMouseX;
         const double y_offset = lastMouseY - y_pos_in;
@@ -245,9 +234,7 @@ namespace mv
         application = this;
 
 #ifdef __EMSCRIPTEN__
-        resize_canvas_to_page();
-        setup_resize_handler();
-
+        emscripten_glfw_make_canvas_resizable(window, "window", nullptr);
         emscripten_set_main_loop(invokeLoop, 60, 1);
 #else
         while (glfwWindowShouldClose(window) == GLFW_FALSE) {
@@ -258,19 +245,26 @@ namespace mv
 
     auto Application::processInput() -> void
     {
-#ifdef __EMSCRIPTEN__
-        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-            glfwSetWindowShouldClose(window, GLFW_TRUE);
-        }
+        constexpr static auto key_press_delay = 0.2;
 
         const auto left_shift_pressed = glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS;
-        const auto key_f_pressed = glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS;
+        const auto key_g_pressed = glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS;
 
-        if (left_shift_pressed && key_f_pressed) {
-            emscripten_request_fullscreen("#canvas", EM_FALSE);
-            resize_canvas_to_page();
+        if (left_shift_pressed && key_g_pressed) {
+            const auto mode = glfwGetInputMode(window, GLFW_CURSOR);
+            const double new_press_time = glfwGetTime();
+
+            if (new_press_time - cursorModePressTime < key_press_delay) {
+                return;
+            }
+
+            cursorModePressTime = new_press_time;
+            firstMouse = true;
+            isMouseShowed = mode == GLFW_CURSOR_DISABLED;
+
+            glfwSetInputMode(
+                window, GLFW_CURSOR, isMouseShowed ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
         }
-#endif
     }
 
     auto Application::onLeaveOrEnter(const bool entered) -> void

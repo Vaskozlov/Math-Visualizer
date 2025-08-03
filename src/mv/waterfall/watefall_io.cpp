@@ -4,29 +4,8 @@ namespace mv
 {
     auto Waterfall::processInput() -> void
     {
-        constexpr static auto key_press_delay = 0.2;
-
         if (!disableInput) {
             Application2D::processInput();
-        }
-
-        const auto left_shift_pressed = glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS;
-        const auto key_g_pressed = glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS;
-
-        if (left_shift_pressed && key_g_pressed) {
-            const auto mode = glfwGetInputMode(window, GLFW_CURSOR);
-            const double new_press_time = glfwGetTime();
-
-            if (new_press_time - pressTime < key_press_delay) {
-                return;
-            }
-
-            pressTime = new_press_time;
-            firstMouse = true;
-            isMouseShowed = mode == GLFW_CURSOR_DISABLED;
-
-            glfwSetInputMode(
-                window, GLFW_CURSOR, isMouseShowed ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
         }
     }
 

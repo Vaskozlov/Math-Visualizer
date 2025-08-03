@@ -13,10 +13,10 @@ set(CMAKE_RANLIB "$ENV{EMSDK}/upstream/emscripten/emranlib")
 set(CMAKE_CXX_COMPILER_AR ${CMAKE_AR})
 set(CMAKE_CXX_COMPILER_RANLIB ${CMAKE_RANLIB})
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -sWASM=1 -pthread -matomics")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -sUSE_PTHREADS=1 -pthread -matomics")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pthread -matomics --use-port=contrib.glfw3 --target=wasm64-unknown-emscripten -msimd128")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -matomics --use-port=contrib.glfw3 --target=wasm64-unknown-emscripten -msimd128")
 
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -sUSE_PTHREADS=1 -sALLOW_MEMORY_GROWTH=1 -sEXIT_RUNTIME -sPTHREAD_POOL_SIZE=3 -sWASM=1 -sFULL_ES3=1")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -sUSE_PTHREADS=1 -sALLOW_MEMORY_GROWTH=1 -sEXIT_RUNTIME -sPTHREAD_POOL_SIZE=3 -sWASM=1 -sFULL_ES3=1 --use-port=contrib.glfw3")
 
 set(CMAKE_FIND_ROOT_PATH "$ENV{EMSDK}/upstream/emscripten/cache/sysroot")
 

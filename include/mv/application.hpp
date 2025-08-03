@@ -35,6 +35,7 @@ namespace mv
         ImGuiIO *imguiIO{};
         double lastMouseX = 0.0;
         double lastMouseY = 0.0;
+        double cursorModePressTime = 0.0;
         float deltaTime = 0.0F;
         float lastFrameTime = 0.0F;
         float windowWidth;

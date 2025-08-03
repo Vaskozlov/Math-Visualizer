@@ -385,33 +385,7 @@ public:
             glfwGetWindowSize(window, &width, &height);
         }
     }
-
-    auto processInput() -> void override
-    {
-        constexpr static auto key_press_delay = 0.2;
-
-        Application3D::processInput();
-
-        const auto left_shift_pressed = glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS;
-        const auto key_g_pressed = glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS;
-
-        if (left_shift_pressed && key_g_pressed) {
-            const auto mode = glfwGetInputMode(window, GLFW_CURSOR);
-            const double new_press_time = glfwGetTime();
-
-            if (new_press_time - pressTime < key_press_delay) {
-                return;
-            }
-
-            pressTime = new_press_time;
-            firstMouse = true;
-            isMouseShowed = mode == GLFW_CURSOR_DISABLED;
-
-            glfwSetInputMode(
-                window, GLFW_CURSOR, isMouseShowed ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
-        }
-    }
-
+    
     auto onMouseRelativeMovement(const double delta_x, const double delta_y) -> void override
     {
         Application3D::onMouseRelativeMovement(delta_x, delta_y);

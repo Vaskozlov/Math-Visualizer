@@ -33,7 +33,6 @@ target_link_libraries(
 )
 
 if(EMSCRIPTEN)
-        target_link_options(math-visualizer INTERFACE -sUSE_GLFW=3)
         target_link_options(math-visualizer INTERFACE -sASSERTIONS=1)
 
         target_compile_options(
