@@ -77,7 +77,8 @@ namespace mv
     {
 #ifdef __EMSCRIPTEN__
         setupCanvas();
-        glfw::init(3, 0);
+        emscripten_glfw_set_next_window_canvas_selector("#canvas");
+        glfw::init(2, 0);
 
 #else
         glfw::init(3, 3);
