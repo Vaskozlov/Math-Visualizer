@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
@@ -15,18 +16,163 @@
 
 #include <GLFW/glfw3.h>
 
+static mv::Application *application{};
+
+struct FilesAccumulator {
+    std::vector<std::filesystem::path> buffer;
+
+    auto add(std::filesystem::path path) -> void {
+        buffer.emplace_back(std::move(path));
+    }
+};
+
+static FilesAccumulator DroppedFilesAccumulator;
+
 #ifdef __EMSCRIPTEN__
 EMSCRIPTEN_KEEPALIVE
 void setupCanvas()
 {
     EM_ASM({ Module.canvas = Module.canvas || document.getElementById('canvas'); });
 }
+
+EMSCRIPTEN_KEEPALIVE
+extern "C" auto on_file_dropped(const char *filename) -> void
+{
+    DroppedFilesAccumulator.add(filename);
+}
+
+EMSCRIPTEN_KEEPALIVE
+extern "C" auto files_dropped() -> void {
+    application->onDrop(DroppedFilesAccumulator.buffer);
+    DroppedFilesAccumulator.buffer.clear();
+}
+
+EM_JS(void, setup_drag_and_copy, (), {
+    const canvas = document.getElementById('canvas');
+
+    if (!canvas) {
+        console.error('Canvas element not found');
+        return;
+    }
+
+    canvas.addEventListener("dragover", (e) => {
+        e.preventDefault();
+    });
+
+    canvas.addEventListener("drop", function (e) {
+        e.preventDefault();
+
+        const items = e.dataTransfer.items;
+        const files = e.dataTransfer.files;
+
+        function clearDirectory(path) {
+            if (!FS.analyzePath(path).exists) return;
+
+            const entries = FS.readdir(path);
+            for (const name of entries) {
+                if (name === "." || name === "..") continue;
+
+                const fullPath = path + "/" + name;
+                const stat = FS.stat(fullPath);
+
+                if (FS.isDir(stat.mode)) {
+                    clearDirectory(fullPath);
+                    FS.rmdir(fullPath);
+                } else {
+                    FS.unlink(fullPath);
+                }
+            }
+        }
+
+        // Helper: Create nested directories
+        function ensureDirectory(path) {
+            const parts = path.split('/');
+            let current = "";
+            for (const part of parts) {
+                if (!part) continue;
+                current += '/' + part;
+
+                if (!FS.analyzePath(current).exists) {
+                    FS.mkdir(current);
+                }
+            }
+        }
+
+        function traverseFileTree(item, path = "") {
+            return new Promise((resolve) => {
+                if (item.isFile) {
+                    item.file((file) => {
+                        file.fullPath = path + file.name;
+                        resolve([file]);
+                    });
+                } else if (item.isDirectory) {
+                    const dirReader = item.createReader();
+                    dirReader.readEntries(async (entries) => {
+                        const results = await Promise.all(
+                            entries.map((entry) =>
+                                traverseFileTree(entry, path + item.name + "/")
+                            )
+                        );
+                        resolve(results.flat());
+                    });
+                } else {
+                    resolve([]);
+                }
+            });
+        }
+
+        (async () => {
+            clearDirectory("/.drop");
+
+            const collectedFiles = [];
+
+            for (let i = 0; i < items.length; i++) {
+                const entry = items[i].webkitGetAsEntry?.();
+                if (entry) {
+                    const files = await traverseFileTree(entry);
+                    collectedFiles.push(...files);
+                }
+            }
+
+            for (const file of collectedFiles) {
+                const arrayBuffer = await file.arrayBuffer();
+                const data = new Uint8Array(arrayBuffer);
+                const path = "/.drop/" + file.fullPath;
+
+                // Ensure directory exists
+                const dirPath = path.split("/").slice(0, -1).join("/");
+                ensureDirectory(dirPath);
+
+                // Write to virtual FS
+                FS.writeFile(path, data);
+            }
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const path = "/.drop/" + file.name;
+
+                const len = lengthBytesUTF8(path) + 1;
+                const pathPtr = _malloc(len);
+
+                stringToUTF8(path, pathPtr, len);
+
+                const isWasm64 = typeof Module.HEAPU64 !== 'undefined';
+
+                Module.ccall("on_file_dropped", null, ["number"], [
+                    isWasm64 ? BigInt(pathPtr) : pathPtr
+                ]);
+
+                _free(pathPtr);
+            }
+
+            Module.ccall("files_dropped", null, [], []);
+        })();
+    });
+});
 #endif
 
 namespace mv
 {
-    static mv::Application *application{};
-
     auto findOutResourcesPath([[maybe_unused]] const int argc, [[maybe_unused]] const char *argv[])
         -> std::string
     {
@@ -60,11 +206,16 @@ namespace mv
         config.FontDataOwnedByAtlas = true;
         config.SizePixels = font_size * 2;
 
-        return imguiIO->Fonts->AddFontFromFileTTF(
+        auto *result = imguiIO->Fonts->AddFontFromFileTTF(
             (resourcesPath / "fonts" / "JetBrainsMono-Medium.ttf").string().c_str(),
             font_size,
             &config,
             imguiIO->Fonts->GetGlyphRangesCyrillic());
+
+        imguiIO->FontDefault = result;
+        imguiIO->Fonts->Build();
+
+        return result;
     }
 
     Application::Application(
@@ -235,6 +386,7 @@ namespace mv
         application = this;
 
 #ifdef __EMSCRIPTEN__
+        setup_drag_and_copy();
         emscripten_glfw_make_canvas_resizable(window, "window", nullptr);
         emscripten_set_main_loop(invokeLoop, 60, 1);
 #else

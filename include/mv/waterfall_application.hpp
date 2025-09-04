@@ -43,8 +43,8 @@ namespace mv
         Shader shaderHsvWithModel = getHsvShaderWithModel();
         Shader shaderLinearWithModel = getLinearShaderWithModel();
 
-        std::list<gl::Waterfall<isl::float16>> powerWaterfalls;
-        std::list<gl::Waterfall<isl::float16>> azimuthWaterfalls;
+        std::vector<gl::Waterfall<isl::float16>> powerWaterfalls;
+        std::vector<gl::Waterfall<isl::float16>> azimuthWaterfalls;
 
         gl::InstancesHolder<gl::InstanceParameters> rectangleInstances;
         gl::shape::Rectangle rectangle{0.0F, 0.0F, 1.0F, 1.0F};
@@ -174,13 +174,13 @@ namespace mv
         auto setPixelPower(std::size_t x, std::size_t y, isl::float16 power) -> void;
 
         [[nodiscard]] auto getAzimuthWaterfalls() const
-            -> const std::list<gl::Waterfall<isl::float16>> &
+            -> const std::vector<gl::Waterfall<isl::float16>> &
         {
             return azimuthWaterfalls;
         }
 
         [[nodiscard]] auto getPowerWaterfalls() const
-            -> const std::list<gl::Waterfall<isl::float16>> &
+            -> const std::vector<gl::Waterfall<isl::float16>> &
         {
             return powerWaterfalls;
         }

@@ -1,9 +1,11 @@
 #ifndef MV_TEXTURE_HPP
 #define MV_TEXTURE_HPP
 
-#include <mv/gl/gl_init.hpp>
+#include <exception>
 #include <filesystem>
 #include <isl/isl.hpp>
+#include <mv/gl/gl_init.hpp>
+#include <utility>
 
 namespace mv::gl
 {
@@ -62,7 +64,34 @@ namespace mv::gl
             const void *buffer, int width, int height, TextureWrapMode wrap_mode,
             TextureMode texture_mode, TextureScaleFormat scale_format = TextureScaleFormat::LINEAR);
 
+        Texture(const Texture &) = delete;
+
+        Texture(Texture &&other) noexcept
+          : data{std::exchange(other.data, nullptr)}
+          , width{std::exchange(other.width, 0)}
+          , height{std::exchange(other.height, 0)}
+          , textureId{std::exchange(other.textureId, 0)}
+          , textureMode{other.textureMode}
+          , scaleFormat{other.scaleFormat}
+          , wrapMode{other.wrapMode}
+        {}
+
         ~Texture();
+
+        auto operator=(const Texture &) -> Texture & = delete;
+
+        auto operator=(Texture &&other) noexcept -> Texture &
+        {
+            std::swap(data, other.data);
+            std::swap(width, other.width);
+            std::swap(height, other.height);
+            std::swap(textureId, other.textureId);
+            std::swap(textureMode, other.textureMode);
+            std::swap(scaleFormat, other.scaleFormat);
+            std::swap(wrapMode, other.wrapMode);
+
+            return *this;
+        }
 
         auto resize(const void *buffer, const std::size_t new_width, const std::size_t new_height)
             -> void

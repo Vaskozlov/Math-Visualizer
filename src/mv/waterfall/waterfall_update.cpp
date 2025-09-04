@@ -82,10 +82,8 @@ namespace mv
                 powerWaterfalls.emplace_back(maxTextureSize, height, default_power);
                 azimuthWaterfalls.emplace_back(maxTextureSize, height, default_azimuth);
             } else {
-                std::next(powerWaterfalls.begin(), static_cast<std::ptrdiff_t>(i))
-                    ->resize(maxTextureSize, height, default_power);
-                std::next(azimuthWaterfalls.begin(), static_cast<std::ptrdiff_t>(i))
-                    ->resize(maxTextureSize, height, default_azimuth);
+                powerWaterfalls[i].resize(maxTextureSize, height, default_power);
+                azimuthWaterfalls[i].resize(maxTextureSize, height, default_azimuth);
             }
         }
 
@@ -93,10 +91,8 @@ namespace mv
             powerWaterfalls.emplace_back(width % maxTextureSize, height, default_power);
             azimuthWaterfalls.emplace_back(width % maxTextureSize, height, default_azimuth);
         } else {
-            std::next(powerWaterfalls.begin(), static_cast<std::ptrdiff_t>(i))
-                ->resize(width % maxTextureSize, height, default_power);
-            std::next(azimuthWaterfalls.begin(), static_cast<std::ptrdiff_t>(i))
-                ->resize(width % maxTextureSize, height, default_azimuth);
+            powerWaterfalls[i].resize(width % maxTextureSize, height, default_power);
+            azimuthWaterfalls[i].resize(width % maxTextureSize, height, default_azimuth);
         }
 
         drawDetections();
@@ -299,25 +295,23 @@ namespace mv
         std::size_t x, std::size_t y, const isl::float16 azimuth, const isl::float16 power) -> void
     {
         x = static_cast<std::size_t>(std::round(static_cast<double>(x) / frequencyScale));
+
         y = static_cast<std::size_t>(
             std::round((static_cast<double>(y) - timeStartOffset) / timeScale));
 
-        std::next(azimuthWaterfalls.begin(), static_cast<std::ptrdiff_t>(x / maxTextureSize))
-            ->setPixelValue(x % maxTextureSize, y, azimuth);
-
-        std::next(powerWaterfalls.begin(), static_cast<std::ptrdiff_t>(x / maxTextureSize))
-            ->setPixelValue(x % maxTextureSize, y, power);
+        azimuthWaterfalls[x / maxTextureSize].setPixelValue(x % maxTextureSize, y, azimuth);
+        powerWaterfalls[x / maxTextureSize].setPixelValue(x % maxTextureSize, y, power);
     }
 
     auto Waterfall::setPixelAzimuth(std::size_t x, std::size_t y, const isl::float16 azimuth)
         -> void
     {
         x = static_cast<std::size_t>(std::round(static_cast<double>(x) / frequencyScale));
+
         y = static_cast<std::size_t>(
             std::round((static_cast<double>(y) - timeStartOffset) / timeScale));
 
-        std::next(azimuthWaterfalls.begin(), static_cast<std::ptrdiff_t>(x / maxTextureSize))
-            ->setPixelValue(x % maxTextureSize, y, azimuth);
+        azimuthWaterfalls[x / maxTextureSize].setPixelValue(x % maxTextureSize, y, azimuth);
     }
 
     auto Waterfall::setPixelPower(std::size_t x, std::size_t y, const isl::float16 power) -> void
@@ -326,8 +320,7 @@ namespace mv
         y = static_cast<std::size_t>(
             std::round((static_cast<double>(y) - timeStartOffset) / timeScale));
 
-        std::next(powerWaterfalls.begin(), static_cast<std::ptrdiff_t>(x / maxTextureSize))
-            ->setPixelValue(x % maxTextureSize, y, power);
+        powerWaterfalls[x / maxTextureSize].setPixelValue(x % maxTextureSize, y, power);
     }
 
     auto Waterfall::doClear() -> isl::Task<>
@@ -411,8 +404,10 @@ namespace mv
             const auto real_height_scale = imageHeightScale;
 
             auto trans = glm::mat4(1.0F);
+
             trans = glm::translate(
                 trans, {index * offset_width_scale + waterfallStart.x, waterfallStart.y, 0.0F});
+
             trans = glm::scale(trans, {real_width_scale, real_height_scale, 1.0F});
 
             waterfallShaderHsvF32.setMat4("model", trans);
@@ -441,8 +436,10 @@ namespace mv
             const auto real_height_scale = imageHeightScale;
 
             auto trans = glm::mat4(1.0F);
+            
             trans = glm::translate(
                 trans, {index * offset_width_scale + waterfallStart.x, waterfallStart.y, 0.0F});
+
             trans = glm::scale(trans, {real_width_scale, real_height_scale, 1.0F});
 
             waterfallShaderLinearF32.setMat4("model", trans);

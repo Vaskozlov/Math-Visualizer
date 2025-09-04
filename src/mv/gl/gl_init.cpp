@@ -1,3 +1,4 @@
+#include <mutex>
 #include <mv/gl/gl_init.hpp>
 
 namespace mv::gl
