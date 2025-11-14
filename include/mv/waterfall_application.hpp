@@ -173,6 +173,8 @@ namespace mv
 
         auto setPixelPower(std::size_t x, std::size_t y, isl::float16 power) -> void;
 
+        auto setPowerPixelsLine(const float *input, std::size_t y) -> void;
+
         [[nodiscard]] auto getAzimuthWaterfalls() const
             -> const std::vector<gl::Waterfall<isl::float16>> &
         {

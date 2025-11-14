@@ -323,6 +323,19 @@ namespace mv
         powerWaterfalls[x / maxTextureSize].setPixelValue(x % maxTextureSize, y, power);
     }
 
+    auto Waterfall::setPowerPixelsLine(const float *input, std::size_t y) -> void
+    {
+        y = static_cast<std::size_t>(
+            std::round((static_cast<double>(y) - timeStartOffset) / timeScale));
+
+        std::size_t i = 0;
+
+        for (auto &waterfall : powerWaterfalls) {
+            waterfall.fillLine(y, input + i);
+            i += waterfall.getWidth();
+        }
+    }
+
     auto Waterfall::doClear() -> isl::Task<>
     {
         azimuthWaterfalls.clear();
@@ -436,7 +449,7 @@ namespace mv
             const auto real_height_scale = imageHeightScale;
 
             auto trans = glm::mat4(1.0F);
-            
+
             trans = glm::translate(
                 trans, {index * offset_width_scale + waterfallStart.x, waterfallStart.y, 0.0F});
 

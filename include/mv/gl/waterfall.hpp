@@ -9,10 +9,43 @@
 #include <mv/gl/texture.hpp>
 #include <mv/rect.hpp>
 
+#if defined(__AVX2__) && defined(__F16C__)
+#    include <immintrin.h>
+#endif
+
+#if defined(__ARM_NEON)
+#    include <arm_neon.h>
+#endif
+
 namespace mv::gl
 {
     namespace detail
     {
+#if defined(__AVX2__) && defined(__F16C__)
+        static constexpr std::size_t vecSize = 8;
+
+        inline auto cvtFp32ToFp16(const float *input, auto *out) -> void
+        {
+            const auto vec32 = _mm256_loadu_ps(input);
+
+            const auto vec16 =
+                _mm256_cvtps_ph(vec32, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC);
+
+            _mm_storeu_si128(reinterpret_cast<__m128i *>(out), vec16);
+        }
+#elif defined(__ARM_NEON)
+        static constexpr std::size_t vecSize = 4;
+
+        inline auto cvtFp32ToFp16(const float *value, auto *out) -> void
+        {
+            const auto vec32 = vld1q_f32(value);
+            const auto vec16 = vcvt_f16_f32(vec32);
+
+            // NOLINTNEXTLINE
+            vst1_f16(reinterpret_cast<float16_t *>(out), vec16);
+        }
+#endif
+
         template <typename T, TextureMode Mode>
         class WaterfallBase
         {
@@ -225,6 +258,21 @@ namespace mv::gl
     {
     public:
         using WaterfallBase::WaterfallBase;
+
+        auto fillLine(std::size_t y, const float *input) -> void
+        {
+            std::size_t i = 0;
+            auto *out = pixels.data() + y * getWidth();
+
+#if (defined(__AVX2__) && defined(__F16C__)) || (defined(__ARM_NEON))
+            for (; i + detail::vecSize < getWidth() + 1; i += detail::vecSize) {
+                detail::cvtFp32ToFp16(input + i, out + i);
+            }
+#endif
+            for (; i < getWidth(); ++i) {
+                out[i] = isl::fp32ToFp16(input[i]);
+            }
+        }
     };
 } // namespace mv::gl
 
